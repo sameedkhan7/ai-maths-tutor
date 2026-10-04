@@ -201,6 +201,40 @@ if (chatForm) {
 }
 
 
+// Helper: Markdown and Math Formatter
+function renderMarkdown(rawText) {
+    if (!rawText) return '';
+    let html = rawText;
+
+    // Code blocks ```...```
+    html = html.replace(/```([\s\S]*?)```/g, (match, p1) => {
+        return `<div class="math-code-block"><pre>${p1.trim()}</pre></div>`;
+    });
+
+    // Headers ###, ##, #
+    html = html.replace(/^### (.*$)/gim, '<h5 class="chat-h5">$1</h5>');
+    html = html.replace(/^## (.*$)/gim, '<h4 class="chat-h4">$1</h4>');
+    html = html.replace(/^# (.*$)/gim, '<h3 class="chat-h3">$1</h3>');
+
+    // Bold **text**
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Italic *text*
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // Bullet points
+    html = html.replace(/^\s*[-•]\s+(.*)$/gim, '<li class="chat-list-item">$1</li>');
+
+    // Numbered lists
+    html = html.replace(/^\s*(\d+)\.\s+(.*)$/gim, '<li class="chat-num-item"><strong>$1.</strong> $2</li>');
+
+    // Paragraph line breaks
+    html = html.replace(/\n\n/g, '<div class="chat-gap"></div>');
+    html = html.replace(/\n/g, '<br>');
+
+    return html;
+}
+
 // Helper: Append Message Bubble
 function appendMessage(sender, text, type) {
     const welcomeHero = document.getElementById('welcome-hero');
@@ -214,20 +248,21 @@ function appendMessage(sender, text, type) {
         <div class="avatar">${avatar}</div>
         <div class="message-content">
             <h4>${sender}</h4>
-            <p>${text.replace(/\n/g, '<br>')}</p>
+            <div class="message-body">${type === 'assistant' ? renderMarkdown(text) : text.replace(/\n/g, '<br>')}</div>
         </div>
     `;
 
     messagesContainer.appendChild(msgDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        // Message aate hi LaTeX math formulas ko sundar equation me render karo
+    // Message aate hi LaTeX math formulas ko sundar equation me render karo
     if (window.renderMathInElement) {
         renderMathInElement(msgDiv, {
             delimiters: [
                 {left: '$$', right: '$$', display: true},
                 {left: '$', right: '$', display: false}
-            ]
+            ],
+            throwOnError: false
         });
     }
 }
