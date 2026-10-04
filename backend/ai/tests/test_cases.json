@@ -1,0 +1,72 @@
+[
+    {
+        "name": "Concept question",
+        "question": "What is a derivative?",
+        "student_level": "beginner",
+        "explanation_style": "simple",
+        "expected_type": "concept"
+    },
+    {
+        "name": "Numerical question",
+        "question": "Solve 2x + 5 = 15",
+        "student_level": "beginner",
+        "explanation_style": "step_by_step",
+        "expected_type": "numerical"
+    },
+    {
+        "name": "Homework question",
+        "question": "Help me with my homework: solve x + 7 = 12",
+        "student_level": "beginner",
+        "explanation_style": "simple",
+        "expected_type": "homework"
+    },
+    {
+        "name": "Follow-up question",
+        "question": "What about this?",
+        "student_level": "beginner",
+        "explanation_style": "simple",
+        "expected_type": "follow-up"
+    },
+    {
+        "name": "Student mistake",
+        "question": "My answer is 8 but the book says 10. Where did I go wrong?",
+        "student_level": "beginner",
+        "explanation_style": "simple",
+        "expected_type": "student mistake"
+    },
+    {
+        "name": "Explain again",
+        "question": "I don't understand. Explain again please.",
+        "student_level": "beginner",
+        "explanation_style": "beginner",
+        "expected_type": "explain_again"
+    },
+    {
+        "name": "Real life style",
+        "question": "What is a percentage?",
+        "student_level": "beginner",
+        "explanation_style": "real_life",
+        "expected_type": "concept"
+    },
+    {
+        "name": "Exam style",
+        "question": "Define a linear equation.",
+        "student_level": "intermediate",
+        "explanation_style": "exam",
+        "expected_type": "concept"
+    },
+    {
+        "name": "Sports style",
+        "question": "Explain slope.",
+        "student_level": "beginner",
+        "explanation_style": "sports",
+        "expected_type": "concept"
+    },
+    {
+        "name": "RAG question",
+        "question": "What is a linear equation?",
+        "student_level": "beginner",
+        "explanation_style": "simple",
+        "expected_type": "concept"
+    }
+]

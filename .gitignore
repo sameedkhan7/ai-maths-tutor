@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+backend/__pycache__/
+backend/ai/__pycache__/
+*.db
+.vscode/
+AI-Maths-Tutor-frontend.zip
