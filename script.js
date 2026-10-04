@@ -449,6 +449,7 @@ function applyFontSize(level) {
 // Open Settings Modal
 function openSettingsModal() {
     if (profilePopupMenu) profilePopupMenu.style.display = 'none';
+    closeMobileSidebar();
     if (settingsModalBackdrop) {
         settingsModalBackdrop.style.display = 'flex';
     }

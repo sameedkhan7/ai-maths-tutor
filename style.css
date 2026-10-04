@@ -471,18 +471,53 @@ body.dark-mode .topic-card:hover .topic-card-arrow {
 }
 
 @media (max-width: 640px) {
+    .welcome-hero {
+        margin: 8px auto 14px auto;
+        padding: 0 4px;
+    }
+    
+    .welcome-avatar-badge {
+        width: 44px;
+        height: 44px;
+        font-size: 22px;
+        margin-bottom: 6px;
+    }
+    
     .topic-cards-grid {
         grid-template-columns: 1fr;
-        gap: 9px;
+        gap: 8px;
+    }
+    
+    .topic-card {
+        padding: 10px 13px;
+        border-radius: 10px;
+        gap: 10px;
+    }
+
+    .topic-card-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        border-radius: 8px;
+    }
+
+    .topic-card-body h5 {
+        font-size: 12.5px;
+        margin-bottom: 1px;
+    }
+
+    .topic-card-body span {
+        font-size: 11px;
     }
     
     .welcome-greeting {
-        font-size: 19px;
+        font-size: 18px;
+        margin-bottom: 3px;
     }
     
     .welcome-subtitle {
-        font-size: 12.5px;
-        margin-bottom: 14px;
+        font-size: 12px;
+        margin-bottom: 12px;
     }
 }
 
@@ -1284,18 +1319,20 @@ body.dark-mode .mobile-menu-btn {
     /* Sidebar drawer ban jaye jo left se slide ho */
     .sidebar {
         position: fixed !important;
-        top: 0;
+        top: 0 !important;
+        bottom: 0 !important;
         left: -320px !important;
-        width: 280px !important;
-        height: 100dvh !important;
-        height: 100vh !important;
+        width: 285px !important;
+        height: 100% !important;
+        max-height: 100dvh !important;
         z-index: 999;
         box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3);
         transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         display: flex !important;
         flex-direction: column !important;
-        justify-content: space-between !important;
-        padding: 16px 14px calc(24px + env(safe-area-inset-bottom)) 14px !important;
+        justify-content: flex-start !important;
+        padding: 16px 14px calc(28px + env(safe-area-inset-bottom)) 14px !important;
+        box-sizing: border-box !important;
     }
 
     /* Jab mobile menu open ho */
@@ -1303,18 +1340,40 @@ body.dark-mode .mobile-menu-btn {
         left: 0 !important;
     }
 
+    .sidebar .history-container {
+        flex: 1 1 auto !important;
+        overflow-y: auto !important;
+        min-height: 0 !important;
+        margin-bottom: 8px !important;
+    }
+
     .sidebar .sidebar-footer {
         display: flex !important;
         visibility: visible !important;
         margin-top: auto !important;
-        padding-top: 12px !important;
+        padding-top: 10px !important;
+        padding-bottom: 4px !important;
         flex-shrink: 0 !important;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    body.dark-mode .sidebar .sidebar-footer {
+        border-top: 1px solid #334155;
     }
 
     .sidebar .user-profile-card {
         display: flex !important;
         visibility: visible !important;
         width: 100% !important;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 8px 10px !important;
+    }
+
+    body.dark-mode .sidebar .user-profile-card {
+        background-color: #1e293b;
+        border-color: #334155;
     }
 
     .sidebar .sidebar-text {
@@ -1323,10 +1382,11 @@ body.dark-mode .mobile-menu-btn {
 
     .sidebar #profile-popup-menu {
         position: absolute !important;
-        bottom: 74px !important;
+        bottom: 88px !important;
         left: 12px !important;
         width: calc(100% - 24px) !important;
         z-index: 9999 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
     }
 
     /* Math toolbar mobile par chota aur compact rahe */
