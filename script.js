@@ -494,11 +494,6 @@ if (popupSettingsItem) {
     popupSettingsItem.addEventListener('click', openSettingsModal);
 }
 
-const headerSettingsBtn = document.getElementById('header-settings-btn');
-if (headerSettingsBtn) {
-    headerSettingsBtn.addEventListener('click', openSettingsModal);
-}
-
 if (settingsCloseBtn) {
     settingsCloseBtn.addEventListener('click', closeSettingsModal);
 }

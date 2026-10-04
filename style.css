@@ -284,35 +284,28 @@ body.dark-mode .popup-logout:hover {
     border-bottom: 1px solid #e2e8f0;
     padding: 14px 24px;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
 }
 
-.header-settings-btn {
-    background: transparent;
-    border: none;
-    font-size: 19px;
-    cursor: pointer;
-    color: #475569;
-    padding: 6px;
-    border-radius: 8px;
+body.dark-mode .chat-header {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+
+.header-info {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
+    gap: 12px;
 }
 
-.header-settings-btn:hover {
-    background-color: #f1f5f9;
-    color: #4f46e5;
+.header-info h3 {
+    font-size: 16px;
+    color: #0f172a;
+    margin: 0;
 }
 
-body.dark-mode .header-settings-btn {
-    color: #cbd5e1;
-}
-
-body.dark-mode .header-settings-btn:hover {
-    background-color: #334155;
+body.dark-mode .header-info h3 {
     color: #f8fafc;
 }
 
