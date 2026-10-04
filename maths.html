@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css?v=6">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Maths Tutore</title>
+        <!-- KaTeX Mathematical Typography Engine -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+               <aside class="sidebar">
+            <!-- Sidebar Header with ChatGPT Toggle Icon -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 class="sidebar-text" style="font-size: 17px; margin: 0;">AI Maths Tutor</h2>
+                <button type="button" id="sidebar-toggle-btn" class="icon-toggle-btn" title="Collapse / Expand Sidebar">◨</button>
+            </div>
+
+            <!-- New Chat Button -->
+            <button id="new-chat-btn">
+                <span>➕</span> <span class="sidebar-text">New Chat</span>
+            </button>
+
+            <!-- History Section -->
+                       <div class="history-container">
+                <!-- 📌 Pinned (Icon hamesha dikhega, text chhote me chhipega) -->
+                <div class="section-header" id="pinned-header-btn">
+                    <span class="section-icon" title="Pinned Chats">📌</span>
+                    <span class="sidebar-text history-title">Pinned</span>
+                </div>
+                <div id="pinned-list" class="chat-items-list"></div>
+
+                <!-- 🕒 Recents (Icon hamesha dikhega, text chhote me chhipega) -->
+                <div class="section-header" id="recents-header-btn" style="margin-top: 14px;">
+                    <span class="section-icon" title="Recent Chats">🕒</span>
+                    <span class="sidebar-text history-title">Recents</span>
+                </div>
+               <div id="history-list" class="chat-items-list"></div>
+            </div>
+
+            <!-- ChatGPT & Claude Style Profile Popup Menu -->
+            <div id="profile-popup-menu" class="profile-popup-menu" style="display: none;">
+                <div class="popup-user-header">
+                    <div class="popup-email" id="popup-user-email">sameedkhan7@gmail.com</div>
+                    <div class="popup-plan-badge" id="popup-plan-badge">Student · Class 11</div>
+                </div>
+                <div class="popup-divider"></div>
+
+                <!-- Dark / Light Theme Toggle -->
+                <div class="popup-item" id="popup-theme-item">
+                    <span class="popup-item-icon" id="popup-theme-icon">🌙</span>
+                    <span class="popup-item-text" id="popup-theme-text">Dark Mode</span>
+                </div>
+
+                <!-- Settings -->
+                <div class="popup-item" id="popup-settings-item">
+                    <span class="popup-item-icon">⚙️</span>
+                    <span class="popup-item-text">Settings</span>
+                </div>
+
+                <div class="popup-divider"></div>
+
+                <!-- Logout -->
+                <div class="popup-item popup-logout" id="popup-logout-item">
+                    <span class="popup-item-icon">🚪</span>
+                    <span class="popup-item-text">Log out</span>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer (ChatGPT & Claude Style Profile) -->
+            <div class="sidebar-footer">
+                <div class="user-profile-card" id="user-profile-card" title="Account settings">
+                    <div class="user-avatar-circle" id="user-avatar-circle">SK</div>
+                    <div class="user-info-text sidebar-text">
+                        <span class="user-full-name" id="user-display-name">Sameed Khan</span>
+                        <span class="user-plan-tag" id="user-plan-tag">Student · NCERT</span>
+                    </div>
+                    <span class="sidebar-text profile-chevron">⋯</span>
+                </div>
+            </div>
+        </aside>
+        <main class="chat-area">
+          <header class="chat-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" title="Open Menu">☰</button>
+                <div>
+                    <h3 id="current-topic" style="margin: 0; font-size: 16px;">What is a derivative?</h3>
+                    <span style="font-size: 11px; background-color: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 999px; font-weight: 600; display: inline-block; margin-top: 3px;">NCERT Grounded</span>
+                </div>
+            </div>
+        </header>
+            <div class="messages-container" id="messages-container">
+                <!-- Pinterest-Style Welcome Hero & Topic Starter Cards -->
+                <div class="welcome-hero" id="welcome-hero">
+                    <div class="welcome-avatar-badge">👩‍🏫</div>
+                    <h2 class="welcome-greeting" id="welcome-greeting">Hello Sameed!</h2>
+                    <p class="welcome-subtitle">I am your <strong>AI Maths Tutor</strong>. Aaj kaunsa mathematics concept intuitively samajhna chahte hain?</p>
+                    
+                    <div class="topic-cards-grid">
+                        <div class="topic-card" data-question="What is a derivative and why do we use it in calculus?">
+                            <div class="topic-card-icon">📐</div>
+                            <div class="topic-card-body">
+                                <h5>Calculus & Derivatives</h5>
+                                <span>Speedometer analogy & dy/dx rate of change</span>
+                            </div>
+                            <div class="topic-card-arrow">→</div>
+                        </div>
+
+                        <div class="topic-card" data-question="Explain trigonometry sin, cos, tan with real-life examples">
+                            <div class="topic-card-icon">🔺</div>
+                            <div class="topic-card-body">
+                                <h5>Trigonometry & Heights</h5>
+                                <span>Understand sin, cos, tan & triangle angles</span>
+                            </div>
+                            <div class="topic-card-arrow">→</div>
+                        </div>
+
+                        <div class="topic-card" data-question="How to solve Quadratic Equations using formula step by step?">
+                            <div class="topic-card-icon">🔢</div>
+                            <div class="topic-card-body">
+                                <h5>Quadratic Equations</h5>
+                                <span>Step-by-step formula & finding roots easily</span>
+                            </div>
+                            <div class="topic-card-arrow">→</div>
+                        </div>
+
+                        <div class="topic-card" data-question="Give me an important Class 11 NCERT practice question with step-by-step explanation">
+                            <div class="topic-card-icon">🎯</div>
+                            <div class="topic-card-body">
+                                <h5>NCERT Board Practice</h5>
+                                <span>Key formulas & scoring tips for exams</span>
+                            </div>
+                            <div class="topic-card-arrow">→</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                           <div class="chat-input-wrapper">
+            <!-- Math Shortcuts Toolbar -->
+            <div class="math-toolbar">
+                <button type="button" class="sym-btn">x²</button>
+                <button type="button" class="sym-btn">√</button>
+                <button type="button" class="sym-btn">π</button>
+                <button type="button" class="sym-btn">∫</button>
+                <button type="button" class="sym-btn">÷</button>
+                <button type="button" class="sym-btn">θ</button>
+                <button type="button" class="sym-btn">±</button>
+            </div>
+
+            <!-- ChatGPT / Antigravity Style Input Card -->
+            <form id="chat-form" class="chat-input-card">
+                <!-- Textarea -->
+                <textarea id="user-input" placeholder="Ask anything or math question..." rows="2"></textarea>
+
+                <!-- Bottom Actions Bar -->
+                <div class="input-card-bottom">
+                    <!-- Left: Plus (+ Photos) & Model Selector -->
+                    <div class="bottom-left">
+                        <!-- ➕ Plus Button -->
+                        <button type="button" id="plus-btn" class="tool-icon-btn" title="Add photos & files">➕</button>
+                        <input type="file" id="file-input" style="display:none;" accept="image/*,.pdf" />
+
+                        <!-- 🧠 Antigravity Style Model/Mode Selector -->
+                        <div class="model-picker">
+                            <button type="button" id="model-pill-btn" class="model-pill-btn">
+                                🧠 <span id="selected-model-text">LLaMA 3.1 (Simple)</span> ▾
+                            </button>
+                            <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
+                                <div class="menu-item active" data-style="simple" data-text="LLaMA 3.1 (Simple)">⚡ LLaMA 3.1 • Simple</div>
+                                <div class="menu-item" data-style="sports" data-text="LLaMA 3.1 (Sports)">🏏 LLaMA 3.1 • Sports</div>
+                                <div class="menu-item" data-style="real-life" data-text="LLaMA 3.1 (Real-Life)">🌍 LLaMA 3.1 • Real-Life</div>
+                                <div class="menu-item" data-style="story" data-text="LLaMA 3.1 (Story)">📖 LLaMA 3.1 • Story</div>
+                                <div class="menu-item" data-style="step-by-step" data-text="LLaMA 3.1 (Step-by-Step)">🔢 LLaMA 3.1 • Step-by-Step</div>
+                            </div>
+                        </div>
+
+                        <!-- Photo Tag (Jab student photo upload kare) -->
+                        <span id="photo-preview-tag" class="photo-tag" style="display: none;">
+                            📷 <span id="photo-name"></span> <b id="remove-photo" style="cursor:pointer; margin-left:4px;">✕</b>
+                        </span>
+                    </div>
+
+                    <!-- Right: Mic + Send -->
+                    <div class="bottom-right">
+                        <button type="button" id="mic-btn" class="tool-icon-btn" title="Speak to Tutor">🎙️</button>
+                        <button type="submit" id="send-btn" class="send-action-btn">➤</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        </main>
+    </div>
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <!-- ============================================== -->
+    <!-- ⚙️ ChatGPT Style Settings Modal Dialog           -->
+    <!-- ============================================== -->
+    <div id="settings-modal-backdrop" class="modal-backdrop" style="display: none;">
+        <div class="settings-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <!-- Modal Header -->
+            <div class="settings-modal-header">
+                <div class="settings-header-left">
+                    <span class="settings-modal-icon">⚙️</span>
+                    <h3 id="settings-title">Settings</h3>
+                </div>
+                <button type="button" id="settings-close-btn" class="settings-close-btn" title="Close">✕</button>
+            </div>
+
+            <!-- Modal Body (Two-Column Layout: Left Tabs + Right Panels) -->
+            <div class="settings-modal-body">
+                <!-- Left Tabs Sidebar -->
+                <aside class="settings-sidebar-tabs">
+                    <button type="button" class="settings-tab-btn active" data-tab="tab-general">
+                        <span class="tab-icon">⚙️</span>
+                        <span class="tab-label">General</span>
+                    </button>
+                    <button type="button" class="settings-tab-btn" data-tab="tab-education">
+                        <span class="tab-icon">🎓</span>
+                        <span class="tab-label">NCERT & Class</span>
+                    </button>
+                    <button type="button" class="settings-tab-btn" data-tab="tab-style">
+                        <span class="tab-icon">🧠</span>
+                        <span class="tab-label">Tutor Style</span>
+                    </button>
+                    <button type="button" class="settings-tab-btn" data-tab="tab-data">
+                        <span class="tab-icon">📁</span>
+                        <span class="tab-label">Data Controls</span>
+                    </button>
+                    <button type="button" class="settings-tab-btn" data-tab="tab-about">
+                        <span class="tab-icon">ℹ️</span>
+                        <span class="tab-label">About</span>
+                    </button>
+                </aside>
+
+                <!-- Right Content Panel -->
+                <div class="settings-panel-content">
+                    <!-- Tab 1: General -->
+                    <div id="tab-general" class="settings-tab-pane active">
+                        <h4 class="pane-title">General</h4>
+                        
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Appearance</span>
+                                <span class="setting-desc">Customize how AI Maths Tutor looks on your device</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="setting-appearance-select" class="settings-select">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="system">System</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Language / भाषा</span>
+                                <span class="setting-desc">Preferred language for explanations and interface</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="setting-language-select" class="settings-select">
+                                    <option value="hinglish">Hinglish (Recommended)</option>
+                                    <option value="en">English (US)</option>
+                                    <option value="hi">हिंदी (Hindi)</option>
+                                    <option value="ur">اردو (Urdu)</option>
+                                    <option value="ar">العربية (Arabic)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Text Size</span>
+                                <span class="setting-desc">Adjust mathematical formula and chat font size</span>
+                            </div>
+                            <div class="setting-control text-size-controls">
+                                <button type="button" id="font-decrease-btn" class="settings-pill-btn" title="Decrease font size">−</button>
+                                <span id="font-size-display" class="font-size-label">Normal</span>
+                                <button type="button" id="font-increase-btn" class="settings-pill-btn" title="Increase font size">+</button>
+                                <button type="button" id="font-reset-btn" class="settings-text-btn">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: NCERT & Class -->
+                    <div id="tab-education" class="settings-tab-pane">
+                        <h4 class="pane-title">NCERT & Class</h4>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Current Class / Grade</span>
+                                <span class="setting-desc">Tutor will tailor concepts and NCERT syllabus to this grade</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="setting-grade-select" class="settings-select">
+                                    <option value="Class 9">Class 9 (NCERT)</option>
+                                    <option value="Class 10">Class 10 (NCERT / Board)</option>
+                                    <option value="Class 11">Class 11 (NCERT Science/Commerce)</option>
+                                    <option value="Class 12">Class 12 (NCERT / Board)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Subject</span>
+                                <span class="setting-desc">Active learning subject</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="setting-subject-select" class="settings-select">
+                                    <option value="maths">📐 Mathematics (Active)</option>
+                                    <option value="science" disabled>🔬 Science (Coming Soon)</option>
+                                    <option value="english" disabled>📖 English (Coming Soon)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Tutor Style -->
+                    <div id="tab-style" class="settings-tab-pane">
+                        <h4 class="pane-title">Tutor Style</h4>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Default Teaching Style</span>
+                                <span class="setting-desc">Choose how the AI tutor begins answering new questions</span>
+                            </div>
+                            <div class="setting-control">
+                                <select id="setting-default-style-select" class="settings-select">
+                                    <option value="simple">💡 Concept-First (Intuition)</option>
+                                    <option value="analogy">🌍 Real-Life Analogy</option>
+                                    <option value="exam">🎯 Exam-Oriented Step-by-Step</option>
+                                    <option value="sports">🏏 Sports Analogy</option>
+                                    <option value="story">📖 Story Mode</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Data Controls -->
+                    <div id="tab-data" class="settings-tab-pane">
+                        <h4 class="pane-title">Data Controls</h4>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Clear Chat History</span>
+                                <span class="setting-desc">Delete all past math questions and pinned discussions</span>
+                            </div>
+                            <div class="setting-control">
+                                <button type="button" id="clear-all-chats-btn" class="settings-danger-btn">Clear All Chats</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Student Account</span>
+                                <span class="setting-desc" id="settings-student-info">Logged in as Sameed Khan</span>
+                            </div>
+                            <div class="setting-control">
+                                <button type="button" id="settings-logout-btn" class="settings-secondary-btn">Log out</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 5: About -->
+                    <div id="tab-about" class="settings-tab-pane">
+                        <h4 class="pane-title">About AI Maths Tutor</h4>
+                        
+                        <div class="about-card">
+                            <div class="about-app-badge">
+                                <span class="app-avatar-icon">∑</span>
+                                <div>
+                                    <div class="about-app-name">AI Maths Tutor</div>
+                                    <div class="about-app-version">Version 1.0 (NCERT Grounded)</div>
+                                </div>
+                            </div>
+                            <p class="about-description">
+                                A patient, concept-first AI learning assistant built specifically for NCERT/CBSE students (Grades 9-12). Grounded in the 5-step intuitive framework: Intuition → Analogy → Math Step → Example → Interactive Practice.
+                            </p>
+                            <div class="about-specs-grid">
+                                <div class="spec-item"><strong>Backend:</strong> Monolithic FastAPI</div>
+                                <div class="spec-item"><strong>Database:</strong> SQLite / MySQL</div>
+                                <div class="spec-item"><strong>Vector RAG:</strong> ChromaDB</div>
+                                <div class="spec-item"><strong>Inference:</strong> LLaMA 3.1 / Groq</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=6"></script>
+</body>
+</html>

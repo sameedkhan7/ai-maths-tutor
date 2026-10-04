@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration — AI Maths Tutor</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f8fafc;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 32px 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 32px;
+            background: #e0e7ff;
+            color: #4f46e5;
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px auto;
+            font-weight: bold;
+        }
+
+        .auth-card h2 {
+            font-size: 22px;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .auth-card p {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 13.5px;
+            outline: none;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            color: #1e293b;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        .auth-submit-btn {
+            width: 100%;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 11px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .auth-submit-btn:hover {
+            background-color: #4338ca;
+        }
+
+        .auth-footer {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .auth-footer a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-logo">∑</div>
+            <h2>Create Account</h2>
+            <p>Join AI Maths Tutor & master concepts easily</p>
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="reg-name">Full Name</label>
+                    <input type="text" id="reg-name" placeholder="e.g. Alex Sharma" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-email">Email Address</label>
+                    <input type="email" id="reg-email" placeholder="student@example.com" required />
+                </div>
+
+                <!-- NCERT Class Selector -->
+                <div class="form-group">
+                    <label for="reg-class">Maths Curriculum / Grade</label>
+                    <select id="reg-class">
+                        <option value="10">NCERT Class 10</option>
+                        <option value="11" selected>NCERT Class 11</option>
+                        <option value="12">NCERT Class 12</option>
+                        <option value="9">NCERT Class 9</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-password">Password</label>
+                    <input type="password" id="reg-password" placeholder="Create a password" required />
+                </div>
+
+                <button type="submit" class="auth-submit-btn">Create Student Account</button>
+            </form>
+
+            <div class="auth-footer">
+                Already have an account? <a href="login.html">Sign In</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const registerForm = document.getElementById('register-form');
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const grade = document.getElementById('reg-class').value;
+
+            localStorage.setItem('studentName', name || 'Sameed Khan');
+            localStorage.setItem('registeredName', name);
+            localStorage.setItem('registeredEmail', email);
+            localStorage.setItem('studentGrade', `Class ${grade}`);
+
+            alert(`🎉 Account created for ${name}! Taking you to your Tutor...`);
+            window.location.href = 'maths.html';
+        });
+    </script>
+</body>
+</html>
