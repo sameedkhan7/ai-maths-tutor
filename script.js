@@ -31,10 +31,27 @@ if (userPlanTagEl) {
     userPlanTagEl.innerText = `Student · ${savedGrade}`;
 }
 
-const welcomeHeadingEl = document.getElementById('welcome-heading');
-if (welcomeHeadingEl) {
-    welcomeHeadingEl.innerText = `Hello ${currentStudentName}! I am your AI Maths Tutor.`;
+const welcomeGreetingEl = document.getElementById('welcome-greeting');
+if (welcomeGreetingEl) {
+    welcomeGreetingEl.innerText = `Hello ${currentStudentName}!`;
 }
+
+// Function to bind click on Pinterest Topic Starter Cards
+function bindTopicCards() {
+    const topicCards = document.querySelectorAll('.topic-card');
+    topicCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const question = card.getAttribute('data-question');
+            if (question && userInput) {
+                userInput.value = question;
+                if (chatForm) {
+                    chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+            }
+        });
+    });
+}
+bindTopicCards();
 
 const badgeEl = document.querySelector('.chat-header span');
 if (badgeEl && savedGrade) {
@@ -183,6 +200,9 @@ if (chatForm) {
 
 // Helper: Append Message Bubble
 function appendMessage(sender, text, type) {
+    const welcomeHero = document.getElementById('welcome-hero');
+    if (welcomeHero) welcomeHero.remove();
+
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${type}`;
     const avatar = type === 'user' ? '🎓' : '👩‍🏫';
@@ -253,16 +273,53 @@ if (newChatBtn && historyList) {
         // By default Recents me daalo
         historyList.appendChild(historyItem);
 
-        // Fresh welcome screen
+        // Fresh Pinterest-style welcome hero with Topic Cards
         messagesContainer.innerHTML = `
-            <div class="message assistant">
-                <div class="avatar">👩‍🏫</div>
-                <div class="message-content">
-                    <h4>Hello ${currentStudentName}! I am your AI Maths Tutor.</h4>
-                    <p>Aap mujhse koi bhi mathematics ka concept, formula ya problem puch sakte hain. Upar se apna favourite explanation style choose karein aur shuru karein!</p>
+            <div class="welcome-hero" id="welcome-hero">
+                <div class="welcome-avatar-badge">👩‍🏫</div>
+                <h2 class="welcome-greeting" id="welcome-greeting">Hello ${currentStudentName}!</h2>
+                <p class="welcome-subtitle">I am your <strong>AI Maths Tutor</strong>. Ready for a new question! Aaj kaunsa concept intuitively samajhna chahte hain?</p>
+                
+                <div class="topic-cards-grid">
+                    <div class="topic-card" data-question="What is a derivative and why do we use it in calculus?">
+                        <div class="topic-card-icon">📐</div>
+                        <div class="topic-card-body">
+                            <h5>Calculus & Derivatives</h5>
+                            <span>Speedometer analogy & dy/dx rate of change</span>
+                        </div>
+                        <div class="topic-card-arrow">→</div>
+                    </div>
+
+                    <div class="topic-card" data-question="Explain trigonometry sin, cos, tan with real-life examples">
+                        <div class="topic-card-icon">🔺</div>
+                        <div class="topic-card-body">
+                            <h5>Trigonometry & Heights</h5>
+                            <span>Understand sin, cos, tan & triangle angles</span>
+                        </div>
+                        <div class="topic-card-arrow">→</div>
+                    </div>
+
+                    <div class="topic-card" data-question="How to solve Quadratic Equations using formula step by step?">
+                        <div class="topic-card-icon">🔢</div>
+                        <div class="topic-card-body">
+                            <h5>Quadratic Equations</h5>
+                            <span>Step-by-step formula & finding roots easily</span>
+                        </div>
+                        <div class="topic-card-arrow">→</div>
+                    </div>
+
+                    <div class="topic-card" data-question="Give me an important Class 11 NCERT practice question with step-by-step explanation">
+                        <div class="topic-card-icon">🎯</div>
+                        <div class="topic-card-body">
+                            <h5>NCERT Board Practice</h5>
+                            <span>Key formulas & scoring tips for exams</span>
+                        </div>
+                        <div class="topic-card-arrow">→</div>
+                    </div>
                 </div>
             </div>
         `;
+        bindTopicCards();
 
         if (topicEl) topicEl.innerText = "New Maths Question";
         userInput.value = '';
@@ -434,6 +491,11 @@ function closeSettingsModal() {
 
 if (popupSettingsItem) {
     popupSettingsItem.addEventListener('click', openSettingsModal);
+}
+
+const headerSettingsBtn = document.getElementById('header-settings-btn');
+if (headerSettingsBtn) {
+    headerSettingsBtn.addEventListener('click', openSettingsModal);
 }
 
 if (settingsCloseBtn) {

@@ -288,15 +288,202 @@ body.dark-mode .popup-logout:hover {
     gap: 10px;
 }
 
-.header-info {
+.header-settings-btn {
+    background: transparent;
+    border: none;
+    font-size: 19px;
+    cursor: pointer;
+    color: #475569;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.header-settings-btn:hover {
+    background-color: #f1f5f9;
+    color: #4f46e5;
+}
+
+body.dark-mode .header-settings-btn {
+    color: #cbd5e1;
+}
+
+body.dark-mode .header-settings-btn:hover {
+    background-color: #334155;
+    color: #f8fafc;
+}
+
+/* ======================================================== */
+/* 🌟 Pinterest Style Welcome Hero & Topic Cards Grid       */
+/* ======================================================== */
+.welcome-hero {
+    max-width: 680px;
+    width: 100%;
+    margin: 16px auto;
+    text-align: center;
+    animation: fadeInModal 0.25s ease-out;
+}
+
+.welcome-avatar-badge {
+    width: 50px;
+    height: 50px;
+    font-size: 26px;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px auto;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.15);
+}
+
+body.dark-mode .welcome-avatar-badge {
+    background: linear-gradient(135deg, #312e81, #1e1b4b);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-greeting {
+    font-size: 23px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+}
+
+body.dark-mode .welcome-greeting {
+    color: #f8fafc;
+}
+
+.welcome-subtitle {
+    font-size: 13.5px;
+    color: #64748b;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+}
+
+body.dark-mode .welcome-subtitle {
+    color: #94a3b8;
+}
+
+.topic-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    text-align: left;
+}
+
+.topic-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 13px 15px;
     display: flex;
     align-items: center;
     gap: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
 }
 
-.header-info h3 {
-    font-size: 16px;
-    color: #0f172a;
+.topic-card:hover {
+    transform: translateY(-2px);
+    border-color: #818cf8;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.1);
+}
+
+body.dark-mode .topic-card {
+    background-color: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .topic-card:hover {
+    background-color: #243248;
+    border-color: #6366f1;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.topic-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background-color: #eef2ff;
+    font-size: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+body.dark-mode .topic-card-icon {
+    background-color: #312e81;
+}
+
+.topic-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.topic-card-body h5 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 2px 0;
+}
+
+body.dark-mode .topic-card-body h5 {
+    color: #f8fafc;
+}
+
+.topic-card-body span {
+    font-size: 11px;
+    color: #64748b;
+    display: block;
+    line-height: 1.3;
+}
+
+body.dark-mode .topic-card-body span {
+    color: #94a3b8;
+}
+
+.topic-card-arrow {
+    font-size: 15px;
+    color: #cbd5e1;
+    font-weight: bold;
+    transition: transform 0.2s, color 0.2s;
+    flex-shrink: 0;
+}
+
+.topic-card:hover .topic-card-arrow {
+    transform: translateX(4px);
+    color: #4f46e5;
+}
+
+body.dark-mode .topic-card-arrow {
+    color: #475569;
+}
+
+body.dark-mode .topic-card:hover .topic-card-arrow {
+    color: #818cf8;
+}
+
+@media (max-width: 640px) {
+    .topic-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 9px;
+    }
+    
+    .welcome-greeting {
+        font-size: 19px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 12.5px;
+        margin-bottom: 14px;
+    }
 }
 
 .header-info span {
@@ -1098,18 +1285,48 @@ body.dark-mode .mobile-menu-btn {
     .sidebar {
         position: fixed !important;
         top: 0;
-        left: -300px !important;
-        width: 270px !important;
+        left: -320px !important;
+        width: 280px !important;
         height: 100dvh !important;
         height: 100vh !important;
         z-index: 999;
         box-shadow: 4px 0 25px rgba(0, 0, 0, 0.3);
         transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        padding: 16px 14px calc(24px + env(safe-area-inset-bottom)) 14px !important;
     }
 
     /* Jab mobile menu open ho */
     .sidebar.mobile-open {
         left: 0 !important;
+    }
+
+    .sidebar .sidebar-footer {
+        display: flex !important;
+        visibility: visible !important;
+        margin-top: auto !important;
+        padding-top: 12px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .sidebar .user-profile-card {
+        display: flex !important;
+        visibility: visible !important;
+        width: 100% !important;
+    }
+
+    .sidebar .sidebar-text {
+        display: inline-block !important;
+    }
+
+    .sidebar #profile-popup-menu {
+        position: absolute !important;
+        bottom: 74px !important;
+        left: 12px !important;
+        width: calc(100% - 24px) !important;
+        z-index: 9999 !important;
     }
 
     /* Math toolbar mobile par chota aur compact rahe */

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -84,21 +84,61 @@
         </aside>
         <main class="chat-area">
           <header class="chat-header">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" title="Open Menu">☰</button>
-                <div>
-                    <h3 id="current-topic" style="margin: 0; font-size: 16px;">What is a derivative?</h3>
-                    <span style="font-size: 11px; background-color: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 999px; font-weight: 600; display: inline-block; margin-top: 3px;">NCERT Grounded</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" title="Open Menu">☰</button>
+                    <div>
+                        <h3 id="current-topic" style="margin: 0; font-size: 16px;">What is a derivative?</h3>
+                        <span style="font-size: 11px; background-color: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 999px; font-weight: 600; display: inline-block; margin-top: 3px;">NCERT Grounded</span>
+                    </div>
                 </div>
+                <!-- Quick Settings Button on Header (Mobile & Desktop) -->
+                <button type="button" id="header-settings-btn" class="header-settings-btn" title="Open Settings">⚙️</button>
             </div>
         </header>
             <div class="messages-container" id="messages-container">
-                <!-- Clean Original Welcome Message -->
-                <div class="message assistant">
-                    <div class="avatar">👩‍🏫</div>
-                    <div class="message-content">
-                        <h4 id="welcome-heading">Hello Sameed! I am your AI Maths Tutor.</h4>
-                        <p>Aap mujhse koi bhi mathematics ka concept, formula ya problem puch sakte hain. Upar se apna favourite explanation style choose karein aur shuru karein!</p>
+                <!-- Pinterest-Style Welcome Hero & Topic Starter Cards -->
+                <div class="welcome-hero" id="welcome-hero">
+                    <div class="welcome-avatar-badge">👩‍🏫</div>
+                    <h2 class="welcome-greeting" id="welcome-greeting">Hello Sameed!</h2>
+                    <p class="welcome-subtitle">I am your <strong>AI Maths Tutor</strong>. Aaj kaunsa mathematics concept intuitively samajhna chahte hain?</p>
+                    
+                    <div class="topic-cards-grid">
+                        <div class="topic-card" data-question="What is a derivative and why do we use it in calculus?">
+                            <div class="topic-card-icon">📐</div>
+                            <div class="topic-card-body">
+                                <h5>Calculus & Derivatives</h5>
+                                <span>Speedometer analogy & dy/dx rate of change</span>
+                            </div>
+                            <div class="topic-card-arrow">→</div>
+                        </div>
+
+                        <div class="topic-card" data-question="Explain trigonometry sin, cos, tan with real-life examples">
+                            <div class="topic-card-icon">🔺</div>
+                            <div class="topic-card-body">
+                                <h5>Trigonometry & Heights</h5>
+                                <span>Understand sin, cos, tan & triangle angles</span>
+                            </div>
+                            <div class="topic-card-arrow">→</div>
+                        </div>
+
+                        <div class="topic-card" data-question="How to solve Quadratic Equations using formula step by step?">
+                            <div class="topic-card-icon">🔢</div>
+                            <div class="topic-card-body">
+                                <h5>Quadratic Equations</h5>
+                                <span>Step-by-step formula & finding roots easily</span>
+                            </div>
+                            <div class="topic-card-arrow">→</div>
+                        </div>
+
+                        <div class="topic-card" data-question="Give me an important Class 11 NCERT practice question with step-by-step explanation">
+                            <div class="topic-card-icon">🎯</div>
+                            <div class="topic-card-body">
+                                <h5>NCERT Board Practice</h5>
+                                <span>Key formulas & scoring tips for exams</span>
+                            </div>
+                            <div class="topic-card-arrow">→</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -357,6 +397,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=7"></script>
+    <script src="script.js?v=8"></script>
 </body>
 </html>
