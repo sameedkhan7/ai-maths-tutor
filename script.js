@@ -99,11 +99,24 @@ if (removePhoto && fileInput) {
 }
 
 
-// 3. Antigravity Model / Style Popup Menu
+// 3. Groq LLM Model Picker Menu
 const modelPillBtn = document.getElementById('model-pill-btn');
 const modelDropdown = document.getElementById('model-dropdown-menu');
 const selectedModelText = document.getElementById('selected-model-text');
-const menuItems = document.querySelectorAll('.menu-item');
+const menuItems = document.querySelectorAll('.model-dropdown-menu .menu-item');
+
+let currentModel = localStorage.getItem('tutorModel') || 'llama-3.3-70b-versatile';
+
+// Restore saved model on load
+if (selectedModelText && currentModel) {
+    menuItems.forEach(item => {
+        if (item.getAttribute('data-model') === currentModel) {
+            menuItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            selectedModelText.innerText = item.getAttribute('data-text');
+        }
+    });
+}
 
 if (modelPillBtn && modelDropdown) {
     modelPillBtn.addEventListener('click', (e) => {
@@ -121,8 +134,11 @@ menuItems.forEach(item => {
     item.addEventListener('click', () => {
         menuItems.forEach(i => i.classList.remove('active'));
         item.classList.add('active');
-        currentStyle = item.getAttribute('data-style');
-        selectedModelText.innerText = item.getAttribute('data-text');
+        currentModel = item.getAttribute('data-model') || 'llama-3.3-70b-versatile';
+        localStorage.setItem('tutorModel', currentModel);
+        if (selectedModelText) {
+            selectedModelText.innerText = item.getAttribute('data-text');
+        }
         modelDropdown.style.display = 'none';
     });
 });
@@ -184,7 +200,7 @@ if (chatForm) {
                 question: question,
                 style: currentStyle,
                 language: selectedLanguage,
-                model: 'llama3.3'
+                model: currentModel
             })
         })
         .then(response => response.json())

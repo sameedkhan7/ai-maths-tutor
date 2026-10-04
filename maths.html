@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=11">
+    <link rel="stylesheet" href="style.css?v=12">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -163,17 +163,16 @@
                         <button type="button" id="plus-btn" class="tool-icon-btn" title="Add photos & files">➕</button>
                         <input type="file" id="file-input" style="display:none;" accept="image/*,.pdf" />
 
-                        <!-- 🧠 Antigravity Style Model/Mode Selector -->
+                        <!-- ⚡ Groq LLM Model Selector -->
                         <div class="model-picker">
                             <button type="button" id="model-pill-btn" class="model-pill-btn">
-                                🧠 <span id="selected-model-text">LLaMA 3.1 (Simple)</span> ▾
+                                ⚡ <span id="selected-model-text">Groq · LLaMA 3.3 (70B)</span> ▾
                             </button>
                             <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
-                                <div class="menu-item active" data-style="simple" data-text="LLaMA 3.1 (Simple)">⚡ LLaMA 3.1 • Simple</div>
-                                <div class="menu-item" data-style="sports" data-text="LLaMA 3.1 (Sports)">🏏 LLaMA 3.1 • Sports</div>
-                                <div class="menu-item" data-style="real-life" data-text="LLaMA 3.1 (Real-Life)">🌍 LLaMA 3.1 • Real-Life</div>
-                                <div class="menu-item" data-style="story" data-text="LLaMA 3.1 (Story)">📖 LLaMA 3.1 • Story</div>
-                                <div class="menu-item" data-style="step-by-step" data-text="LLaMA 3.1 (Step-by-Step)">🔢 LLaMA 3.1 • Step-by-Step</div>
+                                <div class="menu-item active" data-model="llama-3.3-70b-versatile" data-text="Groq · LLaMA 3.3 (70B)">⚡ Groq · LLaMA 3.3 (70B)</div>
+                                <div class="menu-item" data-model="llama-3.1-8b-instant" data-text="Groq · LLaMA 3.1 (8B)">🚀 Groq · LLaMA 3.1 (8B Instant)</div>
+                                <div class="menu-item" data-model="mixtral-8x7b-32768" data-text="Groq · Mixtral (8x7B)">🧠 Groq · Mixtral 8x7B</div>
+                                <div class="menu-item" data-model="gemma2-9b-it" data-text="Groq · Gemma 2 (9B)">💎 Groq · Gemma 2 (9B)</div>
                             </div>
                         </div>
 
@@ -393,6 +392,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=11"></script>
+    <script src="script.js?v=12"></script>
 </body>
 </html>

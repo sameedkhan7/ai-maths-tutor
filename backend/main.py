@@ -113,7 +113,8 @@ def chat_with_tutor(request: ChatRequest):
             question=q,
             chat_history=chat_history_msgs,
             explanation_style=style,
-            language=request.language if request.language in ["english", "hindi", "hinglish", "urdu"] else "hinglish"
+            language=request.language if request.language in ["english", "hindi", "hinglish", "urdu"] else "hinglish",
+            model=request.model or "llama-3.3-70b-versatile"
         )
         tutor_res = generate_tutor_response(tutor_req)
         reply = tutor_res.answer
