@@ -259,6 +259,13 @@ function submitUserMessage() {
         }
         if (data.chat_id) {
             currentChatId = data.chat_id;
+            localStorage.setItem('activeChatId', data.chat_id);
+            try {
+                const url = new URL(window.location.href);
+                url.searchParams.set('c', data.chat_id);
+                window.history.replaceState({ chatId: data.chat_id }, '', url.toString());
+            } catch (e) {}
+
             const topicEl = document.getElementById('current-topic');
             if (topicEl && data.question) {
                 topicEl.innerText = data.question.length > 35 ? data.question.slice(0, 35) + '...' : data.question;
@@ -586,8 +593,15 @@ function createChatHistoryItemEl(chat) {
 // Restore all messages of a chat session
 async function loadChatSession(chatId, title) {
     currentChatId = chatId;
+    try {
+        localStorage.setItem('activeChatId', String(chatId));
+        const url = new URL(window.location.href);
+        url.searchParams.set('c', String(chatId));
+        window.history.replaceState({ chatId: String(chatId) }, '', url.toString());
+    } catch (e) {}
+
     const topicEl = document.getElementById('current-topic');
-    if (topicEl) topicEl.innerText = title;
+    if (topicEl && title) topicEl.innerText = title;
 
     // Highlight active item in sidebar
     document.querySelectorAll('.history-item').forEach(el => {
@@ -636,6 +650,14 @@ async function loadChatSession(chatId, title) {
 // Start New Chat (Clean Slate)
 function startNewChat() {
     currentChatId = null;
+    try {
+        localStorage.removeItem('activeChatId');
+        const url = new URL(window.location.href);
+        url.searchParams.delete('c');
+        url.searchParams.delete('chat');
+        window.history.replaceState({}, '', url.toString());
+    } catch (e) {}
+
     const topicEl = document.getElementById('current-topic');
     if (topicEl) topicEl.innerText = "New Maths Question";
 
@@ -721,12 +743,65 @@ async function renameChatPrompt(chatId, currentTitle) {
     }
 }
 
+// Restore active chat session if user refreshed the page (like ChatGPT & Claude)
+function restoreActiveSessionOnInit() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlChatId = urlParams.get('c') || urlParams.get('chat');
+        const savedActiveChatId = urlChatId || localStorage.getItem('activeChatId');
+
+        if (savedActiveChatId) {
+            const chats = allChatsCache.length > 0 ? allChatsCache : getCachedChats();
+            const found = chats.find(c => String(c.id) === String(savedActiveChatId));
+            const chatTitle = found ? found.title : "Maths Session";
+            loadChatSession(savedActiveChatId, chatTitle);
+            return true;
+        }
+    } catch (e) {
+        console.warn('Error restoring session on init:', e);
+    }
+    return false;
+}
+
+// Browser Back / Forward Navigation Support
+window.addEventListener('popstate', (e) => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlChatId = urlParams.get('c') || urlParams.get('chat');
+        if (urlChatId) {
+            const found = allChatsCache.find(c => String(c.id) === String(urlChatId));
+            loadChatSession(urlChatId, found ? found.title : "Maths Session");
+        } else {
+            startNewChat();
+        }
+    } catch (err) {}
+});
+
 // Initial Instant Render from Cache, then fetch from API
 allChatsCache = getCachedChats();
 if (allChatsCache.length > 0) {
     renderSidebarChats(allChatsCache);
 }
-fetchAndRenderSidebarChats();
+// 🔄 Restore previous active chat on page refresh!
+const hasRestored = restoreActiveSessionOnInit();
+
+fetchAndRenderSidebarChats().then(() => {
+    // If an active session is currently running, keep its title and sidebar highlight synced
+    if (currentChatId) {
+        const freshFound = allChatsCache.find(c => String(c.id) === String(currentChatId));
+        if (freshFound) {
+            const topicEl = document.getElementById('current-topic');
+            if (topicEl) topicEl.innerText = freshFound.title;
+        }
+        document.querySelectorAll('.history-item').forEach(el => {
+            if (String(el.getAttribute('data-chat-id')) === String(currentChatId)) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+    }
+});
 
 // 7. Profile Popup Menu (ChatGPT & Claude Style)
 const userProfileCard = document.getElementById('user-profile-card');
