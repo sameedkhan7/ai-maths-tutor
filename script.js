@@ -5,6 +5,11 @@
 // Global State
 let currentStyle = 'simple';
 
+// 🌐 Dynamic API URL (Automatically switches to public HTTPS tunnel on GitHub Pages / Phone)
+const API_BASE_URL = (window.location.protocol === 'https:' || (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost'))
+    ? 'https://aqua-gained-presenting-movies.trycloudflare.com'
+    : 'http://127.0.0.1:8000';
+
 // 0. Student Profile Initialization (ChatGPT & Claude Style)
 const currentStudentName = localStorage.getItem('studentName') || 'Sameed Khan';
 const userDisplayNameEl = document.getElementById('user-display-name');
@@ -105,17 +110,23 @@ const modelDropdown = document.getElementById('model-dropdown-menu');
 const selectedModelText = document.getElementById('selected-model-text');
 const menuItems = document.querySelectorAll('.model-dropdown-menu .menu-item');
 
-let currentModel = localStorage.getItem('tutorModel') || 'llama-3.3-70b-versatile';
+let currentModel = localStorage.getItem('tutorModel') || 'openai/gpt-oss-120b';
 
 // Restore saved model on load
 if (selectedModelText && currentModel) {
+    let found = false;
     menuItems.forEach(item => {
         if (item.getAttribute('data-model') === currentModel) {
             menuItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             selectedModelText.innerText = item.getAttribute('data-text');
+            found = true;
         }
     });
+    if (!found) {
+        currentModel = 'openai/gpt-oss-120b';
+        localStorage.setItem('tutorModel', currentModel);
+    }
 }
 
 if (modelPillBtn && modelDropdown) {
@@ -134,7 +145,7 @@ menuItems.forEach(item => {
     item.addEventListener('click', () => {
         menuItems.forEach(i => i.classList.remove('active'));
         item.classList.add('active');
-        currentModel = item.getAttribute('data-model') || 'llama-3.3-70b-versatile';
+        currentModel = item.getAttribute('data-model') || 'openai/gpt-oss-120b';
         localStorage.setItem('tutorModel', currentModel);
         if (selectedModelText) {
             selectedModelText.innerText = item.getAttribute('data-text');
@@ -193,7 +204,7 @@ if (chatForm) {
         const selectedLanguage = localStorage.getItem('tutorLanguage') || 'hinglish';
 
         // 🚀 Asli FastAPI Backend API Call:
-        fetch('http://127.0.0.1:8000/api/chat', {
+        fetch(`${API_BASE_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

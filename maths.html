@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=14">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -166,13 +166,13 @@
                         <!-- ⚡ Groq LLM Model Selector -->
                         <div class="model-picker">
                             <button type="button" id="model-pill-btn" class="model-pill-btn">
-                                ⚡ <span id="selected-model-text">Groq · LLaMA 3.3 (70B)</span> ▾
+                                ⚡ <span id="selected-model-text">Groq · GPT-OSS (120B)</span> ▾
                             </button>
                             <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
-                                <div class="menu-item active" data-model="llama-3.3-70b-versatile" data-text="Groq · LLaMA 3.3 (70B)">⚡ Groq · LLaMA 3.3 (70B)</div>
-                                <div class="menu-item" data-model="llama-3.1-8b-instant" data-text="Groq · LLaMA 3.1 (8B)">🚀 Groq · LLaMA 3.1 (8B Instant)</div>
-                                <div class="menu-item" data-model="mixtral-8x7b-32768" data-text="Groq · Mixtral (8x7B)">🧠 Groq · Mixtral 8x7B</div>
-                                <div class="menu-item" data-model="gemma2-9b-it" data-text="Groq · Gemma 2 (9B)">💎 Groq · Gemma 2 (9B)</div>
+                                <div class="menu-item active" data-model="openai/gpt-oss-120b" data-text="Groq · GPT-OSS (120B)">⚡ Groq · GPT-OSS (120B Versatile)</div>
+                                <div class="menu-item" data-model="openai/gpt-oss-20b" data-text="Groq · GPT-OSS (20B)">🚀 Groq · GPT-OSS (20B Fast)</div>
+                                <div class="menu-item" data-model="qwen/qwen3.8-27b" data-text="Groq · Qwen 3.8 (27B)">🧠 Groq · Qwen 3.8 (27B Math)</div>
+                                <div class="menu-item" data-model="allam-2-7b" data-text="Groq · Allam (7B)">🌍 Groq · Allam (7B)</div>
                             </div>
                         </div>
 
@@ -392,6 +392,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=12"></script>
+    <script src="script.js?v=14"></script>
 </body>
 </html>
