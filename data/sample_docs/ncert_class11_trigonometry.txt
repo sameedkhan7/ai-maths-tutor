@@ -1,0 +1,34 @@
+# NCERT Class 11 Mathematics — Chapter 3: Trigonometric Functions
+
+## 1. Trigonometric Functions & Unit Circle
+Let a circle of radius 1 unit have its center at the origin O(0,0) of the coordinate system.
+For any angle theta (in radians) formed by the terminal ray:
+- x-coordinate = cos theta
+- y-coordinate = sin theta
+- tan theta = sin theta / cos theta (cos theta != 0)
+- cot theta = cos theta / sin theta (sin theta != 0)
+- sec theta = 1 / cos theta (cos theta != 0)
+- csc theta = 1 / sin theta (sin theta != 0)
+
+## 2. Fundamental Pythagorean Trigonometric Identities
+1. sin^2(theta) + cos^2(theta) = 1 (Valid for all real theta)
+2. 1 + tan^2(theta) = sec^2(theta)
+3. 1 + cot^2(theta) = csc^2(theta)
+
+## 3. Compound Angle Formulas (NCERT Class 11 Core)
+1. cos(x + y) = cos(x)*cos(y) - sin(x)*sin(y)
+2. cos(x - y) = cos(x)*cos(y) + sin(x)*sin(y)
+3. sin(x + y) = sin(x)*cos(y) + cos(x)*sin(y)
+4. sin(x - y) = sin(x)*cos(y) - cos(x)*sin(y)
+5. tan(x + y) = [tan(x) + tan(y)] / [1 - tan(x)*tan(y)]
+6. tan(x - y) = [tan(x) - tan(y)] / [1 + tan(x)*tan(y)]
+
+## 4. Double Angle Formulas
+- sin(2x) = 2*sin(x)*cos(x) = [2*tan(x)] / [1 + tan^2(x)]
+- cos(2x) = cos^2(x) - sin^2(x) = 2*cos^2(x) - 1 = 1 - 2*sin^2(x) = [1 - tan^2(x)] / [1 + tan^2(x)]
+- tan(2x) = [2*tan(x)] / [1 - tan^2(x)]
+
+## 5. Right Triangle Geometric Definition
+- sin(theta) = Opposite Side / Hypotenuse
+- cos(theta) = Adjacent Side / Hypotenuse
+- tan(theta) = Opposite Side / Adjacent Side

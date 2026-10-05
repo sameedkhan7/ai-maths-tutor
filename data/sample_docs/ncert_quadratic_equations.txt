@@ -1,0 +1,24 @@
+# NCERT Mathematics — Quadratic Equations (Class 10 Chapter 4 & Class 11 Chapter 5)
+
+## 1. Definition of Quadratic Equation
+An equation of the form:
+a*x^2 + b*x + c = 0, where a, b, c are real numbers and a != 0,
+is called a standard Quadratic Equation in variable x.
+
+## 2. The Quadratic Formula (Shreedharacharya's Rule)
+The roots (solutions) of the quadratic equation a*x^2 + b*x + c = 0 are given by:
+x = [-b +- sqrt(b^2 - 4*a*c)] / (2*a)
+
+## 3. Nature of Roots and Discriminant (D)
+The expression D = b^2 - 4*a*c is called the **Discriminant** of the quadratic equation:
+1. If D > 0: Two distinct real roots.
+2. If D = 0: Two equal (coincident) real roots: x = -b / (2*a).
+3. If D < 0: No real roots (Two complex conjugate roots: x = [-b +- i*sqrt(4*a*c - b^2)] / (2*a) in NCERT Class 11).
+
+## 4. Relations Between Roots and Coefficients
+Let alpha and beta be the roots of a*x^2 + b*x + c = 0:
+- Sum of roots: alpha + beta = -b / a
+- Product of roots: alpha * beta = c / a
+
+The quadratic equation whose roots are alpha and beta is:
+x^2 - (alpha + beta)*x + (alpha * beta) = 0

@@ -3,13 +3,14 @@ from backend.ai.config import (
     PROMPT_VERSION,
 )
 
-from backend.ai.schemas import TutorRequest, TutorResponse
+from backend.ai.schemas import TutorRequest, TutorResponse, RAGChunk
 from backend.ai.styles import detect_style
 from backend.ai.intent import detect_question_type
 from backend.ai.prompts import MASTER_SYSTEM_PROMPT
 from backend.ai.context_builder import build_messages
 from backend.ai.groq_client import call_groq
 from backend.ai.math_engine import get_exact_math_context
+from backend.rag.retriever import retrieve_math_context
 
 def generate_tutor_response(req: TutorRequest) -> TutorResponse:
     """
@@ -25,20 +26,35 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
 
         # Validate / normalize explanation style
         explanation_style = detect_style(
-        req.question,
-        req.explanation_style
-)
+            req.question,
+            req.explanation_style
+        )
+
+        # 📚 Member 2: Auto-retrieve NCERT RAG chunks from Knowledge Base
+        if not req.rag_chunks:
+            try:
+                rag_res = retrieve_math_context(req.question, top_k=2)
+                if rag_res and rag_res.get("has_context"):
+                    for c in rag_res.get("chunks", []):
+                        req.rag_chunks.append(RAGChunk(
+                            text=c["text"],
+                            source=c.get("source", "NCERT Mathematics"),
+                            page=c.get("page", 1),
+                            score=c.get("score", 0.8)
+                        ))
+            except Exception as e:
+                print(f"RAG retrieval notice: {e}")
 
         # Add style and question type information to system prompt
         system_prompt = (
-    f"{MASTER_SYSTEM_PROMPT}\n\n"
-    f"CURRENT QUESTION TYPE: {question_type}\n"
-    f"EXPLANATION STYLE: {explanation_style}\n"
-    f"STUDENT LEVEL: {req.student_level}\n"
-    f"IMPORTANT: Your entire response MUST be written in {req.language}. "
-    f"Do not answer in English unless the requested language is english.\n"
-    f"RESPONSE LANGUAGE: {req.language}"
-)
+            f"{MASTER_SYSTEM_PROMPT}\n\n"
+            f"CURRENT QUESTION TYPE: {question_type}\n"
+            f"EXPLANATION STYLE: {explanation_style}\n"
+            f"STUDENT LEVEL: {req.student_level}\n"
+            f"IMPORTANT: Your entire response MUST be written in {req.language}. "
+            f"Do not answer in English unless the requested language is english.\n"
+            f"RESPONSE LANGUAGE: {req.language}"
+        )
 
         # Check exact mathematical verification with SymPy
         exact_math = get_exact_math_context(req.question)

@@ -1,0 +1,32 @@
+# NCERT Class 11 Mathematics — Chapter 13: Limits and Derivatives
+
+## 1. Intuitive Idea of Derivatives
+Suppose a point is moving along a straight line. Let the distance travelled by the point in time t be given by s = f(t).
+The average velocity in the time interval [t, t + h] is:
+Average Velocity = (f(t + h) - f(t)) / h
+
+The instantaneous velocity at time t is the limit of this average velocity as h approaches 0:
+v(t) = lim_{h -> 0} [f(t + h) - f(t)] / h
+
+This limit is called the **Derivative of f(x) with respect to x** and is denoted by f'(x) or dy/dx.
+
+## 2. Standard Derivative Formulas (NCERT Class 11 Table 13.1)
+1. d/dx (x^n) = n * x^(n - 1)  (Power Rule, for all real n)
+2. d/dx (sin x) = cos x
+3. d/dx (cos x) = -sin x
+4. d/dx (tan x) = sec^2 x
+5. d/dx (cot x) = -csc^2 x
+6. d/dx (sec x) = sec x * tan x
+7. d/dx (csc x) = -csc x * cot x
+8. d/dx (constant c) = 0
+
+## 3. Algebra of Derivatives
+Let u(x) and v(x) be two differentiable functions:
+- **Sum Rule:** d/dx [u(x) + v(x)] = d/dx u(x) + d/dx v(x)
+- **Difference Rule:** d/dx [u(x) - v(x)] = d/dx u(x) - d/dx v(x)
+- **Product Rule (Leibnitz Rule):** d/dx [u * v] = u * (dv/dx) + v * (du/dx)
+- **Quotient Rule:** d/dx [u / v] = [v * (du/dx) - u * (dv/dx)] / (v^2), where v(x) != 0
+
+## 4. Solved NCERT Board Practice
+**Example 1:** Find the derivative of f(x) = x^3 + sin(x).
+Solution: By Sum Rule, f'(x) = d/dx(x^3) + d/dx(sin x) = 3*x^2 + cos(x).
