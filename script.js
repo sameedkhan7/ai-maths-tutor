@@ -82,22 +82,9 @@ symButtons.forEach(button => {
 // ⌨️ Enter Key to Send Message (Shift+Enter for newline)
 if (userInput) {
     userInput.addEventListener('keydown', function (e) {
-        const isEnter = e.key === 'Enter' || e.code === 'Enter' || e.keyCode === 13 || e.which === 13;
-        if (isEnter && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        if ((e.key === 'Enter' || e.keyCode === 13) && !e.shiftKey && !e.ctrlKey && !e.altKey) {
             e.preventDefault();
-            const sendBtn = document.getElementById('send-btn');
-            if (sendBtn) {
-                sendBtn.click();
-            } else {
-                const form = document.getElementById('chat-form');
-                if (form) {
-                    if (typeof form.requestSubmit === 'function') {
-                        form.requestSubmit();
-                    } else {
-                        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                    }
-                }
-            }
+            submitUserMessage();
         }
     });
 }
@@ -205,50 +192,63 @@ if (micBtn) {
 
 
 // 5. Chat Form Submit (Ask Tutor)
+// 5. Chat Submission Logic (Ask Tutor)
+function submitUserMessage() {
+    if (!userInput) return;
+    const question = userInput.value.trim();
+    if (!question && (!fileInput || !fileInput.files.length)) return;
+
+    let displayQuestion = question;
+    if (fileInput && fileInput.files.length > 0) {
+        displayQuestion = `📷 [Uploaded: ${fileInput.files[0].name}]<br>` + question;
+        fileInput.value = '';
+        if (photoTag) photoTag.style.display = 'none';
+    }
+
+    // Student message bubble
+    appendMessage('You', displayQuestion, 'user');
+    userInput.value = '';
+
+    const selectedLanguage = localStorage.getItem('tutorLanguage') || 'hinglish';
+
+    // 🚀 Asli FastAPI Backend API Call:
+    fetch(`${API_BASE_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            question: question,
+            style: currentStyle,
+            language: selectedLanguage,
+            model: currentModel
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.reply) {
+            appendMessage('AI Maths Tutor', data.reply, 'assistant');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        appendMessage('AI Maths Tutor', '⚠️ Backend server connect nahi ho pa raha hai. Make sure FastAPI server chal raha hai!', 'assistant');
+    });
+}
+
 const chatForm = document.getElementById('chat-form');
 const messagesContainer = document.getElementById('messages-container');
+const sendBtn = document.getElementById('send-btn');
 
 if (chatForm) {
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
-        const question = userInput.value.trim();
-        if (!question && (!fileInput || !fileInput.files.length)) return;
+        submitUserMessage();
+    });
+}
 
-        let displayQuestion = question;
-        if (fileInput && fileInput.files.length > 0) {
-            displayQuestion = `📷 [Uploaded: ${fileInput.files[0].name}]<br>` + question;
-            fileInput.value = '';
-            if (photoTag) photoTag.style.display = 'none';
-        }
-
-        // Student message bubble
-        appendMessage('You', displayQuestion, 'user');
-        userInput.value = '';
-
-        const selectedLanguage = localStorage.getItem('tutorLanguage') || 'hinglish';
-
-        // 🚀 Asli FastAPI Backend API Call:
-        fetch(`${API_BASE_URL}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                question: question,
-                style: currentStyle,
-                language: selectedLanguage,
-                model: currentModel
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.reply) {
-                appendMessage('AI Maths Tutor', data.reply, 'assistant');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            appendMessage('AI Maths Tutor', '⚠️ Backend server connect nahi ho pa raha hai. Make sure FastAPI server chal raha hai!', 'assistant');
-        });
+if (sendBtn) {
+    sendBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        submitUserMessage();
     });
 }
 
