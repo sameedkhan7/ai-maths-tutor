@@ -159,6 +159,177 @@
         .auth-footer a:hover {
             text-decoration: underline;
         }
+
+        /* Google Account Chooser Modal */
+        .google-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .google-modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .google-modal-card {
+            background: #ffffff;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 440px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            padding: 36px 32px 28px 32px;
+            text-align: center;
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.2s ease;
+            box-sizing: border-box;
+            border: 1px solid #e2e8f0;
+        }
+
+        .google-modal-backdrop.active .google-modal-card {
+            transform: scale(1);
+        }
+
+        .google-modal-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            color: #64748b;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .google-modal-close:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .google-modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f1f1f;
+            margin: 12px 0 4px 0;
+        }
+
+        .google-modal-subtitle {
+            font-size: 13.5px;
+            color: #5f6368;
+            margin-bottom: 24px;
+        }
+
+        .google-account-list {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .google-account-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .google-account-item:last-child {
+            border-bottom: none;
+        }
+
+        .google-account-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .google-account-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .google-account-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .google-account-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f1f1f;
+            line-height: 1.2;
+        }
+
+        .google-account-email {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .google-modal-footer {
+            font-size: 11.5px;
+            color: #5f6368;
+            line-height: 1.5;
+            text-align: left;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .google-loading-state {
+            display: none;
+            padding: 24px 0;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .google-spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #e0e7ff;
+            border-top: 3px solid #4285F4;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -213,10 +384,75 @@
         </div>
     </div>
 
-    <!-- Simple Login Handler Script -->
+    <!-- ============================================== -->
+    <!-- 🌐 Authentic Google Account Chooser Modal     -->
+    <!-- ============================================== -->
+    <div id="google-modal-backdrop" class="google-modal-backdrop">
+        <div class="google-modal-card">
+            <button type="button" class="google-modal-close" id="google-modal-close" title="Close">✕</button>
+            
+            <div id="google-modal-main">
+                <!-- Google SVG Logo -->
+                <svg width="28" height="28" viewBox="0 0 24 24" style="margin-bottom: 4px;">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.33 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+                
+                <h3 class="google-modal-title">Choose an account</h3>
+                <p class="google-modal-subtitle">to continue to <strong>AI Maths Tutor</strong></p>
+
+                <!-- Accounts List -->
+                <div class="google-account-list">
+                    <!-- Account 1: Sameed Khan -->
+                    <div class="google-account-item" onclick="selectGoogleAccount('Sameed Khan', 'sameedkhan7@gmail.com')">
+                        <div class="google-account-avatar" style="background-color: #4f46e5;">SK</div>
+                        <div class="google-account-info">
+                            <div class="google-account-name">Sameed Khan</div>
+                            <div class="google-account-email">sameedkhan7@gmail.com</div>
+                        </div>
+                    </div>
+
+                    <!-- Account 2: Alex Sharma -->
+                    <div class="google-account-item" onclick="selectGoogleAccount('Alex Sharma', 'alex.student@ncert.ac.in')">
+                        <div class="google-account-avatar" style="background-color: #059669;">AS</div>
+                        <div class="google-account-info">
+                            <div class="google-account-name">Alex Sharma</div>
+                            <div class="google-account-email">alex.student@ncert.ac.in</div>
+                        </div>
+                    </div>
+
+                    <!-- Account 3: Use Another Account -->
+                    <div class="google-account-item" onclick="promptGoogleAccount()">
+                        <div class="google-account-avatar" style="background-color: #64748b;">👤</div>
+                        <div class="google-account-info">
+                            <div class="google-account-name">Use another account</div>
+                            <div class="google-account-email">Sign in with a different Google ID</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="google-modal-footer">
+                    To continue, Google will share your name, email address, and language preference with <strong>AI Maths Tutor</strong>. See our Privacy Policy.
+                </div>
+            </div>
+
+            <!-- Loading Spinner State -->
+            <div id="google-loading-state" class="google-loading-state">
+                <div class="google-spinner"></div>
+                <h4 style="margin: 0; font-size: 15px; color: #1e293b;" id="google-loading-text">Signing in...</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Handler Script -->
     <script>
         const loginForm = document.getElementById('login-form');
         const demoBtn = document.getElementById('demo-login-btn');
+        const googleModalBackdrop = document.getElementById('google-modal-backdrop');
+        const googleModalClose = document.getElementById('google-modal-close');
+        const googleBtn = document.getElementById('google-login-btn');
 
         // Form Submit
         loginForm.addEventListener('submit', (e) => {
@@ -227,11 +463,9 @@
 
             let finalDisplayName = inputVal;
 
-            // Agar pehle se registered user ka match mil jaye
             if (savedRegEmail && inputVal.toLowerCase() === savedRegEmail.toLowerCase()) {
                 finalDisplayName = savedRegName;
             } else if (inputVal.includes('@')) {
-                // Email format: e.g. sameedkhan7@gmail.com -> Sameed Khan
                 let raw = inputVal.split('@')[0].replace(/[._0-9]/g, ' ').trim();
                 if (raw) {
                     finalDisplayName = raw.split(' ')
@@ -242,7 +476,6 @@
                     finalDisplayName = inputVal.split('@')[0];
                 }
             } else {
-                // Direct name format: e.g. sameed -> Sameed
                 finalDisplayName = inputVal.charAt(0).toUpperCase() + inputVal.slice(1);
             }
 
@@ -262,19 +495,58 @@
             window.location.href = 'maths.html';
         });
 
-        // Google One-Tap / Continue with Google
-        const googleBtn = document.getElementById('google-login-btn');
-        if (googleBtn) {
+        // Open Google Account Chooser Modal
+        if (googleBtn && googleModalBackdrop) {
             googleBtn.addEventListener('click', () => {
-                const savedRegName = localStorage.getItem('registeredName') || 'Sameed Khan';
-                const savedRegEmail = localStorage.getItem('registeredEmail') || 'sameedkhan7@gmail.com';
-                
-                // Set authenticated Google user
-                localStorage.setItem('studentName', savedRegName);
-                localStorage.setItem('studentEmail', savedRegEmail);
-                localStorage.setItem('authProvider', 'google');
-                window.location.href = 'maths.html';
+                googleModalBackdrop.classList.add('active');
             });
+        }
+
+        // Close Google Modal
+        if (googleModalClose && googleModalBackdrop) {
+            googleModalClose.addEventListener('click', () => {
+                googleModalBackdrop.classList.remove('active');
+            });
+
+            googleModalBackdrop.addEventListener('click', (e) => {
+                if (e.target === googleModalBackdrop) {
+                    googleModalBackdrop.classList.remove('active');
+                }
+            });
+        }
+
+        // Account Selection Handler
+        function selectGoogleAccount(name, email) {
+            const mainView = document.getElementById('google-modal-main');
+            const loadingView = document.getElementById('google-loading-state');
+            const loadingText = document.getElementById('google-loading-text');
+
+            if (mainView && loadingView) {
+                mainView.style.display = 'none';
+                loadingView.style.display = 'flex';
+                loadingText.innerText = `Signing in as ${name}...`;
+            }
+
+            localStorage.setItem('studentName', name);
+            localStorage.setItem('studentEmail', email);
+            localStorage.setItem('authProvider', 'google');
+
+            setTimeout(() => {
+                window.location.href = 'maths.html';
+            }, 750);
+        }
+
+        // Prompt custom Google email
+        function promptGoogleAccount() {
+            const email = prompt('Enter your Google email address:', 'student@gmail.com');
+            if (email && email.trim()) {
+                const name = email.split('@')[0].replace(/[._0-9]/g, ' ').trim() || 'Google Student';
+                const formattedName = name.split(' ')
+                    .filter(w => w.length > 0)
+                    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                    .join(' ');
+                selectGoogleAccount(formattedName, email.trim());
+            }
         }
     </script>
 </body>
