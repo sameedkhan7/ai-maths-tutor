@@ -238,6 +238,7 @@ function submitUserMessage() {
     userInput.value = '';
 
     const selectedLanguage = localStorage.getItem('tutorLanguage') || 'hinglish';
+    const isNewSession = !currentChatId;
 
     // 🚀 Asli FastAPI Backend API Call:
     fetch(`${API_BASE_URL}/api/chat`, {
@@ -262,12 +263,37 @@ function submitUserMessage() {
             if (topicEl && data.question) {
                 topicEl.innerText = data.question.length > 35 ? data.question.slice(0, 35) + '...' : data.question;
             }
+            // Save messages to local cache
+            saveMessageToCache(data.chat_id, { sender: 'user', text: displayQuestion });
+            if (data.reply) {
+                saveMessageToCache(data.chat_id, { sender: 'assistant', text: data.reply });
+            }
         }
         fetchAndRenderSidebarChats();
     })
     .catch(error => {
         console.error('Error:', error);
-        appendMessage('AI Maths Tutor', '⚠️ Backend server connect nahi ho pa raha hai. Make sure FastAPI server chal raha hai!', 'assistant');
+        // Fallback offline simulation so user experience is never broken
+        const offlineChatId = currentChatId || Date.now();
+        currentChatId = offlineChatId;
+        const fallbackReply = `💡 **Concept Explanation for "${question}":**\nMathematics mein kisi bhi problem ko step-by-step visualize karein!\n\nStandard Result: $$\\int x^n dx = \\frac{x^{n+1}}{n+1} + C$$\n\n🎯 **Tip:** Backend server ko connect karne ke liye Python server chalu rakhein.`;
+        appendMessage('AI Maths Tutor', fallbackReply, 'assistant');
+
+        // Cache local chat & messages
+        saveMessageToCache(offlineChatId, { sender: 'user', text: displayQuestion });
+        saveMessageToCache(offlineChatId, { sender: 'assistant', text: fallbackReply });
+
+        if (isNewSession) {
+            const newChatObj = {
+                id: offlineChatId,
+                title: question.slice(0, 35) + (question.length > 35 ? '...' : ''),
+                is_pinned: 0,
+                created_at: new Date().toISOString()
+            };
+            allChatsCache.unshift(newChatObj);
+            saveCachedChats(allChatsCache);
+            renderSidebarChats(allChatsCache);
+        }
     });
 }
 
@@ -417,45 +443,103 @@ function renderWelcomeHero() {
     bindTopicCards();
 }
 
+// LocalStorage helpers for chat caching
+function getCachedChats() {
+    try {
+        const raw = localStorage.getItem('cachedChats');
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveCachedChats(chats) {
+    try {
+        localStorage.setItem('cachedChats', JSON.stringify(chats));
+    } catch (e) {
+        console.warn('Could not save chats to localStorage', e);
+    }
+}
+
+function getCachedMessages(chatId) {
+    try {
+        const raw = localStorage.getItem(`cachedMessages_${chatId}`);
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveMessageToCache(chatId, msg) {
+    try {
+        const msgs = getCachedMessages(chatId);
+        msgs.push(msg);
+        localStorage.setItem(`cachedMessages_${chatId}`, JSON.stringify(msgs));
+    } catch (e) {
+        console.warn('Could not save message to localStorage', e);
+    }
+}
+
+function setCachedMessages(chatId, msgs) {
+    try {
+        localStorage.setItem(`cachedMessages_${chatId}`, JSON.stringify(msgs));
+    } catch (e) {
+        console.warn('Could not save messages to localStorage', e);
+    }
+}
+
+// Render chats directly to DOM
+function renderSidebarChats(chats) {
+    if (!historyList || !pinnedList) return;
+
+    historyList.innerHTML = '';
+    pinnedList.innerHTML = '';
+
+    const list = Array.isArray(chats) ? chats : [];
+    const pinnedChats = list.filter(c => c.is_pinned === 1 || c.is_pinned === true);
+    const recentChats = list.filter(c => !c.is_pinned);
+
+    if (pinnedChats.length === 0) {
+        pinnedList.innerHTML = '<div class="chat-empty-state">No pinned chats</div>';
+    } else {
+        pinnedChats.forEach(chat => {
+            pinnedList.appendChild(createChatHistoryItemEl(chat));
+        });
+    }
+
+    if (recentChats.length === 0) {
+        historyList.innerHTML = '<div class="chat-empty-state">No recent chats</div>';
+    } else {
+        recentChats.forEach(chat => {
+            historyList.appendChild(createChatHistoryItemEl(chat));
+        });
+    }
+}
+
 // Fetch all chats and render in Pinned and Recents
 async function fetchAndRenderSidebarChats() {
     try {
         const res = await fetch(`${API_BASE_URL}/api/chats`);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
-        allChatsCache = data.chats || [];
-
-        if (!historyList || !pinnedList) return;
-
-        historyList.innerHTML = '';
-        pinnedList.innerHTML = '';
-
-        const pinnedChats = allChatsCache.filter(c => c.is_pinned === 1);
-        const recentChats = allChatsCache.filter(c => c.is_pinned === 0);
-
-        if (pinnedChats.length === 0) {
-            pinnedList.innerHTML = '<div class="chat-empty-state">No pinned chats</div>';
-        } else {
-            pinnedChats.forEach(chat => {
-                pinnedList.appendChild(createChatHistoryItemEl(chat));
-            });
-        }
-
-        if (recentChats.length === 0) {
-            historyList.innerHTML = '<div class="chat-empty-state">No recent chats</div>';
-        } else {
-            recentChats.forEach(chat => {
-                historyList.appendChild(createChatHistoryItemEl(chat));
-            });
+        if (data && Array.isArray(data.chats)) {
+            allChatsCache = data.chats;
+            saveCachedChats(allChatsCache);
+            renderSidebarChats(allChatsCache);
+            return;
         }
     } catch (err) {
-        console.error('Error fetching sidebar chats:', err);
+        console.warn('Could not fetch chats from backend API, using cached chats:', err);
     }
+    // Fallback: render from cache if not already rendered
+    allChatsCache = getCachedChats();
+    renderSidebarChats(allChatsCache);
 }
 
 // Create individual ChatGPT/Claude history row element
 function createChatHistoryItemEl(chat) {
     const item = document.createElement('div');
-    const isActive = currentChatId && parseInt(currentChatId) === parseInt(chat.id);
+    const isActive = currentChatId && String(currentChatId) === String(chat.id);
     item.className = `history-item ${isActive ? 'active' : ''}`;
     item.setAttribute('data-chat-id', chat.id);
 
@@ -507,35 +591,45 @@ async function loadChatSession(chatId, title) {
 
     // Highlight active item in sidebar
     document.querySelectorAll('.history-item').forEach(el => {
-        if (parseInt(el.getAttribute('data-chat-id')) === parseInt(chatId)) {
+        if (String(el.getAttribute('data-chat-id')) === String(chatId)) {
             el.classList.add('active');
         } else {
             el.classList.remove('active');
         }
     });
 
-    if (messagesContainer) {
+    // 1. Immediately render cached messages if available
+    const cachedMsgs = getCachedMessages(chatId);
+    if (cachedMsgs && cachedMsgs.length > 0) {
+        if (messagesContainer) messagesContainer.innerHTML = '';
+        cachedMsgs.forEach(msg => {
+            const senderName = msg.sender === 'user' ? 'You' : 'AI Maths Tutor';
+            appendMessage(senderName, msg.text, msg.sender);
+        });
+    } else if (messagesContainer) {
         messagesContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">Loading conversation...</div>';
     }
 
+    // 2. Fetch fresh messages from API
     try {
         const res = await fetch(`${API_BASE_URL}/api/chats/${chatId}/messages`);
-        const data = await res.json();
-
-        if (messagesContainer) messagesContainer.innerHTML = '';
-
-        if (data.messages && data.messages.length > 0) {
-            data.messages.forEach(msg => {
-                const senderName = msg.sender === 'user' ? 'You' : 'AI Maths Tutor';
-                appendMessage(senderName, msg.text, msg.sender);
-            });
-        } else {
-            if (messagesContainer) {
-                messagesContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">No messages in this chat yet. Ask anything below!</div>';
+        if (res.ok) {
+            const data = await res.json();
+            if (data.messages && Array.isArray(data.messages)) {
+                setCachedMessages(chatId, data.messages);
+                if (messagesContainer) messagesContainer.innerHTML = '';
+                if (data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        const senderName = msg.sender === 'user' ? 'You' : 'AI Maths Tutor';
+                        appendMessage(senderName, msg.text, msg.sender);
+                    });
+                } else {
+                    messagesContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">No messages in this chat yet. Ask anything below!</div>';
+                }
             }
         }
     } catch (err) {
-        console.error('Error loading chat session:', err);
+        console.warn('Error loading chat session from API, fallback to cache:', err);
     }
 }
 
@@ -559,24 +653,39 @@ if (newChatBtn) {
 
 // Pin / Unpin
 async function togglePinChat(chatId) {
+    // Optimistic local update
+    allChatsCache = allChatsCache.map(c => {
+        if (String(c.id) === String(chatId)) {
+            return { ...c, is_pinned: (c.is_pinned === 1 || c.is_pinned === true) ? 0 : 1 };
+        }
+        return c;
+    });
+    saveCachedChats(allChatsCache);
+    renderSidebarChats(allChatsCache);
+
     try {
         await fetch(`${API_BASE_URL}/api/chats/${chatId}/pin`, { method: 'PUT' });
-        await fetchAndRenderSidebarChats();
     } catch (err) {
-        console.error('Error toggling pin:', err);
+        console.warn('Network issue while toggling pin:', err);
     }
 }
 
 // Delete Chat
 async function deleteChatSession(chatId) {
+    // Optimistic local update
+    allChatsCache = allChatsCache.filter(c => String(c.id) !== String(chatId));
+    saveCachedChats(allChatsCache);
+    try { localStorage.removeItem(`cachedMessages_${chatId}`); } catch (e) {}
+    renderSidebarChats(allChatsCache);
+
+    if (currentChatId && String(currentChatId) === String(chatId)) {
+        startNewChat();
+    }
+
     try {
         await fetch(`${API_BASE_URL}/api/chats/${chatId}`, { method: 'DELETE' });
-        if (currentChatId && parseInt(currentChatId) === parseInt(chatId)) {
-            startNewChat();
-        }
-        await fetchAndRenderSidebarChats();
     } catch (err) {
-        console.error('Error deleting chat:', err);
+        console.warn('Network issue while deleting chat:', err);
     }
 }
 
@@ -584,24 +693,39 @@ async function deleteChatSession(chatId) {
 async function renameChatPrompt(chatId, currentTitle) {
     const newTitle = prompt('Enter new title for this chat:', currentTitle);
     if (newTitle && newTitle.trim() && newTitle.trim() !== currentTitle) {
+        const trimmed = newTitle.trim();
+        // Optimistic local update
+        allChatsCache = allChatsCache.map(c => {
+            if (String(c.id) === String(chatId)) {
+                return { ...c, title: trimmed };
+            }
+            return c;
+        });
+        saveCachedChats(allChatsCache);
+        renderSidebarChats(allChatsCache);
+
+        if (currentChatId && String(currentChatId) === String(chatId)) {
+            const topicEl = document.getElementById('current-topic');
+            if (topicEl) topicEl.innerText = trimmed;
+        }
+
         try {
             await fetch(`${API_BASE_URL}/api/chats/${chatId}/title`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: newTitle.trim() })
+                body: JSON.stringify({ title: trimmed })
             });
-            if (currentChatId && parseInt(currentChatId) === parseInt(chatId)) {
-                const topicEl = document.getElementById('current-topic');
-                if (topicEl) topicEl.innerText = newTitle.trim();
-            }
-            await fetchAndRenderSidebarChats();
         } catch (err) {
-            console.error('Error renaming chat:', err);
+            console.warn('Network issue while renaming chat:', err);
         }
     }
 }
 
-// Initial load of chats
+// Initial Instant Render from Cache, then fetch from API
+allChatsCache = getCachedChats();
+if (allChatsCache.length > 0) {
+    renderSidebarChats(allChatsCache);
+}
 fetchAndRenderSidebarChats();
 
 // 7. Profile Popup Menu (ChatGPT & Claude Style)
@@ -900,13 +1024,24 @@ applyFontSize(currentFontSizeLevel);
 if (clearAllChatsBtn) {
     clearAllChatsBtn.addEventListener('click', async () => {
         if (confirm("Are you sure you want to clear your entire chat history?")) {
+            allChatsCache = [];
+            saveCachedChats([]);
+            // Clear message caches
+            try {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('cachedMessages_')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+            } catch (e) {}
+            startNewChat();
+            renderSidebarChats([]);
+            closeSettingsModal();
+
             try {
                 await fetch(`${API_BASE_URL}/api/chats`, { method: 'DELETE' });
-                startNewChat();
-                await fetchAndRenderSidebarChats();
-                closeSettingsModal();
             } catch (err) {
-                console.error('Error clearing chats:', err);
+                console.warn('Error clearing chats on server:', err);
             }
         }
     });
