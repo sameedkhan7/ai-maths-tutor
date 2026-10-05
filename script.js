@@ -886,12 +886,16 @@ function updateThemeUI(isDark) {
     }
 }
 
-// Initial theme check
+// Initial theme check (Default: Dark Mode)
 const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'dark') {
-    updateThemeUI(true);
-} else {
+if (savedTheme === 'light') {
     updateThemeUI(false);
+} else {
+    // Default to Dark Mode for new users & initial load
+    updateThemeUI(true);
+    if (!savedTheme) {
+        localStorage.setItem('theme', 'dark');
+    }
 }
 
 if (popupThemeItem) {
@@ -975,7 +979,7 @@ function openSettingsModal() {
     }
 
     // Sync current values
-    const currentTheme = localStorage.getItem('theme') || 'light';
+    const currentTheme = localStorage.getItem('theme') || 'dark';
     if (settingAppearanceSelect) {
         settingAppearanceSelect.value = currentTheme;
     }
