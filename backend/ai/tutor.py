@@ -46,8 +46,8 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
             system_prompt=system_prompt,
         )
 
-        # Call Groq
-        answer = call_groq(messages)
+        # Call Groq with selected model
+        answer = call_groq(messages, model=req.model)
 
         return TutorResponse(
             answer=answer,
@@ -56,7 +56,7 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
             used_rag=used_rag,
             sources=sources,
             prompt_version=PROMPT_VERSION,
-            model=GROQ_MODEL,
+            model=req.model or GROQ_MODEL or "llama-3.3-70b-versatile",
             error=None,
         )
 

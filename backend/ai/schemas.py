@@ -33,6 +33,7 @@ class TutorRequest(BaseModel):
     language: Literal["english", "hindi", "hinglish", "urdu"] = "english"
     student_level: Literal["beginner", "intermediate", "advanced"] = "beginner"
     rag_chunks: list[RAGChunk] = Field(default_factory=list)
+    model: str = "llama-3.3-70b-versatile"
 
 # =========================
 # TUTOR RESPONSE

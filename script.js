@@ -81,15 +81,21 @@ symButtons.forEach(button => {
 
 // ⌨️ Enter Key to Send Message (Shift+Enter for newline)
 if (userInput) {
-    userInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+    userInput.addEventListener('keydown', function (e) {
+        const isEnter = e.key === 'Enter' || e.code === 'Enter' || e.keyCode === 13 || e.which === 13;
+        if (isEnter && !e.shiftKey && !e.ctrlKey && !e.altKey) {
             e.preventDefault();
-            const form = document.getElementById('chat-form');
-            if (form) {
-                if (typeof form.requestSubmit === 'function') {
-                    form.requestSubmit();
-                } else {
-                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            const sendBtn = document.getElementById('send-btn');
+            if (sendBtn) {
+                sendBtn.click();
+            } else {
+                const form = document.getElementById('chat-form');
+                if (form) {
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    }
                 }
             }
         }

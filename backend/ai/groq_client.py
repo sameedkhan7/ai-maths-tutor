@@ -21,6 +21,7 @@ def create_groq_client() -> Groq:
 
 def call_groq(
     messages: list[dict],
+    model: str | None = None,
     retries: int = 3,
 ) -> str:
     """
@@ -28,14 +29,15 @@ def call_groq(
     """
 
     client = create_groq_client()
+    default_model = GROQ_MODEL or "openai/gpt-oss-120b"
+    target_model = model or default_model
 
     last_error = None
 
     for attempt in range(retries):
-
         try:
             response = client.chat.completions.create(
-                model=GROQ_MODEL,
+                model=target_model,
                 messages=messages,
                 temperature=TEMPERATURE,
                 max_tokens=MAX_TOKENS,
@@ -45,6 +47,10 @@ def call_groq(
 
         except Exception as error:
             last_error = error
+            # If model is not found, fallback to the working default model
+            if "model_not_found" in str(error) and target_model != default_model:
+                target_model = default_model
+                continue
 
     raise RuntimeError(
         f"Groq API failed after {retries} attempts: {last_error}"
