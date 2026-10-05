@@ -9,7 +9,7 @@ from backend.ai.intent import detect_question_type
 from backend.ai.prompts import MASTER_SYSTEM_PROMPT
 from backend.ai.context_builder import build_messages
 from backend.ai.groq_client import call_groq
-
+from backend.ai.math_engine import get_exact_math_context
 
 def generate_tutor_response(req: TutorRequest) -> TutorResponse:
     """
@@ -39,6 +39,11 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
     f"Do not answer in English unless the requested language is english.\n"
     f"RESPONSE LANGUAGE: {req.language}"
 )
+
+        # Check exact mathematical verification with SymPy
+        exact_math = get_exact_math_context(req.question)
+        if exact_math:
+            system_prompt += f"\n\nEXACT MATHEMATICAL VERIFICATION:\n{exact_math}\nUse this exact verified analytical solution in your 5-step intuitive explanation."
 
         # Build final messages
         messages, sources, used_rag = build_messages(

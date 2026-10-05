@@ -4,6 +4,8 @@
 
 // Global State
 let currentStyle = 'simple';
+let currentChatId = null;
+let allChatsCache = [];
 
 // 🌐 Dynamic API URL (Automatically switches to public HTTPS tunnel on GitHub Pages / Phone)
 const API_BASE_URL = (window.location.protocol === 'https:' || (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost'))
@@ -191,7 +193,6 @@ if (micBtn) {
 }
 
 
-// 5. Chat Form Submit (Ask Tutor)
 // 5. Chat Submission Logic (Ask Tutor)
 function submitUserMessage() {
     if (!userInput) return;
@@ -219,7 +220,8 @@ function submitUserMessage() {
             question: question,
             style: currentStyle,
             language: selectedLanguage,
-            model: currentModel
+            model: currentModel,
+            chat_id: currentChatId
         })
     })
     .then(response => response.json())
@@ -227,6 +229,14 @@ function submitUserMessage() {
         if (data.reply) {
             appendMessage('AI Maths Tutor', data.reply, 'assistant');
         }
+        if (data.chat_id) {
+            currentChatId = data.chat_id;
+            const topicEl = document.getElementById('current-topic');
+            if (topicEl && data.question) {
+                topicEl.innerText = data.question.length > 35 ? data.question.slice(0, 35) + '...' : data.question;
+            }
+        }
+        fetchAndRenderSidebarChats();
     })
     .catch(error => {
         console.error('Error:', error);
@@ -322,102 +332,248 @@ function appendMessage(sender, text, type) {
 }
 
 
-// 6. New Chat, History Restore & 📌 Pin/Unpin Feature
+// 6. ChatGPT & Claude Style Chat History & Session Switcher
 const newChatBtn = document.getElementById('new-chat-btn');
 const historyList = document.getElementById('history-list');
 const pinnedList = document.getElementById('pinned-list');
 
-if (newChatBtn && historyList) {
-    newChatBtn.addEventListener('click', () => {
-        const topicEl = document.getElementById('current-topic');
-        const currentTopic = topicEl ? topicEl.innerText : 'New Maths Question';
-        const savedHTML = messagesContainer.innerHTML;
-
-        // History item with Title + Pin Button
-        const historyItem = document.createElement('div');
-        historyItem.className = 'history-item';
-        
-        historyItem.innerHTML = `
-            <span class="chat-item-title">💬 ${currentTopic}</span>
-            <button type="button" class="pin-toggle-btn" title="Pin to top">📌</button>
-        `;
-
-        // Click Title: Purani chat wapas khule
-        historyItem.querySelector('.chat-item-title').addEventListener('click', () => {
-            if (topicEl) topicEl.innerText = currentTopic;
-            messagesContainer.innerHTML = savedHTML;
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        });
-
-        // Click Pin Icon: Pinned aur Recents ke beech move ho
-        const pinBtn = historyItem.querySelector('.pin-toggle-btn');
-        pinBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (historyItem.parentElement === historyList) {
-                if (pinnedList) pinnedList.appendChild(historyItem);
-                pinBtn.title = "Unpin chat";
-            } else {
-                historyList.appendChild(historyItem);
-                pinBtn.title = "Pin to top";
-            }
-        });
-
-        // By default Recents me daalo
-        historyList.appendChild(historyItem);
-
-        // Fresh Pinterest-style welcome hero with Topic Cards
-        messagesContainer.innerHTML = `
-            <div class="welcome-hero" id="welcome-hero">
-                <div class="welcome-avatar-badge">👩‍🏫</div>
-                <h2 class="welcome-greeting" id="welcome-greeting">Hello ${currentStudentName}!</h2>
-                <p class="welcome-subtitle">I am your <strong>AI Maths Tutor</strong>. Ready for a new question! Aaj kaunsa concept intuitively samajhna chahte hain?</p>
-                
-                <div class="topic-cards-grid">
-                    <div class="topic-card" data-question="What is a derivative and why do we use it in calculus?">
-                        <div class="topic-card-icon">📐</div>
-                        <div class="topic-card-body">
-                            <h5>Calculus & Derivatives</h5>
-                            <span>Speedometer analogy & dy/dx rate of change</span>
-                        </div>
-                        <div class="topic-card-arrow">→</div>
+// Helper: Render Welcome Hero & Topic Starter Cards
+function renderWelcomeHero() {
+    if (!messagesContainer) return;
+    messagesContainer.innerHTML = `
+        <div class="welcome-hero" id="welcome-hero">
+            <div class="welcome-avatar-badge">👩‍🏫</div>
+            <h2 class="welcome-greeting" id="welcome-greeting">Hello ${currentStudentName}!</h2>
+            <p class="welcome-subtitle">I am your <strong>AI Maths Tutor</strong>. Ready for a new question! Aaj kaunsa concept intuitively samajhna chahte hain?</p>
+            
+            <div class="topic-cards-grid">
+                <div class="topic-card" data-question="What is a derivative and why do we use it in calculus?">
+                    <div class="topic-card-icon">📐</div>
+                    <div class="topic-card-body">
+                        <h5>Calculus & Derivatives</h5>
+                        <span>Speedometer analogy & dy/dx rate of change</span>
                     </div>
+                    <div class="topic-card-arrow">→</div>
+                </div>
 
-                    <div class="topic-card" data-question="Explain trigonometry sin, cos, tan with real-life examples">
-                        <div class="topic-card-icon">🔺</div>
-                        <div class="topic-card-body">
-                            <h5>Trigonometry & Heights</h5>
-                            <span>Understand sin, cos, tan & triangle angles</span>
-                        </div>
-                        <div class="topic-card-arrow">→</div>
+                <div class="topic-card" data-question="Explain trigonometry sin, cos, tan with real-life examples">
+                    <div class="topic-card-icon">🔺</div>
+                    <div class="topic-card-body">
+                        <h5>Trigonometry & Heights</h5>
+                        <span>Understand sin, cos, tan & triangle angles</span>
                     </div>
+                    <div class="topic-card-arrow">→</div>
+                </div>
 
-                    <div class="topic-card" data-question="How to solve Quadratic Equations using formula step by step?">
-                        <div class="topic-card-icon">🔢</div>
-                        <div class="topic-card-body">
-                            <h5>Quadratic Equations</h5>
-                            <span>Step-by-step formula & finding roots easily</span>
-                        </div>
-                        <div class="topic-card-arrow">→</div>
+                <div class="topic-card" data-question="How to solve Quadratic Equations using formula step by step?">
+                    <div class="topic-card-icon">🔢</div>
+                    <div class="topic-card-body">
+                        <h5>Quadratic Equations</h5>
+                        <span>Step-by-step formula & finding roots easily</span>
                     </div>
+                    <div class="topic-card-arrow">→</div>
+                </div>
 
-                    <div class="topic-card" data-question="Give me an important Class 11 NCERT practice question with step-by-step explanation">
-                        <div class="topic-card-icon">🎯</div>
-                        <div class="topic-card-body">
-                            <h5>NCERT Board Practice</h5>
-                            <span>Key formulas & scoring tips for exams</span>
-                        </div>
-                        <div class="topic-card-arrow">→</div>
+                <div class="topic-card" data-question="Give me an important Class 11 NCERT practice question with step-by-step explanation">
+                    <div class="topic-card-icon">🎯</div>
+                    <div class="topic-card-body">
+                        <h5>NCERT Board Practice</h5>
+                        <span>Key formulas & scoring tips for exams</span>
                     </div>
+                    <div class="topic-card-arrow">→</div>
                 </div>
             </div>
-        `;
-        bindTopicCards();
+        </div>
+    `;
+    bindTopicCards();
+}
 
-        if (topicEl) topicEl.innerText = "New Maths Question";
+// Fetch all chats and render in Pinned and Recents
+async function fetchAndRenderSidebarChats() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/chats`);
+        const data = await res.json();
+        allChatsCache = data.chats || [];
+
+        if (!historyList || !pinnedList) return;
+
+        historyList.innerHTML = '';
+        pinnedList.innerHTML = '';
+
+        const pinnedChats = allChatsCache.filter(c => c.is_pinned === 1);
+        const recentChats = allChatsCache.filter(c => c.is_pinned === 0);
+
+        if (pinnedChats.length === 0) {
+            pinnedList.innerHTML = '<div class="chat-empty-state">No pinned chats</div>';
+        } else {
+            pinnedChats.forEach(chat => {
+                pinnedList.appendChild(createChatHistoryItemEl(chat));
+            });
+        }
+
+        if (recentChats.length === 0) {
+            historyList.innerHTML = '<div class="chat-empty-state">No recent chats</div>';
+        } else {
+            recentChats.forEach(chat => {
+                historyList.appendChild(createChatHistoryItemEl(chat));
+            });
+        }
+    } catch (err) {
+        console.error('Error fetching sidebar chats:', err);
+    }
+}
+
+// Create individual ChatGPT/Claude history row element
+function createChatHistoryItemEl(chat) {
+    const item = document.createElement('div');
+    const isActive = currentChatId && parseInt(currentChatId) === parseInt(chat.id);
+    item.className = `history-item ${isActive ? 'active' : ''}`;
+    item.setAttribute('data-chat-id', chat.id);
+
+    item.innerHTML = `
+        <div class="chat-item-main" title="${chat.title}">
+            <span class="chat-item-icon">💬</span>
+            <span class="chat-item-title">${chat.title}</span>
+        </div>
+        <div class="chat-item-actions">
+            <button type="button" class="chat-action-btn pin-btn" title="${chat.is_pinned ? 'Unpin chat' : 'Pin to top'}">${chat.is_pinned ? '📌' : '📍'}</button>
+            <button type="button" class="chat-action-btn rename-btn" title="Rename title">✏️</button>
+            <button type="button" class="chat-action-btn delete-btn" title="Delete chat">🗑️</button>
+        </div>
+    `;
+
+    // Click Main: Restore Conversation
+    item.querySelector('.chat-item-main').addEventListener('click', () => {
+        loadChatSession(chat.id, chat.title);
+    });
+
+    // Toggle Pin
+    item.querySelector('.pin-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await togglePinChat(chat.id);
+    });
+
+    // Rename
+    item.querySelector('.rename-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await renameChatPrompt(chat.id, chat.title);
+    });
+
+    // Delete
+    item.querySelector('.delete-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete chat "${chat.title}"?`)) {
+            await deleteChatSession(chat.id);
+        }
+    });
+
+    return item;
+}
+
+// Restore all messages of a chat session
+async function loadChatSession(chatId, title) {
+    currentChatId = chatId;
+    const topicEl = document.getElementById('current-topic');
+    if (topicEl) topicEl.innerText = title;
+
+    // Highlight active item in sidebar
+    document.querySelectorAll('.history-item').forEach(el => {
+        if (parseInt(el.getAttribute('data-chat-id')) === parseInt(chatId)) {
+            el.classList.add('active');
+        } else {
+            el.classList.remove('active');
+        }
+    });
+
+    if (messagesContainer) {
+        messagesContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">Loading conversation...</div>';
+    }
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/chats/${chatId}/messages`);
+        const data = await res.json();
+
+        if (messagesContainer) messagesContainer.innerHTML = '';
+
+        if (data.messages && data.messages.length > 0) {
+            data.messages.forEach(msg => {
+                const senderName = msg.sender === 'user' ? 'You' : 'AI Maths Tutor';
+                appendMessage(senderName, msg.text, msg.sender);
+            });
+        } else {
+            if (messagesContainer) {
+                messagesContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">No messages in this chat yet. Ask anything below!</div>';
+            }
+        }
+    } catch (err) {
+        console.error('Error loading chat session:', err);
+    }
+}
+
+// Start New Chat (Clean Slate)
+function startNewChat() {
+    currentChatId = null;
+    const topicEl = document.getElementById('current-topic');
+    if (topicEl) topicEl.innerText = "New Maths Question";
+
+    document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+    renderWelcomeHero();
+    if (userInput) {
         userInput.value = '';
         userInput.focus();
-    });
+    }
 }
+
+if (newChatBtn) {
+    newChatBtn.addEventListener('click', startNewChat);
+}
+
+// Pin / Unpin
+async function togglePinChat(chatId) {
+    try {
+        await fetch(`${API_BASE_URL}/api/chats/${chatId}/pin`, { method: 'PUT' });
+        await fetchAndRenderSidebarChats();
+    } catch (err) {
+        console.error('Error toggling pin:', err);
+    }
+}
+
+// Delete Chat
+async function deleteChatSession(chatId) {
+    try {
+        await fetch(`${API_BASE_URL}/api/chats/${chatId}`, { method: 'DELETE' });
+        if (currentChatId && parseInt(currentChatId) === parseInt(chatId)) {
+            startNewChat();
+        }
+        await fetchAndRenderSidebarChats();
+    } catch (err) {
+        console.error('Error deleting chat:', err);
+    }
+}
+
+// Rename Chat
+async function renameChatPrompt(chatId, currentTitle) {
+    const newTitle = prompt('Enter new title for this chat:', currentTitle);
+    if (newTitle && newTitle.trim() && newTitle.trim() !== currentTitle) {
+        try {
+            await fetch(`${API_BASE_URL}/api/chats/${chatId}/title`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: newTitle.trim() })
+            });
+            if (currentChatId && parseInt(currentChatId) === parseInt(chatId)) {
+                const topicEl = document.getElementById('current-topic');
+                if (topicEl) topicEl.innerText = newTitle.trim();
+            }
+            await fetchAndRenderSidebarChats();
+        } catch (err) {
+            console.error('Error renaming chat:', err);
+        }
+    }
+}
+
+// Initial load of chats
+fetchAndRenderSidebarChats();
 
 // 7. Profile Popup Menu (ChatGPT & Claude Style)
 const userProfileCard = document.getElementById('user-profile-card');
@@ -699,23 +855,16 @@ applyFontSize(currentFontSizeLevel);
 
 // 6. Clear All Chats
 if (clearAllChatsBtn) {
-    clearAllChatsBtn.addEventListener('click', () => {
-        if (confirm("Are you sure you want to clear your chat history?")) {
-            if (historyList) historyList.innerHTML = '';
-            if (pinnedList) pinnedList.innerHTML = '';
-            
-            if (messagesContainer) {
-                messagesContainer.innerHTML = `
-                    <div class="message assistant">
-                        <div class="avatar">👩‍🏫</div>
-                        <div class="message-content">
-                            <h4>Hello ${currentStudentName}! I am your AI Maths Tutor.</h4>
-                            <p>History cleared! Aap mujhse koi bhi mathematics ka concept, formula ya problem puch sakte hain.</p>
-                        </div>
-                    </div>
-                `;
+    clearAllChatsBtn.addEventListener('click', async () => {
+        if (confirm("Are you sure you want to clear your entire chat history?")) {
+            try {
+                await fetch(`${API_BASE_URL}/api/chats`, { method: 'DELETE' });
+                startNewChat();
+                await fetchAndRenderSidebarChats();
+                closeSettingsModal();
+            } catch (err) {
+                console.error('Error clearing chats:', err);
             }
-            closeSettingsModal();
         }
     });
 }

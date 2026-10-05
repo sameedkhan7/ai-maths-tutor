@@ -163,3 +163,46 @@ def toggle_pin(chat_id: int):
     conn.commit()
     conn.close()
     return {"success": True}
+
+# 7. Get All Messages for a Specific Chat Session (Restore History on Click)
+@app.get("/api/chats/{chat_id}/messages")
+def get_chat_messages(chat_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, sender, text, style, created_at FROM messages WHERE chat_id = ? ORDER BY id ASC", (chat_id,))
+    messages = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return {"chat_id": chat_id, "messages": messages}
+
+# 8. Delete a Specific Chat Session
+@app.delete("/api/chats/{chat_id}")
+def delete_chat(chat_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM messages WHERE chat_id = ?", (chat_id,))
+    cursor.execute("DELETE FROM chats WHERE id = ?", (chat_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True, "deleted_chat_id": chat_id}
+
+# 9. Clear All Chats
+@app.delete("/api/chats")
+def clear_all_chats():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM messages")
+    cursor.execute("DELETE FROM chats")
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "All chats cleared"}
+
+# 10. Rename Chat Title
+@app.put("/api/chats/{chat_id}/title")
+def rename_chat_title(chat_id: int, payload: dict):
+    new_title = payload.get("title", "Maths Question").strip()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE chats SET title = ? WHERE id = ?", (new_title, chat_id))
+    conn.commit()
+    conn.close()
+    return {"success": True, "new_title": new_title}
