@@ -407,18 +407,39 @@ function renderWelcomeHero() {
             <h2 class="welcome-greeting" id="welcome-greeting">Hello ${currentStudentName}!</h2>
             <p class="welcome-subtitle">How can I help with <strong>NCERT Maths</strong> today?</p>
             
-            <!-- 🔮 Center 3D Holographic Math Orb with Celestial Rings -->
+            <!-- 🔮 Center 3D Holographic Math Orb with Orbiting Math Symbols -->
             <div class="math-orb-system">
                 <div class="math-orb-core"></div>
                 <div class="math-orb-glow"></div>
+
+                <!-- Outer Floating Mathematical Operator Particles -->
+                <div class="orbit-particle p-plus">+</div>
+                <div class="orbit-particle p-minus">−</div>
+                <div class="orbit-particle p-multiply">×</div>
+                <div class="orbit-particle p-divide">÷</div>
+                <div class="orbit-particle p-infinity">∞</div>
+                <div class="orbit-particle p-delta">Δ</div>
+
+                <!-- 1st Rotating Ring (Horizontal-ish) -->
                 <div class="math-orb-ring ring-horizontal">
                     <span class="orbit-symbol sym-pi">π</span>
                     <span class="orbit-symbol sym-sqrt">√</span>
+                    <span class="orbit-symbol sym-plus">+</span>
                 </div>
+
+                <!-- 2nd Rotating Ring (Inclined Right) -->
                 <div class="math-orb-ring ring-inclined">
                     <span class="orbit-symbol sym-sigma">Σ</span>
                     <span class="orbit-symbol sym-integral">∫</span>
                     <span class="orbit-symbol sym-theta">θ</span>
+                    <span class="orbit-symbol sym-minus">−</span>
+                </div>
+
+                <!-- 3rd Rotating Ring (Inclined Left) -->
+                <div class="math-orb-ring ring-vertical">
+                    <span class="orbit-symbol sym-multiply">×</span>
+                    <span class="orbit-symbol sym-divide">÷</span>
+                    <span class="orbit-symbol sym-infinity">∞</span>
                 </div>
             </div>
 

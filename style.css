@@ -612,19 +612,28 @@ body.dark-mode .welcome-subtitle {
 }
 
 .ring-horizontal {
-    width: 210px;
+    width: 215px;
     height: 75px;
     transform: rotateX(68deg) rotateY(-10deg);
     animation: ringSpin 20s linear infinite;
 }
 
 .ring-inclined {
-    width: 220px;
+    width: 225px;
     height: 80px;
     transform: rotateX(64deg) rotateY(38deg);
     animation: ringSpinReverse 24s linear infinite;
     border-color: rgba(168, 85, 247, 0.6);
     box-shadow: 0 0 18px rgba(168, 85, 247, 0.7);
+}
+
+.ring-vertical {
+    width: 210px;
+    height: 78px;
+    transform: rotateX(72deg) rotateY(-48deg);
+    animation: ringSpin3 22s linear infinite;
+    border-color: rgba(6, 182, 212, 0.6);
+    box-shadow: 0 0 18px rgba(6, 182, 212, 0.7);
 }
 
 @keyframes ringSpin {
@@ -637,7 +646,12 @@ body.dark-mode .welcome-subtitle {
     100% { transform: rotateX(64deg) rotateY(38deg) rotateZ(0deg); }
 }
 
-/* Orbiting Math Symbols */
+@keyframes ringSpin3 {
+    0% { transform: rotateX(72deg) rotateY(-48deg) rotateZ(0deg); }
+    100% { transform: rotateX(72deg) rotateY(-48deg) rotateZ(360deg); }
+}
+
+/* Orbiting Math Symbols on Rings */
 .orbit-symbol {
     position: absolute;
     font-size: 17px;
@@ -650,9 +664,109 @@ body.dark-mode .welcome-subtitle {
 
 .sym-pi { top: -8px; left: 35px; }
 .sym-sqrt { bottom: -8px; right: 40px; }
+.sym-plus { top: 40%; left: -10px; font-size: 19px; color: #fb923c; }
 .sym-sigma { top: -10px; right: 30px; font-size: 19px; }
-.sym-integral { bottom: -12px; left: 25px; font-size: 22px; }
-.sym-theta { top: 40%; right: -12px; }
+.sym-integral { bottom: -12px; left: 25px; font-size: 22px; color: #38bdf8; }
+.sym-theta { top: 40%; right: -12px; color: #c084fc; }
+.sym-minus { bottom: -8px; right: 20px; font-size: 20px; color: #f472b6; }
+.sym-multiply { top: -8px; left: 25px; font-size: 18px; color: #facc15; }
+.sym-divide { bottom: -10px; right: 35px; font-size: 20px; color: #34d399; }
+.sym-infinity { top: 45%; right: -10px; font-size: 20px; color: #a78bfa; }
+
+/* 🌟 Free Floating Mathematical Particles Swirling Around Orb */
+.orbit-particle {
+    position: absolute;
+    font-family: 'Cambria Math', 'Times New Roman', serif;
+    font-weight: 800;
+    user-select: none;
+    pointer-events: none;
+    z-index: 4;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+}
+
+.p-plus {
+    top: 15px;
+    left: 20px;
+    font-size: 22px;
+    color: #fb923c;
+    animation: floatParticle1 6s ease-in-out infinite alternate;
+}
+
+.p-minus {
+    bottom: 25px;
+    right: 20px;
+    font-size: 24px;
+    color: #f472b6;
+    animation: floatParticle2 7s ease-in-out infinite alternate;
+}
+
+.p-multiply {
+    top: 25px;
+    right: 15px;
+    font-size: 20px;
+    color: #facc15;
+    animation: floatParticle3 5.5s ease-in-out infinite alternate;
+}
+
+.p-divide {
+    bottom: 18px;
+    left: 15px;
+    font-size: 22px;
+    color: #34d399;
+    animation: floatParticle4 6.5s ease-in-out infinite alternate;
+}
+
+.p-infinity {
+    top: 50%;
+    left: -18px;
+    font-size: 24px;
+    color: #38bdf8;
+    animation: floatParticle5 8s ease-in-out infinite alternate;
+}
+
+.p-delta {
+    top: 48%;
+    right: -18px;
+    font-size: 20px;
+    color: #c084fc;
+    animation: floatParticle6 7.5s ease-in-out infinite alternate;
+}
+
+@keyframes floatParticle1 {
+    0% { transform: translate(0, 0) rotate(0deg) scale(0.9); opacity: 0.7; }
+    50% { transform: translate(12px, -15px) rotate(15deg) scale(1.15); opacity: 1; filter: drop-shadow(0 0 14px #fb923c); }
+    100% { transform: translate(-8px, 10px) rotate(-10deg) scale(1); opacity: 0.8; }
+}
+
+@keyframes floatParticle2 {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+    50% { transform: translate(-15px, 12px) scale(1.2); opacity: 1; filter: drop-shadow(0 0 15px #f472b6); }
+    100% { transform: translate(10px, -8px) scale(0.95); opacity: 0.7; }
+}
+
+@keyframes floatParticle3 {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 0.75; }
+    50% { transform: translate(-10px, -14px) rotate(30deg) scale(1.2); opacity: 1; filter: drop-shadow(0 0 14px #facc15); }
+    100% { transform: translate(12px, 8px) rotate(-20deg) scale(0.9); opacity: 0.8; }
+}
+
+@keyframes floatParticle4 {
+    0% { transform: translate(0, 0); opacity: 0.8; }
+    50% { transform: translate(14px, 10px) scale(1.25); opacity: 1; filter: drop-shadow(0 0 16px #34d399); }
+    100% { transform: translate(-10px, -12px) scale(0.95); opacity: 0.7; }
+}
+
+@keyframes floatParticle5 {
+    0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.7; }
+    50% { transform: translateY(-18px) rotate(15deg) scale(1.2); opacity: 1; filter: drop-shadow(0 0 18px #38bdf8); }
+    100% { transform: translateY(14px) rotate(-15deg) scale(0.9); opacity: 0.8; }
+}
+
+@keyframes floatParticle6 {
+    0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.75; }
+    50% { transform: translateY(16px) rotate(-20deg) scale(1.25); opacity: 1; filter: drop-shadow(0 0 18px #c084fc); }
+    100% { transform: translateY(-14px) rotate(15deg) scale(0.9); opacity: 0.8; }
+}
 
 .topic-cards-grid {
     display: grid;
