@@ -526,21 +526,36 @@ body.dark-mode .header-info h3 {
 }
 
 .welcome-avatar-badge {
-    width: 50px;
-    height: 50px;
-    font-size: 26px;
-    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    width: 62px;
+    height: 62px;
+    font-size: 30px;
+    background: radial-gradient(circle at 35% 35%, #93c5fd, #818cf8 40%, #c084fc 75%, #f472b6 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 10px auto;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.15);
+    margin: 0 auto 12px auto;
+    box-shadow: 
+        0 0 25px rgba(129, 140, 248, 0.45),
+        0 0 45px rgba(192, 132, 252, 0.3),
+        inset -3px -3px 8px rgba(0, 0, 0, 0.2),
+        inset 3px 3px 8px rgba(255, 255, 255, 0.6);
+    animation: orbFloat 4s ease-in-out infinite;
+    user-select: none;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-4px) scale(1.02); }
 }
 
 body.dark-mode .welcome-avatar-badge {
-    background: linear-gradient(135deg, #312e81, #1e1b4b);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    background: radial-gradient(circle at 35% 35%, #38bdf8, #6366f1 45%, #a855f7 80%, #ec4899 100%);
+    box-shadow: 
+        0 0 30px rgba(56, 189, 248, 0.5),
+        0 0 55px rgba(168, 85, 247, 0.45),
+        inset -4px -4px 10px rgba(0, 0, 0, 0.45),
+        inset 4px 4px 10px rgba(255, 255, 255, 0.7);
 }
 
 .welcome-greeting {
@@ -1067,28 +1082,47 @@ body.dark-mode .math-code-block {
 
     
     /* ChatGPT / Antigravity Style Input Wrapper */
+/* ChatGPT / Antigravity Style Input Wrapper with Ambient Neon Glow */
 .chat-input-wrapper {
     background-color: #ffffff;
     border-top: 1px solid #e2e8f0;
     padding: 16px 24px;
+    position: relative;
+    transition: background-color 0.25s ease;
 }
 
-/* Single Sleek Card (No awkward outer circles) */
+/* Single Sleek Card with Ambient Dual-Tone Backlight Glow (Left Amber / Right Cyan-Violet) */
 .chat-input-card {
+    position: relative;
     background-color: #ffffff;
     border: 1px solid #cbd5e1;
-    border-radius: 16px;
-    padding: 12px 16px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    padding: 12px 18px;
+    box-shadow: 
+        -14px 0 30px -4px rgba(249, 115, 22, 0.22),
+        14px 0 30px -4px rgba(6, 182, 212, 0.26),
+        0 4px 14px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chat-input-card:hover {
+    box-shadow: 
+        -18px 0 38px -2px rgba(249, 115, 22, 0.32),
+        18px 0 38px -2px rgba(6, 182, 212, 0.36),
+        0 0 24px -2px rgba(168, 85, 247, 0.25),
+        0 6px 20px rgba(0, 0, 0, 0.07);
 }
 
 .chat-input-card:focus-within {
-    border-color: #6366f1;
-    box-shadow: 0 4px 18px rgba(99, 102, 241, 0.15);
+    border-color: #818cf8;
+    box-shadow: 
+        -24px 0 48px 0px rgba(249, 115, 22, 0.42),
+        24px 0 48px 0px rgba(6, 182, 212, 0.46),
+        0 0 32px 2px rgba(168, 85, 247, 0.35),
+        0 8px 24px rgba(99, 102, 241, 0.18);
 }
 
 .chat-input-card textarea {
@@ -1127,11 +1161,12 @@ body.dark-mode .math-code-block {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s;
+    transition: background 0.15s, transform 0.15s;
 }
 
 .tool-icon-btn:hover {
     background-color: #f1f5f9;
+    transform: scale(1.08);
 }
 
 /* Antigravity Model Pill */
@@ -1157,6 +1192,7 @@ body.dark-mode .math-code-block {
 .model-pill-btn:hover {
     background-color: #e0e7ff;
     color: #4f46e5;
+    border-color: #818cf8;
 }
 
 /* Dropdown Menu (Antigravity popup style) */
@@ -1204,38 +1240,40 @@ body.dark-mode .math-code-block {
     border-radius: 6px;
 }
 
-/* Send Button */
+/* Send Button with Gradient & Glow */
 .send-action-btn {
-    background-color: #4f46e5;
+    background: linear-gradient(135deg, #06b6d4, #6366f1);
     color: white;
     border: none;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 13px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 10px rgba(6, 182, 212, 0.35);
 }
 
 .send-action-btn:hover {
-    background-color: #4338ca;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, #0891b2, #4f46e5);
+    transform: scale(1.08);
+    box-shadow: 0 4px 18px rgba(6, 182, 212, 0.55), 0 0 15px rgba(99, 102, 241, 0.45);
 }
 
 /* ================================= */
 /* 🌙 DARK MODE STYLES               */
 /* ================================= */
 body.dark-mode {
-    background-color: #0f172a;
+    background-color: #090d16;
     color: #f8fafc;
 }
 
 body.dark-mode .sidebar {
-    background-color: #1e293b;
-    border-color: #334155;
+    background-color: #0f172a;
+    border-color: #1e293b;
     color: #f8fafc;
 }
 
@@ -1245,12 +1283,12 @@ body.dark-mode #current-topic {
 }
 
 body.dark-mode .chat-area {
-    background-color: #0f172a;
+    background: radial-gradient(circle at 50% 15%, #172554 0%, #0b1120 50%, #030712 100%);
 }
 
 body.dark-mode .chat-header {
-    background-color: #1e293b;
-    border-color: #334155;
+    background-color: #0f172a;
+    border-color: #1e293b;
 }
 
 body.dark-mode .message-content {
@@ -1268,13 +1306,39 @@ body.dark-mode .message-content p {
 }
 
 body.dark-mode .chat-input-wrapper {
-    background-color: #0f172a;
-    border-color: #334155;
+    background-color: #090d16;
+    border-color: #1e293b;
 }
 
+/* 🌟 Dark Mode Dual-Tone Neon Aura Glow (Orange Left / Cyan-Violet Right) */
 body.dark-mode .chat-input-card {
-    background-color: #1e293b;
-    border-color: #334155;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 
+        -22px 0 48px -4px rgba(255, 122, 0, 0.45),
+        22px 0 48px -4px rgba(6, 182, 212, 0.48),
+        0 0 28px -4px rgba(168, 85, 247, 0.35),
+        0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .chat-input-card:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 
+        -28px 0 58px -2px rgba(255, 122, 0, 0.55),
+        28px 0 58px -2px rgba(6, 182, 212, 0.58),
+        0 0 38px 2px rgba(168, 85, 247, 0.45),
+        0 10px 35px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .chat-input-card:focus-within {
+    border-color: #a78bfa;
+    box-shadow: 
+        -34px 0 68px 0px rgba(255, 122, 0, 0.68),
+        34px 0 68px 0px rgba(6, 182, 212, 0.7),
+        0 0 48px 6px rgba(168, 85, 247, 0.55),
+        0 12px 40px rgba(0, 0, 0, 0.7);
 }
 
 body.dark-mode .chat-input-card textarea {
@@ -1282,15 +1346,29 @@ body.dark-mode .chat-input-card textarea {
 }
 
 body.dark-mode .sym-btn {
-    background-color: #1e293b;
-    border-color: #334155;
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: #cbd5e1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .sym-btn:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(6, 182, 212, 0.35));
+    border-color: #818cf8;
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(99, 102, 241, 0.45);
 }
 
 body.dark-mode .model-pill-btn {
-    background-color: #334155;
-    border-color: #475569;
+    background-color: #1e293b;
+    border-color: #334155;
     color: #f8fafc;
+}
+
+body.dark-mode .model-pill-btn:hover {
+    background-color: #334155;
+    border-color: #6366f1;
 }
 
 body.dark-mode .model-dropdown-menu {
