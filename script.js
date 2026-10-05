@@ -77,6 +77,16 @@ symButtons.forEach(button => {
     });
 });
 
+// ⌨️ Enter Key to Send Message (Shift+Enter for newline)
+if (userInput && chatForm) {
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+    });
+}
+
 
 // 2. Plus Button (+ Photo / File Upload)
 const plusBtn = document.getElementById('plus-btn');
