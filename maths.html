@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=20">
+    <link rel="stylesheet" href="style.css?v=21">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -23,6 +23,37 @@
             <button id="new-chat-btn">
                 <span>➕</span> <span class="sidebar-text">New Chat</span>
             </button>
+
+            <!-- ChatGPT Style Quick Navigation Menu -->
+            <div class="sidebar-nav-menu">
+                <!-- 1. NCERT Classes -->
+                <div class="nav-menu-item" id="nav-ncert-classes-btn" title="Select NCERT Class (9th-12th)">
+                    <span class="nav-item-icon">🎓</span>
+                    <span class="sidebar-text nav-item-label">NCERT Classes</span>
+                    <span class="nav-item-badge sidebar-text" id="nav-class-badge">Class 11</span>
+                </div>
+
+                <!-- 2. Tutor Style -->
+                <div class="nav-menu-item" id="nav-tutor-style-btn" title="Choose Teaching Style">
+                    <span class="nav-item-icon">🧠</span>
+                    <span class="sidebar-text nav-item-label">Tutor Style</span>
+                    <span class="nav-item-badge sidebar-text" id="nav-style-badge">Intuition</span>
+                </div>
+
+                <!-- 3. Math Library & Formulas -->
+                <div class="nav-menu-item" id="nav-formulas-btn" title="NCERT Formula Library">
+                    <span class="nav-item-icon">📚</span>
+                    <span class="sidebar-text nav-item-label">Formula Library</span>
+                </div>
+
+                <!-- 4. SymPy Solver Engine -->
+                <div class="nav-menu-item" id="nav-sympy-solver-btn" title="SymPy Calculus & Algebra Solver">
+                    <span class="nav-item-icon">⚡</span>
+                    <span class="sidebar-text nav-item-label">SymPy Solver</span>
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
 
             <!-- History Section -->
                        <div class="history-container">
@@ -392,6 +423,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=20"></script>
+    <script src="script.js?v=21"></script>
 </body>
 </html>

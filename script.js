@@ -65,6 +65,54 @@ if (badgeEl && savedGrade) {
     badgeEl.innerText = `NCERT ${savedGrade}`;
 }
 
+// 🧭 ChatGPT Style Sidebar Navigation Menu
+const navNcertClassesBtn = document.getElementById('nav-ncert-classes-btn');
+const navTutorStyleBtn = document.getElementById('nav-tutor-style-btn');
+const navFormulasBtn = document.getElementById('nav-formulas-btn');
+const navSympySolverBtn = document.getElementById('nav-sympy-solver-btn');
+const navClassBadge = document.getElementById('nav-class-badge');
+const navStyleBadge = document.getElementById('nav-style-badge');
+
+if (navClassBadge && savedGrade) {
+    navClassBadge.innerText = savedGrade;
+}
+
+if (navStyleBadge) {
+    const currentStyleVal = localStorage.getItem('defaultStyle') || 'simple';
+    navStyleBadge.innerText = currentStyleVal === 'sports' ? 'Cricket' : currentStyleVal === 'step-by-step' ? 'Steps' : 'Intuition';
+}
+
+if (navNcertClassesBtn) {
+    navNcertClassesBtn.addEventListener('click', () => {
+        openSettingsToTab('tab-education');
+    });
+}
+
+if (navTutorStyleBtn) {
+    navTutorStyleBtn.addEventListener('click', () => {
+        openSettingsToTab('tab-style');
+    });
+}
+
+if (navFormulasBtn) {
+    navFormulasBtn.addEventListener('click', () => {
+        if (userInput) {
+            const grade = localStorage.getItem('studentGrade') || 'Class 11';
+            userInput.value = `Give me a complete chapter-wise NCERT ${grade} Mathematics formula cheat sheet with examples and key scoring tips.`;
+            submitUserMessage();
+        }
+    });
+}
+
+if (navSympySolverBtn) {
+    navSympySolverBtn.addEventListener('click', () => {
+        if (userInput) {
+            userInput.value = `Find the exact derivative and integral of: x^3 + 4*x^2 - 5*x + 12`;
+            userInput.focus();
+        }
+    });
+}
+
 
 
 
@@ -694,6 +742,15 @@ function applyFontSize(level) {
     }
 }
 
+// Open Settings to a specific tab directly
+function openSettingsToTab(tabId) {
+    openSettingsModal();
+    const targetBtn = document.querySelector(`.settings-tab-btn[data-tab="${tabId}"]`);
+    if (targetBtn) {
+        targetBtn.click();
+    }
+}
+
 // Open Settings Modal
 function openSettingsModal() {
     if (profilePopupMenu) profilePopupMenu.style.display = 'none';
@@ -811,6 +868,7 @@ if (settingGradeSelect) {
         if (userPlanTagEl) userPlanTagEl.innerText = `Student · ${newGrade}`;
         if (popupPlanBadge) popupPlanBadge.innerText = `Student · ${newGrade}`;
         if (badgeEl) badgeEl.innerText = `NCERT ${newGrade}`;
+        if (navClassBadge) navClassBadge.innerText = newGrade;
     });
 }
 
@@ -820,6 +878,10 @@ if (settingDefaultStyleSelect) {
         const newStyle = e.target.value;
         localStorage.setItem('defaultStyle', newStyle);
         currentStyle = newStyle;
+
+        if (navStyleBadge) {
+            navStyleBadge.innerText = newStyle === 'sports' ? 'Cricket' : newStyle === 'step-by-step' ? 'Steps' : 'Intuition';
+        }
 
         // Sync pill dropdown text
         const matchingMenuItem = document.querySelector(`.menu-item[data-style="${newStyle}"]`);
