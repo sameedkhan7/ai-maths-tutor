@@ -72,17 +72,26 @@ const userInput = document.getElementById('user-input');
 
 symButtons.forEach(button => {
     button.addEventListener('click', () => {
-        userInput.value += button.innerText;
-        userInput.focus();
+        if (userInput) {
+            userInput.value += button.innerText;
+            userInput.focus();
+        }
     });
 });
 
 // ⌨️ Enter Key to Send Message (Shift+Enter for newline)
-if (userInput && chatForm) {
+if (userInput) {
     userInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            const form = document.getElementById('chat-form');
+            if (form) {
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit();
+                } else {
+                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+            }
         }
     });
 }
