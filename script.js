@@ -238,7 +238,9 @@ function renderMarkdown(rawText) {
         return `<div class="math-code-block"><pre>${p1.trim()}</pre></div>`;
     });
 
-    // Headers ###, ##, #
+    // Headers #####, ####, ###, ##, #
+    html = html.replace(/^##### (.*$)/gim, '<h6 class="chat-h6">$1</h6>');
+    html = html.replace(/^#### (.*$)/gim, '<h5 class="chat-h5">$1</h5>');
     html = html.replace(/^### (.*$)/gim, '<h5 class="chat-h5">$1</h5>');
     html = html.replace(/^## (.*$)/gim, '<h4 class="chat-h4">$1</h4>');
     html = html.replace(/^# (.*$)/gim, '<h3 class="chat-h3">$1</h3>');

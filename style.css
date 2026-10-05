@@ -627,6 +627,17 @@ body.dark-mode .message-body strong {
     color: #f1f5f9;
 }
 
+.chat-h6 {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #334155;
+    margin: 10px 0 3px 0;
+}
+
+body.dark-mode .chat-h6 {
+    color: #cbd5e1;
+}
+
 .chat-h5 {
     font-size: 14.5px;
     font-weight: 700;
