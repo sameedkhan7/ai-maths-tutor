@@ -404,10 +404,24 @@ function renderWelcomeHero() {
     if (!messagesContainer) return;
     messagesContainer.innerHTML = `
         <div class="welcome-hero" id="welcome-hero">
-            <div class="welcome-avatar-badge">👩‍🏫</div>
             <h2 class="welcome-greeting" id="welcome-greeting">Hello ${currentStudentName}!</h2>
-            <p class="welcome-subtitle">I am your <strong>AI Maths Tutor</strong>. Ready for a new question! Aaj kaunsa concept intuitively samajhna chahte hain?</p>
+            <p class="welcome-subtitle">How can I help with <strong>NCERT Maths</strong> today?</p>
             
+            <!-- 🔮 Center 3D Holographic Math Orb with Celestial Rings -->
+            <div class="math-orb-system">
+                <div class="math-orb-core"></div>
+                <div class="math-orb-glow"></div>
+                <div class="math-orb-ring ring-horizontal">
+                    <span class="orbit-symbol sym-pi">π</span>
+                    <span class="orbit-symbol sym-sqrt">√</span>
+                </div>
+                <div class="math-orb-ring ring-inclined">
+                    <span class="orbit-symbol sym-sigma">Σ</span>
+                    <span class="orbit-symbol sym-integral">∫</span>
+                    <span class="orbit-symbol sym-theta">θ</span>
+                </div>
+            </div>
+
             <div class="topic-cards-grid">
                 <div class="topic-card" data-question="What is a derivative and why do we use it in calculus?">
                     <div class="topic-card-icon">📐</div>

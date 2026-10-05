@@ -518,67 +518,141 @@ body.dark-mode .header-info h3 {
 /* 🌟 Pinterest Style Welcome Hero & Topic Cards Grid       */
 /* ======================================================== */
 .welcome-hero {
-    max-width: 680px;
+    max-width: 780px;
     width: 100%;
-    margin: 16px auto;
+    margin: 8px auto 14px auto;
     text-align: center;
     animation: fadeInModal 0.25s ease-out;
 }
 
-.welcome-avatar-badge {
-    width: 62px;
-    height: 62px;
-    font-size: 30px;
-    background: radial-gradient(circle at 35% 35%, #93c5fd, #818cf8 40%, #c084fc 75%, #f472b6 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 12px auto;
-    box-shadow: 
-        0 0 25px rgba(129, 140, 248, 0.45),
-        0 0 45px rgba(192, 132, 252, 0.3),
-        inset -3px -3px 8px rgba(0, 0, 0, 0.2),
-        inset 3px 3px 8px rgba(255, 255, 255, 0.6);
-    animation: orbFloat 4s ease-in-out infinite;
-    user-select: none;
-}
-
-@keyframes orbFloat {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-4px) scale(1.02); }
-}
-
-body.dark-mode .welcome-avatar-badge {
-    background: radial-gradient(circle at 35% 35%, #38bdf8, #6366f1 45%, #a855f7 80%, #ec4899 100%);
-    box-shadow: 
-        0 0 30px rgba(56, 189, 248, 0.5),
-        0 0 55px rgba(168, 85, 247, 0.45),
-        inset -4px -4px 10px rgba(0, 0, 0, 0.45),
-        inset 4px 4px 10px rgba(255, 255, 255, 0.7);
-}
-
 .welcome-greeting {
-    font-size: 23px;
+    font-size: 26px;
     font-weight: 700;
     color: #0f172a;
-    margin: 0 0 6px 0;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.3px;
 }
 
 body.dark-mode .welcome-greeting {
     color: #f8fafc;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
 }
 
 .welcome-subtitle {
-    font-size: 13.5px;
+    font-size: 14px;
     color: #64748b;
-    margin: 0 0 20px 0;
+    margin: 0 0 14px 0;
     line-height: 1.5;
 }
 
 body.dark-mode .welcome-subtitle {
     color: #94a3b8;
 }
+
+/* ======================================================== */
+/* 🔮 3D Holographic Math Orb System with Celestial Rings    */
+/* ======================================================== */
+.math-orb-system {
+    position: relative;
+    width: 220px;
+    height: 190px;
+    margin: 8px auto 18px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 900px;
+    user-select: none;
+}
+
+.math-orb-core {
+    width: 124px;
+    height: 124px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f0f9ff 0%, #7dd3fc 22%, #818cf8 52%, #c084fc 76%, #f472b6 90%, #f97316 100%);
+    box-shadow: 
+        0 0 45px rgba(56, 189, 248, 0.65),
+        0 0 85px rgba(168, 85, 247, 0.5),
+        inset -8px -8px 22px rgba(0, 0, 0, 0.4),
+        inset 8px 8px 22px rgba(255, 255, 255, 0.9);
+    animation: orbPulse 4s ease-in-out infinite alternate;
+    position: relative;
+    z-index: 2;
+}
+
+.math-orb-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(129, 140, 248, 0.4) 0%, rgba(6, 182, 212, 0.25) 50%, transparent 75%);
+    filter: blur(16px);
+    z-index: 1;
+    pointer-events: none;
+    animation: orbGlowBreath 4s ease-in-out infinite alternate;
+}
+
+@keyframes orbPulse {
+    0% { transform: scale(1) translateY(0); }
+    100% { transform: scale(1.05) translateY(-5px); }
+}
+
+@keyframes orbGlowBreath {
+    0% { opacity: 0.7; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1.12); }
+}
+
+/* Orbiting Celestial Rings */
+.math-orb-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.6), inset 0 0 8px rgba(168, 85, 247, 0.35);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.ring-horizontal {
+    width: 210px;
+    height: 75px;
+    transform: rotateX(68deg) rotateY(-10deg);
+    animation: ringSpin 20s linear infinite;
+}
+
+.ring-inclined {
+    width: 220px;
+    height: 80px;
+    transform: rotateX(64deg) rotateY(38deg);
+    animation: ringSpinReverse 24s linear infinite;
+    border-color: rgba(168, 85, 247, 0.6);
+    box-shadow: 0 0 18px rgba(168, 85, 247, 0.7);
+}
+
+@keyframes ringSpin {
+    0% { transform: rotateX(68deg) rotateY(-10deg) rotateZ(0deg); }
+    100% { transform: rotateX(68deg) rotateY(-10deg) rotateZ(360deg); }
+}
+
+@keyframes ringSpinReverse {
+    0% { transform: rotateX(64deg) rotateY(38deg) rotateZ(360deg); }
+    100% { transform: rotateX(64deg) rotateY(38deg) rotateZ(0deg); }
+}
+
+/* Orbiting Math Symbols */
+.orbit-symbol {
+    position: absolute;
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.95), 0 0 20px rgba(56, 189, 248, 0.85);
+    font-family: 'Cambria Math', 'Times New Roman', serif;
+    user-select: none;
+}
+
+.sym-pi { top: -8px; left: 35px; }
+.sym-sqrt { bottom: -8px; right: 40px; }
+.sym-sigma { top: -10px; right: 30px; font-size: 19px; }
+.sym-integral { bottom: -12px; left: 25px; font-size: 22px; }
+.sym-theta { top: 40%; right: -12px; }
 
 .topic-cards-grid {
     display: grid;
@@ -608,15 +682,16 @@ body.dark-mode .welcome-subtitle {
 }
 
 body.dark-mode .topic-card {
-    background-color: #1e293b;
-    border-color: #334155;
+    background-color: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(12px);
+    border-color: rgba(255, 255, 255, 0.08);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode .topic-card:hover {
-    background-color: #243248;
-    border-color: #6366f1;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    background-color: rgba(30, 41, 59, 0.8);
+    border-color: #818cf8;
+    box-shadow: 0 8px 22px rgba(99, 102, 241, 0.25);
 }
 
 .topic-card-icon {
@@ -1081,92 +1156,194 @@ body.dark-mode .math-code-block {
 
 
     
-    /* ChatGPT / Antigravity Style Input Wrapper */
-/* ChatGPT / Antigravity Style Input Wrapper with Ambient Neon Glow */
+    /* ======================================================== */
+/* 🌟 Floating Neon Capsule Input Area (Exact Demo Style)   */
+/* ======================================================== */
 .chat-input-wrapper {
-    background-color: #ffffff;
-    border-top: 1px solid #e2e8f0;
-    padding: 16px 24px;
-    position: relative;
-    transition: background-color 0.25s ease;
-}
-
-/* Single Sleek Card with Ambient Dual-Tone Backlight Glow (Left Amber / Right Cyan-Violet) */
-.chat-input-card {
-    position: relative;
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 20px;
-    padding: 12px 18px;
-    box-shadow: 
-        -14px 0 30px -4px rgba(249, 115, 22, 0.22),
-        14px 0 30px -4px rgba(6, 182, 212, 0.26),
-        0 4px 14px rgba(0, 0, 0, 0.05);
+    background-color: transparent !important;
+    border-top: none !important;
+    padding: 10px 24px 20px 24px;
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+/* Math Shortcuts Toolbar (Centered Floating Glass Pill) */
+.math-toolbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 12px;
+    padding: 5px 14px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(203, 213, 225, 0.6);
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .math-toolbar {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.sym-btn {
+    background: rgba(241, 245, 249, 0.8);
+    border: 1px solid rgba(203, 213, 225, 0.7);
+    border-radius: 8px;
+    padding: 4px 11px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.dark-mode .sym-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+}
+
+.sym-btn:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: #818cf8;
+    color: #4f46e5;
+    transform: translateY(-2px);
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+}
+
+body.dark-mode .sym-btn:hover {
+    background: rgba(99, 102, 241, 0.3);
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(99, 102, 241, 0.6);
+}
+
+/* 🌟 Glowing Neon Capsule Input Form */
+.glowing-neon-capsule {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 999px;
+    padding: 8px 14px 8px 22px;
+    position: relative;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    box-shadow: 
+        -20px 0 45px -4px rgba(249, 115, 22, 0.4),
+        20px 0 45px -4px rgba(6, 182, 212, 0.45),
+        0 0 30px 2px rgba(168, 85, 247, 0.3),
+        0 8px 24px rgba(0, 0, 0, 0.08);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.chat-input-card:hover {
+body.dark-mode .glowing-neon-capsule {
+    background: linear-gradient(135deg, rgba(13, 21, 39, 0.94), rgba(10, 15, 29, 0.98)) padding-box,
+                linear-gradient(90deg, #f97316 0%, #ec4899 45%, #a855f7 68%, #06b6d4 100%) border-box;
+    border: 2px solid transparent;
     box-shadow: 
-        -18px 0 38px -2px rgba(249, 115, 22, 0.32),
-        18px 0 38px -2px rgba(6, 182, 212, 0.36),
-        0 0 24px -2px rgba(168, 85, 247, 0.25),
-        0 6px 20px rgba(0, 0, 0, 0.07);
+        -28px 0 55px 0px rgba(249, 115, 22, 0.8),
+        28px 0 55px 0px rgba(6, 182, 212, 0.85),
+        0 0 45px 5px rgba(217, 70, 239, 0.7),
+        0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
-.chat-input-card:focus-within {
-    border-color: #818cf8;
+.glowing-neon-capsule:hover {
     box-shadow: 
-        -24px 0 48px 0px rgba(249, 115, 22, 0.42),
-        24px 0 48px 0px rgba(6, 182, 212, 0.46),
-        0 0 32px 2px rgba(168, 85, 247, 0.35),
-        0 8px 24px rgba(99, 102, 241, 0.18);
+        -34px 0 65px 2px rgba(249, 115, 22, 0.9),
+        34px 0 65px 2px rgba(6, 182, 212, 0.95),
+        0 0 55px 8px rgba(217, 70, 239, 0.8),
+        0 12px 35px rgba(0, 0, 0, 0.65);
 }
 
-.chat-input-card textarea {
-    width: 100%;
+.glowing-neon-capsule:focus-within {
+    box-shadow: 
+        -40px 0 75px 4px rgba(249, 115, 22, 1),
+        40px 0 75px 4px rgba(6, 182, 212, 1),
+        0 0 65px 12px rgba(217, 70, 239, 0.9),
+        0 14px 40px rgba(0, 0, 0, 0.75);
+}
+
+.glowing-neon-capsule textarea {
+    flex: 1;
     border: none;
     outline: none;
-    font-size: 14px;
-    background: transparent;
+    font-size: 14.5px;
+    background: transparent !important;
     resize: none;
     color: #1e293b;
-    line-height: 1.5;
+    line-height: 1.4;
+    padding: 6px 0;
+    min-height: 24px;
+    max-height: 120px;
 }
 
-/* Bottom Actions Row */
-.input-card-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+body.dark-mode .glowing-neon-capsule textarea {
+    color: #f8fafc !important;
 }
 
-.bottom-left, .bottom-right {
+.glowing-neon-capsule textarea::placeholder {
+    color: #94a3b8;
+}
+
+.capsule-tools-bar {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
 }
 
-/* Icons (+ and Mic) */
-.tool-icon-btn {
-    background: transparent;
-    border: none;
-    font-size: 16px;
-    width: 32px;
-    height: 32px;
+.capsule-icon-btn {
+    background: rgba(241, 245, 249, 0.8);
+    border: 1px solid rgba(203, 213, 225, 0.7);
+    font-size: 15px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s, transform 0.15s;
+    color: #475569;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.tool-icon-btn:hover {
-    background-color: #f1f5f9;
-    transform: scale(1.08);
+body.dark-mode .capsule-icon-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+}
+
+.capsule-icon-btn.photo-btn {
+    background: rgba(168, 85, 247, 0.15);
+    border-color: rgba(168, 85, 247, 0.35);
+    color: #9333ea;
+}
+
+body.dark-mode .capsule-icon-btn.photo-btn {
+    background: rgba(168, 85, 247, 0.22);
+    border-color: rgba(168, 85, 247, 0.45);
+    color: #e9d5ff;
+}
+
+.capsule-icon-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.capsule-icon-btn.photo-btn:hover {
+    background: rgba(168, 85, 247, 0.4);
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
 }
 
 /* Antigravity Model Pill */
@@ -1189,13 +1366,24 @@ body.dark-mode .math-code-block {
     transition: all 0.15s;
 }
 
+body.dark-mode .model-pill-btn {
+    background-color: rgba(30, 41, 59, 0.8);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+}
+
 .model-pill-btn:hover {
     background-color: #e0e7ff;
     color: #4f46e5;
     border-color: #818cf8;
 }
 
-/* Dropdown Menu (Antigravity popup style) */
+body.dark-mode .model-pill-btn:hover {
+    background-color: #334155;
+    border-color: #6366f1;
+}
+
+/* Dropdown Menu */
 .model-dropdown-menu {
     position: absolute;
     bottom: 40px;
@@ -1203,10 +1391,15 @@ body.dark-mode .math-code-block {
     background: #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    width: 220px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    width: 230px;
     z-index: 100;
     overflow: hidden;
+}
+
+body.dark-mode .model-dropdown-menu {
+    background-color: #1e293b;
+    border-color: #334155;
 }
 
 .menu-item {
@@ -1218,15 +1411,46 @@ body.dark-mode .math-code-block {
     transition: background 0.15s;
 }
 
+body.dark-mode .menu-item {
+    color: #cbd5e1;
+}
+
 .menu-item:hover {
     background-color: #f1f5f9;
     color: #4f46e5;
+}
+
+body.dark-mode .menu-item:hover {
+    background-color: #334155;
+    color: #818cf8;
 }
 
 .menu-item.active {
     background-color: #e0e7ff;
     color: #4f46e5;
     font-weight: 700;
+}
+
+/* Send Button with Cyan Gradient & Glow */
+.send-action-btn {
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    color: #ffffff;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.7);
+}
+
+.send-action-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 24px rgba(6, 182, 212, 0.95);
 }
 
 /* Uploaded Photo Tag */
@@ -1240,40 +1464,17 @@ body.dark-mode .math-code-block {
     border-radius: 6px;
 }
 
-/* Send Button with Gradient & Glow */
-.send-action-btn {
-    background: linear-gradient(135deg, #06b6d4, #6366f1);
-    color: white;
-    border: none;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 2px 10px rgba(6, 182, 212, 0.35);
-}
-
-.send-action-btn:hover {
-    background: linear-gradient(135deg, #0891b2, #4f46e5);
-    transform: scale(1.08);
-    box-shadow: 0 4px 18px rgba(6, 182, 212, 0.55), 0 0 15px rgba(99, 102, 241, 0.45);
-}
-
 /* ================================= */
 /* 🌙 DARK MODE STYLES               */
 /* ================================= */
 body.dark-mode {
-    background-color: #090d16;
+    background-color: #060913;
     color: #f8fafc;
 }
 
 body.dark-mode .sidebar {
-    background-color: #0f172a;
-    border-color: #1e293b;
+    background-color: #0b0f19;
+    border-color: rgba(255, 255, 255, 0.06);
     color: #f8fafc;
 }
 
@@ -1283,17 +1484,22 @@ body.dark-mode #current-topic {
 }
 
 body.dark-mode .chat-area {
-    background: radial-gradient(circle at 50% 15%, #172554 0%, #0b1120 50%, #030712 100%);
+    background: radial-gradient(circle at 50% 12%, #172554 0%, #0b1120 45%, #030712 100%);
+    background-image: 
+        radial-gradient(circle at 50% 12%, #172554 0%, #0b1120 45%, #030712 100%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
 }
 
 body.dark-mode .chat-header {
-    background-color: #0f172a;
-    border-color: #1e293b;
+    background-color: #0b0f19;
+    border-color: rgba(255, 255, 255, 0.06);
 }
 
 body.dark-mode .message-content {
-    background-color: #1e293b;
-    border-color: #334155;
+    background-color: #0f172a;
+    border-color: rgba(255, 255, 255, 0.08);
     color: #f8fafc;
 }
 
@@ -1303,86 +1509,6 @@ body.dark-mode .message-content h4 {
 
 body.dark-mode .message-content p {
     color: #cbd5e1;
-}
-
-body.dark-mode .chat-input-wrapper {
-    background-color: #090d16;
-    border-color: #1e293b;
-}
-
-/* 🌟 Dark Mode Dual-Tone Neon Aura Glow (Orange Left / Cyan-Violet Right) */
-body.dark-mode .chat-input-card {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 
-        -22px 0 48px -4px rgba(255, 122, 0, 0.45),
-        22px 0 48px -4px rgba(6, 182, 212, 0.48),
-        0 0 28px -4px rgba(168, 85, 247, 0.35),
-        0 8px 30px rgba(0, 0, 0, 0.5);
-}
-
-body.dark-mode .chat-input-card:hover {
-    border-color: rgba(255, 255, 255, 0.22);
-    box-shadow: 
-        -28px 0 58px -2px rgba(255, 122, 0, 0.55),
-        28px 0 58px -2px rgba(6, 182, 212, 0.58),
-        0 0 38px 2px rgba(168, 85, 247, 0.45),
-        0 10px 35px rgba(0, 0, 0, 0.6);
-}
-
-body.dark-mode .chat-input-card:focus-within {
-    border-color: #a78bfa;
-    box-shadow: 
-        -34px 0 68px 0px rgba(255, 122, 0, 0.68),
-        34px 0 68px 0px rgba(6, 182, 212, 0.7),
-        0 0 48px 6px rgba(168, 85, 247, 0.55),
-        0 12px 40px rgba(0, 0, 0, 0.7);
-}
-
-body.dark-mode .chat-input-card textarea {
-    color: #f8fafc;
-}
-
-body.dark-mode .sym-btn {
-    background: rgba(30, 41, 59, 0.85);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #cbd5e1;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .sym-btn:hover {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(6, 182, 212, 0.35));
-    border-color: #818cf8;
-    color: #ffffff;
-    box-shadow: 0 0 14px rgba(99, 102, 241, 0.45);
-}
-
-body.dark-mode .model-pill-btn {
-    background-color: #1e293b;
-    border-color: #334155;
-    color: #f8fafc;
-}
-
-body.dark-mode .model-pill-btn:hover {
-    background-color: #334155;
-    border-color: #6366f1;
-}
-
-body.dark-mode .model-dropdown-menu {
-    background-color: #1e293b;
-    border-color: #334155;
-}
-
-body.dark-mode .menu-item {
-    color: #cbd5e1;
-}
-
-body.dark-mode .menu-item:hover {
-    background-color: #334155;
-    color: #818cf8;
 }
 
 body.dark-mode .theme-icon-btn {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=27">
+    <link rel="stylesheet" href="style.css?v=28">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -112,12 +112,27 @@
             </div>
         </header>
             <div class="messages-container" id="messages-container">
-                <!-- Pinterest-Style Welcome Hero & Topic Starter Cards -->
+                <!-- 3D Holographic Math Orb Welcome Hero -->
                 <div class="welcome-hero" id="welcome-hero">
-                    <div class="welcome-avatar-badge">👩‍🏫</div>
                     <h2 class="welcome-greeting" id="welcome-greeting">Hello Sameed!</h2>
-                    <p class="welcome-subtitle">I am your <strong>AI Maths Tutor</strong>. Aaj kaunsa mathematics concept intuitively samajhna chahte hain?</p>
+                    <p class="welcome-subtitle">How can I help with <strong>NCERT Maths</strong> today?</p>
                     
+                    <!-- 🔮 Center 3D Holographic Math Orb with Celestial Rings -->
+                    <div class="math-orb-system">
+                        <div class="math-orb-core"></div>
+                        <div class="math-orb-glow"></div>
+                        <div class="math-orb-ring ring-horizontal">
+                            <span class="orbit-symbol sym-pi">π</span>
+                            <span class="orbit-symbol sym-sqrt">√</span>
+                        </div>
+                        <div class="math-orb-ring ring-inclined">
+                            <span class="orbit-symbol sym-sigma">Σ</span>
+                            <span class="orbit-symbol sym-integral">∫</span>
+                            <span class="orbit-symbol sym-theta">θ</span>
+                        </div>
+                    </div>
+
+                    <!-- Topic Starter Cards Grid -->
                     <div class="topic-cards-grid">
                         <div class="topic-card" data-question="What is a derivative and why do we use it in calculus?">
                             <div class="topic-card-icon">📐</div>
@@ -157,35 +172,32 @@
                     </div>
                 </div>
             </div>
-                           <div class="chat-input-wrapper">
-            <!-- Math Shortcuts Toolbar -->
-            <div class="math-toolbar">
-                <button type="button" class="sym-btn">x²</button>
-                <button type="button" class="sym-btn">√</button>
-                <button type="button" class="sym-btn">π</button>
-                <button type="button" class="sym-btn">∫</button>
-                <button type="button" class="sym-btn">÷</button>
-                <button type="button" class="sym-btn">θ</button>
-                <button type="button" class="sym-btn">±</button>
-            </div>
 
-            <!-- ChatGPT / Antigravity Style Input Card -->
-            <form id="chat-form" class="chat-input-card">
-                <!-- Textarea -->
-                <textarea id="user-input" placeholder="Ask anything or math question..." rows="2"></textarea>
+            <!-- Floating Neon Capsule Input Area -->
+            <div class="chat-input-wrapper">
+                <!-- Math Shortcuts Toolbar (Centered Floating Glass Pill) -->
+                <div class="math-toolbar">
+                    <button type="button" class="sym-btn">x²</button>
+                    <button type="button" class="sym-btn">√</button>
+                    <button type="button" class="sym-btn">π</button>
+                    <button type="button" class="sym-btn">∫</button>
+                    <button type="button" class="sym-btn">d/dx</button>
+                    <button type="button" class="sym-btn">lim</button>
+                    <button type="button" class="sym-btn">θ</button>
+                    <button type="button" class="sym-btn">±</button>
+                </div>
 
-                <!-- Bottom Actions Bar -->
-                <div class="input-card-bottom">
-                    <!-- Left: Plus (+ Photos) & Model Selector -->
-                    <div class="bottom-left">
-                        <!-- ➕ Plus Button -->
-                        <button type="button" id="plus-btn" class="tool-icon-btn" title="Add photos & files">➕</button>
-                        <input type="file" id="file-input" style="display:none;" accept="image/*,.pdf" />
+                <!-- ChatGPT / Nexus AI Glowing Capsule Input Form -->
+                <form id="chat-form" class="chat-input-card glowing-neon-capsule">
+                    <!-- Textarea input -->
+                    <textarea id="user-input" placeholder="Ask any math equation or concept..." rows="1"></textarea>
 
-                        <!-- ⚡ Groq LLM Model Selector -->
+                    <!-- Right action tools inside capsule -->
+                    <div class="capsule-tools-bar">
+                        <!-- ⚡ Model Selector Pill -->
                         <div class="model-picker">
                             <button type="button" id="model-pill-btn" class="model-pill-btn">
-                                ⚡ <span id="selected-model-text">Groq · GPT-OSS (120B)</span> ▾
+                                ⚡ <span id="selected-model-text">Groq · LLaMA 3.3</span> ▾
                             </button>
                             <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
                                 <div class="menu-item active" data-model="openai/gpt-oss-120b" data-text="Groq · GPT-OSS (120B)">⚡ Groq · GPT-OSS (120B Versatile)</div>
@@ -195,20 +207,29 @@
                             </div>
                         </div>
 
-                        <!-- Photo Tag (Jab student photo upload kare) -->
-                        <span id="photo-preview-tag" class="photo-tag" style="display: none;">
-                            📷 <span id="photo-name"></span> <b id="remove-photo" style="cursor:pointer; margin-left:4px;">✕</b>
-                        </span>
-                    </div>
+                        <!-- 📷 Photo Upload Pill Button -->
+                        <button type="button" id="plus-btn" class="capsule-icon-btn photo-btn" title="Add photo or formula image">
+                            🖼️
+                        </button>
+                        <input type="file" id="file-input" style="display:none;" accept="image/*,.pdf" />
 
-                    <!-- Right: Mic + Send -->
-                    <div class="bottom-right">
-                        <button type="button" id="mic-btn" class="tool-icon-btn" title="Speak to Tutor">🎙️</button>
-                        <button type="submit" id="send-btn" class="send-action-btn">➤</button>
+                        <!-- 🎙️ Mic Button -->
+                        <button type="button" id="mic-btn" class="capsule-icon-btn mic-btn" title="Speak to Tutor">
+                            🎙️
+                        </button>
+
+                        <!-- ➤ Cyan Glowing Send Button -->
+                        <button type="submit" id="send-btn" class="send-action-btn" title="Send question">
+                            ➤
+                        </button>
                     </div>
+                </form>
+
+                <!-- Photo Tag (Jab student photo upload kare) -->
+                <div id="photo-preview-tag" class="photo-tag" style="display: none; margin-top: 6px;">
+                    📷 <span id="photo-name"></span> <b id="remove-photo" style="cursor:pointer; margin-left:6px;">✕</b>
                 </div>
-            </form>
-        </div>
+            </div>
         </main>
     </div>
     <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
@@ -411,6 +432,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=27"></script>
+    <script src="script.js?v=28"></script>
 </body>
 </html>
