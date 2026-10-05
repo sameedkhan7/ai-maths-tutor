@@ -70,6 +70,8 @@ const navNcertClassesBtn = document.getElementById('nav-ncert-classes-btn');
 const navTutorStyleBtn = document.getElementById('nav-tutor-style-btn');
 const navFormulasBtn = document.getElementById('nav-formulas-btn');
 const navSympySolverBtn = document.getElementById('nav-sympy-solver-btn');
+const navExamPracticeBtn = document.getElementById('nav-exam-practice-btn');
+const navGraphPlotterBtn = document.getElementById('nav-graph-plotter-btn');
 const navClassBadge = document.getElementById('nav-class-badge');
 const navStyleBadge = document.getElementById('nav-style-badge');
 
@@ -109,6 +111,25 @@ if (navSympySolverBtn) {
         if (userInput) {
             userInput.value = `Find the exact derivative and integral of: x^3 + 4*x^2 - 5*x + 12`;
             userInput.focus();
+        }
+    });
+}
+
+if (navExamPracticeBtn) {
+    navExamPracticeBtn.addEventListener('click', () => {
+        if (userInput) {
+            const grade = localStorage.getItem('studentGrade') || 'Class 11';
+            userInput.value = `Give me 3 important NCERT ${grade} Board Exam practice questions (1 easy, 1 moderate, 1 hard) with step-by-step solutions and scoring marking scheme.`;
+            submitUserMessage();
+        }
+    });
+}
+
+if (navGraphPlotterBtn) {
+    navGraphPlotterBtn.addEventListener('click', () => {
+        if (userInput) {
+            userInput.value = `Explain the graph, domain, range and key curve points of: y = sin(x) and y = x^2 with visual text diagram.`;
+            submitUserMessage();
         }
     });
 }
@@ -372,7 +393,9 @@ function appendMessage(sender, text, type) {
         renderMathInElement(msgDiv, {
             delimiters: [
                 {left: '$$', right: '$$', display: true},
-                {left: '$', right: '$', display: false}
+                {left: '$', right: '$', display: false},
+                {left: '\\[', right: '\\]', display: true},
+                {left: '\\(', right: '\\)', display: false}
             ],
             throwOnError: false
         });
