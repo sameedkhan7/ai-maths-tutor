@@ -68,8 +68,10 @@ if (badgeEl && savedGrade) {
 // 🧭 ChatGPT Style Sidebar Navigation Menu
 const navNcertClassesBtn = document.getElementById('nav-ncert-classes-btn');
 const navTutorStyleBtn = document.getElementById('nav-tutor-style-btn');
+const navTutorLangBtn = document.getElementById('nav-tutor-lang-btn');
 const navClassBadge = document.getElementById('nav-class-badge');
 const navStyleBadge = document.getElementById('nav-style-badge');
+const navLangBadge = document.getElementById('nav-lang-badge');
 
 if (navClassBadge && savedGrade) {
     navClassBadge.innerText = savedGrade;
@@ -78,6 +80,11 @@ if (navClassBadge && savedGrade) {
 if (navStyleBadge) {
     const currentStyleVal = localStorage.getItem('defaultStyle') || 'simple';
     navStyleBadge.innerText = currentStyleVal === 'sports' ? 'Cricket' : currentStyleVal === 'step-by-step' ? 'Steps' : 'Intuition';
+}
+
+if (navLangBadge) {
+    const currentLangVal = localStorage.getItem('tutorLanguage') || 'hinglish';
+    navLangBadge.innerText = currentLangVal === 'hi' ? 'Hindi' : currentLangVal === 'en' ? 'English' : currentLangVal === 'ur' ? 'Urdu' : 'Hinglish';
 }
 
 if (navNcertClassesBtn) {
@@ -89,6 +96,12 @@ if (navNcertClassesBtn) {
 if (navTutorStyleBtn) {
     navTutorStyleBtn.addEventListener('click', () => {
         openSettingsToTab('tab-style');
+    });
+}
+
+if (navTutorLangBtn) {
+    navTutorLangBtn.addEventListener('click', () => {
+        openSettingsToTab('tab-general');
     });
 }
 
@@ -225,25 +238,89 @@ menuItems.forEach(item => {
 });
 
 
-// 4. Voice Mic Button (Speech-to-Text)
+// 4. Voice Mic Button (Speech-to-Text - Real-time Voice Recognition)
 const micBtn = document.getElementById('mic-btn');
+let activeSpeechRecognition = null;
+let isVoiceRecording = false;
+
 if (micBtn) {
     micBtn.addEventListener('click', () => {
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-IN';
-            micBtn.style.color = '#ef4444'; // Red recording indicator
-            recognition.start();
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert('Voice recognition is supported in Chrome, Edge, and Android web browsers.');
+            return;
+        }
 
-            recognition.onresult = (event) => {
-                userInput.value += event.results[0][0].transcript;
-                micBtn.style.color = 'inherit';
-            };
-            recognition.onerror = () => { micBtn.style.color = 'inherit'; };
-            recognition.onend = () => { micBtn.style.color = 'inherit'; };
+        // Toggle Stop if already recording
+        if (isVoiceRecording && activeSpeechRecognition) {
+            activeSpeechRecognition.stop();
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        activeSpeechRecognition = new SpeechRecognition();
+        
+        // Dynamically set language code based on student's tutor language setting
+        const currentLang = localStorage.getItem('tutorLanguage') || 'hinglish';
+        if (currentLang === 'hi') {
+            activeSpeechRecognition.lang = 'hi-IN';
+        } else if (currentLang === 'en') {
+            activeSpeechRecognition.lang = 'en-US';
+        } else if (currentLang === 'ur') {
+            activeSpeechRecognition.lang = 'ur-PK';
         } else {
-            alert('Voice recording supported in Chrome & Edge browsers.');
+            activeSpeechRecognition.lang = 'en-IN'; // Default Hinglish/Indian English
+        }
+
+        activeSpeechRecognition.continuous = false;
+        activeSpeechRecognition.interimResults = true;
+
+        const originalPlaceholder = userInput ? userInput.placeholder : "Ask any math equation or concept...";
+        let initialInputValue = userInput ? userInput.value : "";
+
+        activeSpeechRecognition.onstart = () => {
+            isVoiceRecording = true;
+            micBtn.classList.add('recording-active');
+            micBtn.title = "Listening... Click to stop";
+            if (userInput) {
+                userInput.placeholder = "🎙️ Listening... Speak your math question now...";
+                userInput.focus();
+            }
+        };
+
+        activeSpeechRecognition.onresult = (event) => {
+            let transcriptText = "";
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcriptText += event.results[i][0].transcript;
+            }
+            if (userInput && transcriptText.trim()) {
+                const spacePrefix = (initialInputValue && !initialInputValue.endsWith(' ')) ? ' ' : '';
+                userInput.value = initialInputValue + spacePrefix + transcriptText;
+            }
+        };
+
+        const stopRecordingUI = () => {
+            isVoiceRecording = false;
+            micBtn.classList.remove('recording-active');
+            micBtn.title = "Speak to Tutor";
+            if (userInput) {
+                userInput.placeholder = originalPlaceholder;
+            }
+        };
+
+        activeSpeechRecognition.onerror = (e) => {
+            console.warn('Speech recognition notice:', e.error);
+            stopRecordingUI();
+        };
+
+        activeSpeechRecognition.onend = () => {
+            stopRecordingUI();
+        };
+
+        try {
+            activeSpeechRecognition.start();
+        } catch (err) {
+            console.warn('Recognition start error:', err);
+            stopRecordingUI();
         }
     });
 }

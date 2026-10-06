@@ -45,15 +45,29 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
             except Exception as e:
                 print(f"RAG retrieval notice: {e}")
 
+        # Define explicit language instructions
+        lang_str = (req.language or "hinglish").lower()
+        if lang_str == "hinglish":
+            lang_rule = (
+                "RESPONSE LANGUAGE: Hinglish (Conversational Mix of Hindi in Roman script + English math terms). "
+                "Write in friendly Indian Hinglish (e.g., 'Samajhte hain ki derivative dy/dx kya hota hai. Rate of change ka matlab...')."
+            )
+        elif lang_str in ["hi", "hindi"]:
+            lang_rule = "RESPONSE LANGUAGE: Hindi (Devanagari script). Write explanations in simple, clear Hindi (हिंदी भाषा)."
+        elif lang_str in ["ur", "urdu"]:
+            lang_rule = "RESPONSE LANGUAGE: Urdu. Write explanations in clear Urdu script (اردو)."
+        elif lang_str in ["ar", "arabic"]:
+            lang_rule = "RESPONSE LANGUAGE: Arabic. Write explanations in clear Arabic script (العربية)."
+        else:
+            lang_rule = f"RESPONSE LANGUAGE: {req.language}. Write explanations in clear, encouraging English."
+
         # Add style and question type information to system prompt
         system_prompt = (
             f"{MASTER_SYSTEM_PROMPT}\n\n"
             f"CURRENT QUESTION TYPE: {question_type}\n"
             f"EXPLANATION STYLE: {explanation_style}\n"
             f"STUDENT LEVEL: {req.student_level}\n"
-            f"IMPORTANT: Your entire response MUST be written in {req.language}. "
-            f"Do not answer in English unless the requested language is english.\n"
-            f"RESPONSE LANGUAGE: {req.language}"
+            f"{lang_rule}"
         )
 
         # Check exact mathematical verification with SymPy
