@@ -396,19 +396,24 @@ function cleanMathTextForSpeech(text) {
     if (!text) return '';
     let str = text;
 
-    // 1. Remove markdown elements
+    // 1. Remove raw code blocks and markdown symbols
     str = str.replace(/```[\s\S]*?```/g, '');
     str = str.replace(/###|##|#/g, '');
     str = str.replace(/\*\*/g, '').replace(/\*/g, '');
 
-    // 2. Convert LaTeX formulas to speakable Hindi/English phrasing
+    // 2. Fix math words spelling issue (convert math operators to natural Hindi/English words)
+    str = str.replace(/\\sum\b|\bSUM\b|\bsum\b/g, ' summation ');
+    str = str.replace(/\\int\b|\bINT\b|\bint\b/g, ' integration ');
+    str = str.replace(/\\lim\b|\bLIM\b|\blim\b/g, ' limit ');
+    str = str.replace(/dy\/dx|d\/dx/g, ' derivative with respect to x ');
+
+    // 3. Convert LaTeX formulas to speakable Hindi/English phrasing
     str = str.replace(/\$\$(.*?)\$\$/g, (m, f) => speakableFormula(f));
     str = str.replace(/\$(.*?)\$/g, (m, f) => speakableFormula(f));
     str = str.replace(/\\\[(.*?)\\\]/g, (m, f) => speakableFormula(f));
     str = str.replace(/\\\((.*?)\\\)/g, (m, f) => speakableFormula(f));
 
-    // 3. Clean up leftover LaTeX backslashes & braces
-    str = str.replace(/\\(int|sum|frac|sqrt|theta|pi|infty|times|div|pm)/g, ' $1 ');
+    // 4. Clean up leftover LaTeX backslashes & braces
     str = str.replace(/[\{\}\\]/g, ' ');
 
     return str.replace(/\s+/g, ' ').trim();
@@ -421,7 +426,8 @@ function speakableFormula(f) {
     s = s.replace(/\^2/g, ' squared');
     s = s.replace(/\^3/g, ' cubed');
     s = s.replace(/\^\{([^}]+)\}/g, ' to the power $1');
-    s = s.replace(/\\int/g, ' integral of ');
+    s = s.replace(/\\sum\b|\bsum\b/g, ' summation ');
+    s = s.replace(/\\int\b|\bint\b/g, ' integral of ');
     s = s.replace(/\\pm/g, ' plus or minus ');
     s = s.replace(/\\times/g, ' multiplied by ');
     s = s.replace(/\\div/g, ' divided by ');
@@ -1274,7 +1280,35 @@ function openSettingsModal() {
         settingsStudentInfo.innerText = `${currentStudentName} (${studentEmail})`;
     }
 
+    // Account tab inputs
+    const accNameInput = document.getElementById('setting-account-name');
+    const accUserInput = document.getElementById('setting-account-username');
+    const accEmailEl = document.getElementById('setting-account-email');
+
+    if (accNameInput) accNameInput.value = localStorage.getItem('studentName') || currentStudentName;
+    if (accUserInput) accUserInput.value = localStorage.getItem('studentUsername') || `@${currentStudentName.toLowerCase().replace(/\s+/g, '')}`;
+    if (accEmailEl) accEmailEl.innerText = localStorage.getItem('studentEmail') || `${currentStudentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
+
     applyFontSize(currentFontSizeLevel);
+}
+
+// Save Account Details
+const saveAccountNameBtn = document.getElementById('save-account-name-btn');
+if (saveAccountNameBtn) {
+    saveAccountNameBtn.addEventListener('click', () => {
+        const accNameInput = document.getElementById('setting-account-name');
+        const accUserInput = document.getElementById('setting-account-username');
+        if (accNameInput && accNameInput.value.trim()) {
+            const newName = accNameInput.value.trim();
+            localStorage.setItem('studentName', newName);
+            if (userDisplayNameEl) userDisplayNameEl.innerText = newName;
+            if (welcomeGreetingEl) welcomeGreetingEl.innerText = `Hello ${newName}!`;
+        }
+        if (accUserInput && accUserInput.value.trim()) {
+            localStorage.setItem('studentUsername', accUserInput.value.trim());
+        }
+        alert('🎉 Account settings updated!');
+    });
 }
 
 // Close Settings Modal

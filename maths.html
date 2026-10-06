@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=30">
+    <link rel="stylesheet" href="style.css?v=50">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -312,6 +312,10 @@
                         <span class="tab-icon">📁</span>
                         <span class="tab-label">Data Controls</span>
                     </button>
+                    <button type="button" class="settings-tab-btn" data-tab="tab-account">
+                        <span class="tab-icon">👤</span>
+                        <span class="tab-label">Account</span>
+                    </button>
                     <button type="button" class="settings-tab-btn" data-tab="tab-about">
                         <span class="tab-icon">ℹ️</span>
                         <span class="tab-label">About</span>
@@ -448,7 +452,43 @@
                         </div>
                     </div>
 
-                    <!-- Tab 5: About -->
+                    <!-- Tab 5: Account (ChatGPT Style Settings) -->
+                    <div id="tab-account" class="settings-tab-pane">
+                        <h4 class="pane-title">Account Settings</h4>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Full Name</span>
+                                <span class="setting-desc">Student display name across tutor session</span>
+                            </div>
+                            <div class="setting-control" style="display: flex; gap: 8px;">
+                                <input type="text" id="setting-account-name" class="settings-select" style="padding: 6px 10px; min-width: 160px;">
+                                <button type="button" id="save-account-name-btn" style="padding: 6px 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Save</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Username / Handle</span>
+                                <span class="setting-desc">Student handle ID</span>
+                            </div>
+                            <div class="setting-control">
+                                <input type="text" id="setting-account-username" class="settings-select" style="padding: 6px 10px; min-width: 160px;" placeholder="@sameedkhan">
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Email Address</span>
+                                <span class="setting-desc">Account email address</span>
+                            </div>
+                            <div class="setting-control">
+                                <span id="setting-account-email" style="font-size: 13px; color: #64748b; font-weight: 600;">student@gmail.com</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 6: About -->
                     <div id="tab-about" class="settings-tab-pane">
                         <h4 class="pane-title">About AI Maths Tutor</h4>
                         
