@@ -246,13 +246,16 @@ def chat_with_tutor(request: ChatRequest):
         "reply": reply
     }
 
-# 5. Get All Chats for Sidebar (Filtered per user_id)
+# 5. Get Chats for Sidebar (Isolated per user_id, optional show_all for Dev Admin)
 @app.get("/api/chats")
-def get_chats(user_id: Optional[int] = 1):
+def get_chats(user_id: Optional[int] = 1, show_all: Optional[bool] = False):
     conn = get_connection()
     cursor = conn.cursor()
-    target_uid = user_id if user_id else 1
-    cursor.execute("SELECT id, title, is_pinned, created_at FROM chats WHERE user_id = ? ORDER BY created_at DESC", (target_uid,))
+    if show_all:
+        cursor.execute("SELECT id, title, is_pinned, created_at, user_id FROM chats ORDER BY created_at DESC")
+    else:
+        target_uid = user_id if user_id else 1
+        cursor.execute("SELECT id, title, is_pinned, created_at FROM chats WHERE user_id = ? ORDER BY created_at DESC", (target_uid,))
     chats = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return {"chats": chats}

@@ -6,3 +6,7 @@ backend/ai/__pycache__/
 *.db
 .vscode/
 AI-Maths-Tutor-frontend.zip
+
+cloudflared.exe
+*.pyc
+__pycache__/

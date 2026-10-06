@@ -822,11 +822,14 @@ function renderSidebarChats(chats) {
     }
 }
 
-// Fetch all chats and render in Pinned and Recents (Filtered per User ID)
+let devShowAllUsersHistory = false;
+
+// Fetch chats and render in Pinned and Recents (Filtered per User ID by default, or all if Developer toggles)
 async function fetchAndRenderSidebarChats() {
     try {
         const uid = getUserId();
-        const res = await fetch(`${API_BASE_URL}/api/chats?user_id=${uid}`);
+        const showAllParam = (userRole === 'developer' && devShowAllUsersHistory) ? '&show_all=true' : '';
+        const res = await fetch(`${API_BASE_URL}/api/chats?user_id=${uid}${showAllParam}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         if (data && Array.isArray(data.chats)) {
@@ -1515,12 +1518,13 @@ if (sidebarToggleBtn) {
 // ===================================================
 const userRole = localStorage.getItem('userRole') || 'student';
 const popupDevItem = document.getElementById('popup-dev-item');
+const popupDevToggleHistoryItem = document.getElementById('popup-dev-toggle-history-item');
+const devToggleHistoryText = document.getElementById('dev-toggle-history-text');
 
 // Developer Profile Badge & Menu Item Visibility (ONLY for developer accounts)
 if (userRole === 'developer') {
-    if (popupDevItem) {
-        popupDevItem.style.display = 'flex';
-    }
+    if (popupDevItem) popupDevItem.style.display = 'flex';
+    if (popupDevToggleHistoryItem) popupDevToggleHistoryItem.style.display = 'flex';
     if (userPlanTagEl) {
         userPlanTagEl.innerHTML = `⚡ <strong style="color:#c084fc;">Developer Admin</strong> · RAG Manager`;
     }
@@ -1530,9 +1534,19 @@ if (userRole === 'developer') {
         popupBadgeEl.style.color = `#c084fc`;
     }
 } else {
-    if (popupDevItem) {
-        popupDevItem.style.display = 'none';
-    }
+    if (popupDevItem) popupDevItem.style.display = 'none';
+    if (popupDevToggleHistoryItem) popupDevToggleHistoryItem.style.display = 'none';
+}
+
+if (popupDevToggleHistoryItem) {
+    popupDevToggleHistoryItem.addEventListener('click', () => {
+        if (profilePopupMenu) profilePopupMenu.style.display = 'none';
+        devShowAllUsersHistory = !devShowAllUsersHistory;
+        if (devToggleHistoryText) {
+            devToggleHistoryText.innerText = devShowAllUsersHistory ? "👥 Showing All Users' Chats" : "👤 Showing My History Only";
+        }
+        fetchAndRenderSidebarChats();
+    });
 }
 
 // Dev Modal Controls
