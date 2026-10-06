@@ -501,6 +501,9 @@
                     <div class="settings-tab-btn dev-tab-btn" data-dev-tab="dev-tab-stats" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
                         <span>📊</span> RAG Stats
                     </div>
+                    <div class="settings-tab-btn dev-tab-btn" data-dev-tab="dev-tab-security" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                        <span>🔐</span> Admin Security
+                    </div>
                 </div>
 
                 <!-- Dev Right Content Area -->
@@ -583,6 +586,24 @@
 
                         <div style="font-size: 12px; color: #cbd5e1; font-weight: 600; margin-bottom: 6px;">Indexed PDF Documents:</div>
                         <ul id="rag-pdf-list" style="max-height: 90px; overflow-y: auto; background: #0f172a; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; font-size: 11px; color: #94a3b8; margin: 0; list-style: none;"></ul>
+                    </div>
+
+                    <!-- Dev Tab 5: Admin Password & Security -->
+                    <div id="dev-tab-security" class="dev-tab-pane" style="display: none;">
+                        <h4 style="margin: 0 0 6px 0; color: #f8fafc; font-size: 15px;">🔐 Change Developer Admin Password</h4>
+                        <p style="font-size: 12px; color: #94a3b8; margin: 0 0 14px 0;">Update your developer login password anytime. The new password will work on both laptop and mobile login screens.</p>
+                        
+                        <form id="dev-password-form" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                                <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; display: block; margin-bottom: 4px;">Developer Email (Fixed)</label>
+                                <input type="text" value="dev@mathstutor.com" disabled style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-size: 13px; cursor: not-allowed;">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; display: block; margin-bottom: 4px;">New Password</label>
+                                <input type="password" id="dev-new-password" placeholder="Enter new developer password..." required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; outline: none;">
+                            </div>
+                            <button type="submit" id="dev-password-submit-btn" style="background: #6366f1; color: white; border: none; border-radius: 8px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer;">🔐 Update Developer Password</button>
+                        </form>
                     </div>
                 </div>
             </div>

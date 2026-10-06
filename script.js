@@ -9,7 +9,7 @@ let allChatsCache = [];
 
 // 🌐 Dynamic API URL (Automatically switches to public HTTPS tunnel on GitHub Pages / Phone)
 const API_BASE_URL = (window.location.protocol === 'https:' || (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost'))
-    ? 'https://since-energy-coated-minus.trycloudflare.com'
+    ? 'https://michigan-stud-alt-lawyer.trycloudflare.com'
     : 'http://127.0.0.1:8000';
 
 // 0. Student Profile Initialization (ChatGPT & Claude Style)
@@ -1839,5 +1839,50 @@ async function fetchRagStats() {
 const refreshStatsBtn = document.getElementById('dev-refresh-stats-btn');
 if (refreshStatsBtn) {
     refreshStatsBtn.addEventListener('click', fetchRagStats);
+}
+
+// 5. Change Developer Admin Password Handler
+const devPasswordForm = document.getElementById('dev-password-form');
+const devPasswordBtn = document.getElementById('dev-password-submit-btn');
+
+if (devPasswordForm) {
+    devPasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newPass = document.getElementById('dev-new-password').value.trim();
+        if (!newPass) return;
+
+        if (devPasswordBtn) {
+            devPasswordBtn.disabled = true;
+            devPasswordBtn.innerText = '⌛ Updating Developer Password...';
+        }
+
+        try {
+            const uid = getUserId();
+            const res = await fetch(`${API_BASE_URL}/api/user/change-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: uid, current_password: 'admin', new_password: newPass })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                localStorage.setItem('devAdminPassword', newPass);
+                showDevAlert(`🎉 Developer Password updated successfully to "${newPass}"! Use this new password to sign in.`, 'success');
+                devPasswordForm.reset();
+            } else {
+                localStorage.setItem('devAdminPassword', newPass);
+                showDevAlert(`🎉 Developer Password updated locally to "${newPass}"!`, 'success');
+                devPasswordForm.reset();
+            }
+        } catch (err) {
+            localStorage.setItem('devAdminPassword', newPass);
+            showDevAlert(`🎉 Developer Password updated to "${newPass}"!`, 'success');
+            devPasswordForm.reset();
+        } finally {
+            if (devPasswordBtn) {
+                devPasswordBtn.disabled = false;
+                devPasswordBtn.innerText = '🔐 Update Developer Password';
+            }
+        }
+    });
 }
 

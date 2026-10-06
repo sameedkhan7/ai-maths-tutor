@@ -73,22 +73,47 @@ def register(req: RegisterRequest):
         conn.close()
 
 # 3. Student / Developer Login API
+class ChangePasswordRequest(BaseModel):
+    user_id: int
+    current_password: str
+    new_password: str
+
 @app.post("/api/login")
 def login(req: LoginRequest):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, grade, role FROM users WHERE email=? AND password=?", (req.email, req.password))
+    cursor.execute("""
+        SELECT id, name, email, grade, role 
+        FROM users 
+        WHERE (LOWER(email) = LOWER(?) OR LOWER(name) = LOWER(?)) AND password = ?
+    """, (req.email, req.email, req.password))
     user = cursor.fetchone()
     conn.close()
     if user:
         return {
             "success": True, 
             "user_id": user["id"], 
-            "name": user["name"], 
+            "name": user["name"],
+            "email": user["email"],
             "grade": user["grade"],
             "role": user["role"] if "role" in user.keys() else "student"
         }
-    raise HTTPException(status_code=401, detail="Invalid email or password")
+    raise HTTPException(status_code=401, detail="Invalid email/username or password")
+
+@app.post("/api/user/change-password")
+def change_password(req: ChangePasswordRequest):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT password FROM users WHERE id = ?", (req.user_id,))
+    user = cursor.fetchone()
+    if not user or user["password"] != req.current_password:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+    cursor.execute("UPDATE users SET password = ? WHERE id = ?", (req.new_password, req.user_id))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Password updated successfully!"}
 
 # ==========================================
 # DEVELOPER / ADMIN CONTROL PANEL ENDPOINTS
@@ -139,16 +164,24 @@ def dev_upload_text(req: TextIngestRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Text ingestion failed: {str(e)}")
 
-@app.post("/api/dev/scrape-url")
-def dev_scrape_url(req: ScrapeRequest):
-    """Scrapes text content from any website URL and ingests into RAG vector store"""
-    if not req.url.startswith("http"):
-        raise HTTPException(status_code=400, detail="URL must start with http:// or https://")
+class PasswordChangeRequest(BaseModel):
+    new_password: str
+
+@app.post("/api/dev/change-password")
+def dev_change_password(req: PasswordChangeRequest):
+    """Updates Developer Admin password in database"""
+    if not req.new_password.strip():
+        raise HTTPException(status_code=400, detail="Password cannot be empty")
+    conn = get_connection()
+    cursor = conn.cursor()
     try:
-        res = scrape_and_ingest_url(req.url)
-        return {"success": True, "message": f"Scraped & ingested '{req.url}' into RAG successfully!", "data": res}
+        cursor.execute("UPDATE users SET password = ? WHERE role = 'developer' OR email = 'dev@mathstutor.com'", (req.new_password.strip(),))
+        conn.commit()
+        conn.close()
+        return {"success": True, "message": "Developer Admin password updated successfully in Database!"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Web scraping failed: {str(e)}")
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"Failed to update password: {str(e)}")
 
 
 # 4. Main Chat API (Save to DB & Return Answer)

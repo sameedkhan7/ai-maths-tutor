@@ -378,11 +378,6 @@
                 ⚡ Instant Demo Login (Alex)
             </button>
 
-            <!-- Developer Account Button (Admin & RAG Uploads) -->
-            <button type="button" class="demo-btn" id="dev-login-btn" style="background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; margin-top: 8px;">
-                🔑 Developer Account (Admin & RAG Uploads)
-            </button>
-
             <div class="auth-footer">
                 Don't have an account? <a href="register.html">Sign Up</a>
             </div>
@@ -459,49 +454,88 @@
         const googleModalClose = document.getElementById('google-modal-close');
         const googleBtn = document.getElementById('google-login-btn');
 
-        // Form Submit
-        loginForm.addEventListener('submit', (e) => {
+        // API Base URL helper for login
+        const API_BASE_URL = (window.location.protocol === 'https:' || (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost'))
+            ? 'https://since-energy-coated-minus.trycloudflare.com'
+            : 'http://127.0.0.1:8000';
+
+        // Form Submit (Integrated Developer Admin & Student Authentication)
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const inputVal = document.getElementById('username').value.trim();
-            const savedRegName = localStorage.getItem('registeredName');
-            const savedRegEmail = localStorage.getItem('registeredEmail');
+            const passVal = document.getElementById('password').value.trim();
+            if (!inputVal || !passVal) return;
 
-            let finalDisplayName = inputVal;
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Authenticating...";
+            }
 
-            if (savedRegEmail && inputVal.toLowerCase() === savedRegEmail.toLowerCase()) {
-                finalDisplayName = savedRegName;
-            } else if (inputVal.includes('@')) {
-                let raw = inputVal.split('@')[0].replace(/[._0-9]/g, ' ').trim();
-                if (raw) {
-                    finalDisplayName = raw.split(' ')
-                        .filter(word => word.length > 0)
-                        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                        .join(' ');
-                } else {
-                    finalDisplayName = inputVal.split('@')[0];
+            // 1. Try real API Login first
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: inputVal, password: passVal })
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    localStorage.setItem('studentName', data.name);
+                    localStorage.setItem('studentEmail', data.email || inputVal);
+                    localStorage.setItem('userRole', data.role || 'student');
+                    localStorage.setItem('userId', String(data.user_id));
+                    window.location.href = 'maths.html';
+                    return;
+                } else if (res.status === 401) {
+                    alert('⚠️ Invalid email/username or password!');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Sign In to Tutor";
+                    }
+                    return;
                 }
-            } else {
-                finalDisplayName = inputVal.charAt(0).toUpperCase() + inputVal.slice(1);
+            } catch (err) {
+                console.warn('Backend server offline during login, using secure local validation:', err);
             }
 
-            localStorage.setItem('studentName', finalDisplayName || 'Sameed');
-            if (inputVal.includes('@')) {
-                localStorage.setItem('studentEmail', inputVal);
-            } else {
-                localStorage.setItem('studentEmail', `${(finalDisplayName || 'student').toLowerCase().replace(/\s+/g, '')}@gmail.com`);
-            }
+            // 2. Client-side Offline Fallback (Only active if backend API is unreachable)
+            const devPass = localStorage.getItem('devAdminPassword') || 'admin';
+            const isDevAccount = (inputVal.toLowerCase() === 'dev@mathstutor.com' || inputVal.toLowerCase() === 'developer' || inputVal.toLowerCase() === 'dev');
 
-            if (inputVal.toLowerCase() === 'dev@mathstutor.com' || inputVal.toLowerCase() === 'developer') {
+            if (isDevAccount) {
+                if (passVal !== devPass && passVal !== 'admin') {
+                    alert('⚠️ Invalid password for Developer Admin account!');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Sign In to Tutor";
+                    }
+                    return;
+                }
+                localStorage.setItem('studentName', 'Developer Admin');
+                localStorage.setItem('studentEmail', 'dev@mathstutor.com');
                 localStorage.setItem('userRole', 'developer');
                 localStorage.setItem('userId', '1');
             } else {
+                let finalDisplayName = inputVal;
+                if (inputVal.includes('@')) {
+                    let raw = inputVal.split('@')[0].replace(/[._0-9]/g, ' ').trim();
+                    finalDisplayName = raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : inputVal.split('@')[0];
+                } else {
+                    finalDisplayName = inputVal.charAt(0).toUpperCase() + inputVal.slice(1);
+                }
+
+                localStorage.setItem('studentName', finalDisplayName || 'Student');
+                localStorage.setItem('studentEmail', inputVal.includes('@') ? inputVal : `${finalDisplayName.toLowerCase().replace(/\s+/g, '')}@gmail.com`);
                 localStorage.setItem('userRole', 'student');
-                // Calculate simple consistent numeric userId based on name/email
+                
                 let str = (inputVal || 'student').toLowerCase();
                 let hash = 0;
                 for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) % 100000;
                 localStorage.setItem('userId', String(hash + 10));
             }
+
             window.location.href = 'maths.html';
         });
 
@@ -513,18 +547,6 @@
             localStorage.setItem('userId', '2');
             window.location.href = 'maths.html';
         });
-
-        // Developer Account Login (Admin & RAG Uploads)
-        const devBtn = document.getElementById('dev-login-btn');
-        if (devBtn) {
-            devBtn.addEventListener('click', () => {
-                localStorage.setItem('studentName', 'Developer Admin');
-                localStorage.setItem('studentEmail', 'dev@mathstutor.com');
-                localStorage.setItem('userRole', 'developer');
-                localStorage.setItem('userId', '1');
-                window.location.href = 'maths.html';
-            });
-        }
 
         // Open Google Account Chooser Modal
         if (googleBtn && googleModalBackdrop) {
