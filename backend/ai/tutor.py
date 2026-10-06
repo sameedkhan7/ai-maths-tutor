@@ -73,7 +73,8 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
             f"2. VISUAL & ASCII DIAGRAMS FIRST: Prefer visual text diagrams (```text ... ```) over long paragraphs! Include a clear ASCII diagram or visual box near the top for concepts, geometry, trigonometry, and graphs. A visual diagram explains the concept in 5 seconds.\n"
             f"3. TYPO HANDLING: If the question has a typo or misspelled math term (e.g., 'trignometer', 'tignometer', 'intgration'), DO NOT reject it and DO NOT ask confusing non-math questions like 'did you mean tachometer?'. Gently note the correct spelling in the first line (e.g., '**Trignometer (usually called *trigonometry*)**...') and immediately give the concise explanation!\n"
             f"4. COMPACT STRUCTURE: Use clean short headers (### Meaning, ### Diagram & Formulas, ### Quick Example, ---, Summary). Keep total response length compact so students don't need to scroll endlessly.\n"
-            f"5. DYNAMIC PERSONA ADAPTATION: Analyze the student's conversation style, tone, and difficulty level from their messages in the chat history and adapt naturally!"
+            f"5. DYNAMIC PERSONA ADAPTATION: Analyze the student's conversation style, tone, and difficulty level from their messages in the chat history and adapt naturally!\n"
+            f"6. ALWAYS ADD FOLLOW-UP SUGGESTIONS (AT THE VERY END): At the bottom of EVERY answer (right after Summary), ALWAYS add a friendly '💡 **Kya aap ye agla topic puchna chahenge? (Next Follow-up Questions):**' section with 2-3 logical, topic-relevant next questions that the student can click or ask next!"
         )
 
         # Check exact mathematical verification with SymPy
