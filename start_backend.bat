@@ -6,11 +6,18 @@ echo         AI MATHS TUTOR - BACKEND LAUNCHER
 echo ========================================================
 echo.
 
+:: Set PYTHONPATH so modules resolve cleanly
+set PYTHONPATH=C:\Users\SK\OneDrive\Desktop\maths project
+
 :: Move to backend folder
-cd /d "%~dp0backend"
+if exist "%~dp0backend" (
+    cd /d "%~dp0backend"
+) else (
+    cd /d "C:\Users\SK\OneDrive\Desktop\maths project\backend"
+)
 
 echo [1/2] Checking Python packages...
-python -m pip install -r requirements.txt --quiet
+python -m pip install -r requirements.txt groq python-dotenv --quiet
 
 echo.
 echo [2/2] Starting FastAPI Server on http://127.0.0.1:8000 ...

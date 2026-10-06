@@ -121,5 +121,76 @@ def ingest_all():
     print("[OK] Fallback chunk store ready.")
     return chunks
 
+import re
+import urllib.request
+from bs4 import BeautifulSoup
+
+def ingest_pdf_bytes(file_bytes: bytes, filename: str):
+    """Saves PDF file bytes and updates RAG vector database"""
+    RAW_PDFS_DIR.mkdir(parents=True, exist_ok=True)
+    pdf_path = RAW_PDFS_DIR / filename
+    with open(pdf_path, "wb") as f:
+        f.write(file_bytes)
+    
+    ingest_all()
+    return {"filename": filename, "size_bytes": len(file_bytes)}
+
+def ingest_text_content(title: str, content: str):
+    """Saves text content and updates RAG vector database"""
+    SAMPLE_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    slug = re.sub(r'[^a-zA-Z0-9]', '_', title)[:30]
+    filename = f"note_{slug}.txt"
+    file_path = SAMPLE_DOCS_DIR / filename
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(f"Title: {title}\n\n{content}")
+    
+    ingest_all()
+    return {"filename": filename, "char_count": len(content)}
+
+def scrape_and_ingest_url(url: str):
+    """Scrapes text content from web URL and ingests into RAG vector database"""
+    SAMPLE_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    req = urllib.request.Request(
+        url, 
+        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+    )
+    with urllib.request.urlopen(req, timeout=12) as response:
+        html = response.read().decode('utf-8', errors='ignore')
+        
+    soup = BeautifulSoup(html, 'html.parser')
+    for elem in soup(["script", "style", "nav", "footer", "header", "svg"]):
+        elem.extract()
+        
+    text = soup.get_text(separator=' ')
+    clean_lines = [line.strip() for line in text.splitlines() if line.strip()]
+    clean_text = "\n".join(clean_lines)
+    
+    slug = re.sub(r'[^a-zA-Z0-9]', '_', url.replace('https://', '').replace('http://', ''))[:35]
+    filename = f"scraped_{slug}.txt"
+    file_path = SAMPLE_DOCS_DIR / filename
+    
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(f"Source URL: {url}\n\n{clean_text}")
+        
+    ingest_all()
+    return {"filename": filename, "source": url, "char_count": len(clean_text)}
+
+def get_rag_stats():
+    """Returns real-time statistics of RAG knowledge base"""
+    SAMPLE_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    RAW_PDFS_DIR.mkdir(parents=True, exist_ok=True)
+    text_files = list(SAMPLE_DOCS_DIR.glob("*.txt"))
+    pdf_files = list(RAW_PDFS_DIR.glob("*.pdf"))
+    docs = load_documents()
+    chunks = split_text_into_chunks(docs)
+    return {
+        "pdf_count": len(pdf_files),
+        "text_count": len(text_files),
+        "total_documents": len(docs),
+        "total_chunks": len(chunks),
+        "pdfs": [p.name for p in pdf_files],
+        "texts": [t.name for t in text_files]
+    }
+
 if __name__ == "__main__":
     ingest_all()

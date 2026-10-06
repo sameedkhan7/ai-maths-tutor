@@ -80,6 +80,12 @@
                     <span class="popup-item-text">Settings</span>
                 </div>
 
+                <!-- Developer RAG Control Center (PDF / Text / Web Scraping) -->
+                <div class="popup-item" id="popup-dev-item" style="color: #c084fc;">
+                    <span class="popup-item-icon">🚀</span>
+                    <span class="popup-item-text">Dev RAG Control Panel</span>
+                </div>
+
                 <div class="popup-divider"></div>
 
                 <!-- Logout -->
@@ -453,6 +459,125 @@
         </div>
     </div>
 
-    <script src="script.js?v=30"></script>
+    <!-- ========================================== -->
+    <!-- ⚡ DEVELOPER RAG CONTROL CENTER MODAL       -->
+    <!-- ========================================== -->
+    <div id="dev-modal-backdrop" class="modal-backdrop settings-backdrop" style="display: none;">
+        <div class="settings-card dev-settings-card" style="max-width: 680px; width: 92%;">
+            <div class="settings-header" style="border-bottom: 1px solid #334155;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 22px;">⚡</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 16px; color: #c084fc;">Developer RAG Knowledge Base Center</h3>
+                        <span style="font-size: 11px; color: #94a3b8;">Upload PDFs, text notes & web scrape into RAG Vector DB</span>
+                    </div>
+                </div>
+                <button type="button" id="dev-modal-close" class="settings-close-btn">&times;</button>
+            </div>
+
+            <div class="settings-body" style="display: flex; gap: 0; min-height: 420px; padding: 0;">
+                <!-- Dev Left Sidebar -->
+                <div class="settings-sidebar" style="width: 180px; border-right: 1px solid #334155; padding: 12px 8px; background: #0f172a;">
+                    <div class="settings-tab-btn dev-tab-btn active" data-dev-tab="dev-tab-pdf" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                        <span>📄</span> PDF Upload
+                    </div>
+                    <div class="settings-tab-btn dev-tab-btn" data-dev-tab="dev-tab-text" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                        <span>📝</span> Text Notes
+                    </div>
+                    <div class="settings-tab-btn dev-tab-btn" data-dev-tab="dev-tab-scrape" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                        <span>🌐</span> Web Scraper
+                    </div>
+                    <div class="settings-tab-btn dev-tab-btn" data-dev-tab="dev-tab-stats" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                        <span>📊</span> RAG Stats
+                    </div>
+                </div>
+
+                <!-- Dev Right Content Area -->
+                <div class="settings-content" style="flex: 1; padding: 20px; background: #1e293b; overflow-y: auto;">
+                    <!-- Alert Status Banner -->
+                    <div id="dev-status-alert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+                    <!-- Dev Tab 1: PDF Upload -->
+                    <div id="dev-tab-pdf" class="dev-tab-pane active">
+                        <h4 style="margin: 0 0 6px 0; color: #f8fafc; font-size: 15px;">Upload PDF to RAG Vector DB</h4>
+                        <p style="font-size: 12px; color: #94a3b8; margin: 0 0 16px 0;">Upload NCERT math chapters, question banks or formula sheets in PDF format. The backend will parse, chunk, and index them automatically into ChromaDB.</p>
+                        
+                        <form id="dev-pdf-form" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="border: 2px dashed #475569; border-radius: 12px; padding: 28px 20px; text-align: center; background: #0f172a;">
+                                <span style="font-size: 36px; display: block; margin-bottom: 8px;">📄</span>
+                                <input type="file" id="dev-pdf-file" accept=".pdf" required style="display: none;">
+                                <label for="dev-pdf-file" style="cursor: pointer; background: #6366f1; color: white; padding: 9px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; display: inline-block;">Choose PDF File</label>
+                                <div id="dev-pdf-filename" style="margin-top: 10px; font-size: 12px; color: #cbd5e1;">No file selected</div>
+                            </div>
+                            <button type="submit" id="dev-pdf-submit-btn" style="background: #a855f7; color: white; border: none; border-radius: 8px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">⚡ Upload & Ingest PDF into RAG</button>
+                        </form>
+                    </div>
+
+                    <!-- Dev Tab 2: Text Notes -->
+                    <div id="dev-tab-text" class="dev-tab-pane" style="display: none;">
+                        <h4 style="margin: 0 0 6px 0; color: #f8fafc; font-size: 15px;">Ingest Custom Text Notes & Files</h4>
+                        <p style="font-size: 12px; color: #94a3b8; margin: 0 0 12px 0;">Upload a .txt / .md file from your computer OR paste text manually below to add to RAG database.</p>
+                        
+                        <!-- Quick .TXT File Upload Box -->
+                        <div style="background: #0f172a; border: 1px dashed #6366f1; border-radius: 8px; padding: 10px 14px; text-align: left; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 16px;">📁</span>
+                                <div>
+                                    <span style="font-size: 12px; color: #cbd5e1; font-weight: 600;">Choose .TXT / .MD File:</span>
+                                    <div id="dev-txt-filename" style="font-size: 11px; color: #94a3b8;">No file chosen</div>
+                                </div>
+                            </div>
+                            <input type="file" id="dev-txt-file" accept=".txt,.md,.text,.csv" style="display: none;">
+                            <label for="dev-txt-file" style="cursor: pointer; background: #312e81; color: #c7d2fe; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;">Browse Text File</label>
+                        </div>
+
+                        <form id="dev-text-form" style="display: flex; flex-direction: column; gap: 10px;">
+                            <input type="text" id="dev-text-title" placeholder="Document Title (e.g. Class 11 Derivatives Summary)" required style="padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; outline: none;">
+                            <textarea id="dev-text-content" rows="6" placeholder="Paste or type text content here (or select a .txt file above)..." required style="padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; font-family: inherit; resize: vertical; outline: none;"></textarea>
+                            <button type="submit" id="dev-text-submit-btn" style="background: #a855f7; color: white; border: none; border-radius: 8px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer;">Save & Ingest Text Document</button>
+                        </form>
+                    </div>
+
+                    <!-- Dev Tab 3: Web Scraper -->
+                    <div id="dev-tab-scrape" class="dev-tab-pane" style="display: none;">
+                        <h4 style="margin: 0 0 6px 0; color: #f8fafc; font-size: 15px;">Web Scraper for RAG Knowledge</h4>
+                        <p style="font-size: 12px; color: #94a3b8; margin: 0 0 14px 0;">Scrape any online math article or website URL and automatically add the extracted text into RAG Vector DB.</p>
+                        
+                        <form id="dev-scrape-form" style="display: flex; flex-direction: column; gap: 12px;">
+                            <input type="url" id="dev-scrape-url" placeholder="https://en.wikipedia.org/wiki/Differential_calculus" required style="padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; outline: none;">
+                            <button type="submit" id="dev-scrape-submit-btn" style="background: #a855f7; color: white; border: none; border-radius: 8px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer;">🌐 Scrape Web Page & Ingest</button>
+                        </form>
+                    </div>
+
+                    <!-- Dev Tab 4: RAG Stats -->
+                    <div id="dev-tab-stats" class="dev-tab-pane" style="display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h4 style="margin: 0; color: #f8fafc; font-size: 15px;">RAG Vector Database Overview</h4>
+                            <button type="button" id="dev-refresh-stats-btn" style="background: #334155; color: #cbd5e1; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;">🔄 Refresh</button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
+                            <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; text-align: center;">
+                                <span style="font-size: 22px; font-weight: bold; color: #c084fc;" id="rag-stat-documents">0</span>
+                                <div style="font-size: 11px; color: #94a3b8;">Total Documents</div>
+                            </div>
+                            <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; text-align: center;">
+                                <span style="font-size: 22px; font-weight: bold; color: #38bdf8;" id="rag-stat-chunks">0</span>
+                                <div style="font-size: 11px; color: #94a3b8;">Vector Chunks</div>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 12px; color: #cbd5e1; font-weight: 600; margin-bottom: 6px;">Indexed Text Documents:</div>
+                        <ul id="rag-text-list" style="max-height: 90px; overflow-y: auto; background: #0f172a; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; font-size: 11px; color: #94a3b8; margin: 0 0 12px 0; list-style: none;"></ul>
+
+                        <div style="font-size: 12px; color: #cbd5e1; font-weight: 600; margin-bottom: 6px;">Indexed PDF Documents:</div>
+                        <ul id="rag-pdf-list" style="max-height: 90px; overflow-y: auto; background: #0f172a; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; font-size: 11px; color: #94a3b8; margin: 0; list-style: none;"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=40"></script>
 </body>
 </html>

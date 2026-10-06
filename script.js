@@ -9,7 +9,7 @@ let allChatsCache = [];
 
 // 🌐 Dynamic API URL (Automatically switches to public HTTPS tunnel on GitHub Pages / Phone)
 const API_BASE_URL = (window.location.protocol === 'https:' || (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost'))
-    ? 'https://aqua-gained-presenting-movies.trycloudflare.com'
+    ? 'https://since-energy-coated-minus.trycloudflare.com'
     : 'http://127.0.0.1:8000';
 
 // 0. Student Profile Initialization (ChatGPT & Claude Style)
@@ -249,7 +249,8 @@ function submitUserMessage() {
             style: currentStyle,
             language: selectedLanguage,
             model: currentModel,
-            chat_id: currentChatId
+            chat_id: currentChatId,
+            user_id: getUserId()
         })
     })
     .then(response => response.json())
@@ -485,10 +486,26 @@ function renderWelcomeHero() {
     bindTopicCards();
 }
 
-// LocalStorage helpers for chat caching
+// User Identification Helper (Guarantees every account has a unique user_id)
+function getUserId() {
+    const savedId = localStorage.getItem('userId');
+    if (savedId) return parseInt(savedId);
+    const email = (localStorage.getItem('studentEmail') || 'sameedkhan7@gmail.com').toLowerCase().trim();
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) {
+        hash = (hash << 5) - hash + email.charCodeAt(i);
+        hash |= 0;
+    }
+    const derivedId = Math.abs(hash) % 1000000 + 1;
+    localStorage.setItem('userId', String(derivedId));
+    return derivedId;
+}
+
+// LocalStorage helpers for per-user chat caching
 function getCachedChats() {
     try {
-        const raw = localStorage.getItem('cachedChats');
+        const uid = getUserId();
+        const raw = localStorage.getItem(`cachedChats_${uid}`);
         return raw ? JSON.parse(raw) : [];
     } catch (e) {
         return [];
@@ -497,7 +514,8 @@ function getCachedChats() {
 
 function saveCachedChats(chats) {
     try {
-        localStorage.setItem('cachedChats', JSON.stringify(chats));
+        const uid = getUserId();
+        localStorage.setItem(`cachedChats_${uid}`, JSON.stringify(chats));
     } catch (e) {
         console.warn('Could not save chats to localStorage', e);
     }
@@ -558,10 +576,11 @@ function renderSidebarChats(chats) {
     }
 }
 
-// Fetch all chats and render in Pinned and Recents
+// Fetch all chats and render in Pinned and Recents (Filtered per User ID)
 async function fetchAndRenderSidebarChats() {
     try {
-        const res = await fetch(`${API_BASE_URL}/api/chats`);
+        const uid = getUserId();
+        const res = await fetch(`${API_BASE_URL}/api/chats?user_id=${uid}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         if (data && Array.isArray(data.chats)) {
@@ -913,6 +932,8 @@ if (popupLogoutItem) {
     popupLogoutItem.addEventListener('click', () => {
         localStorage.removeItem('studentName');
         localStorage.removeItem('studentEmail');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
         window.location.href = 'login.html';
     });
 }
@@ -1241,4 +1262,326 @@ if (sidebarToggleBtn) {
             closeMobileSidebar();
         }
     });
-}
+}
+
+// ===================================================
+// ⚡ DEVELOPER RAG CONTROL CENTER & ROLE MANAGEMENT
+// ===================================================
+const userRole = localStorage.getItem('userRole') || 'student';
+
+// Developer Profile Badge Customization
+if (userRole === 'developer') {
+    if (userPlanTagEl) {
+        userPlanTagEl.innerHTML = `⚡ <strong style="color:#c084fc;">Developer Admin</strong> · RAG Manager`;
+    }
+    const popupBadgeEl = document.getElementById('popup-plan-badge');
+    if (popupBadgeEl) {
+        popupBadgeEl.innerHTML = `⚡ Developer Admin · Full RAG Access`;
+        popupBadgeEl.style.color = `#c084fc`;
+    }
+}
+
+// Dev Modal Controls
+const devModalBackdrop = document.getElementById('dev-modal-backdrop');
+const devModalCloseBtn = document.getElementById('dev-modal-close');
+const popupDevItem = document.getElementById('popup-dev-item');
+
+function openDevModal() {
+    if (devModalBackdrop) {
+        devModalBackdrop.style.display = 'flex';
+        fetchRagStats();
+    }
+}
+
+function closeDevModal() {
+    if (devModalBackdrop) {
+        devModalBackdrop.style.display = 'none';
+    }
+}
+
+if (popupDevItem) {
+    popupDevItem.addEventListener('click', () => {
+        if (profilePopupMenu) profilePopupMenu.style.display = 'none';
+        openDevModal();
+    });
+}
+
+if (devModalCloseBtn) {
+    devModalCloseBtn.addEventListener('click', closeDevModal);
+}
+
+if (devModalBackdrop) {
+    devModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === devModalBackdrop) closeDevModal();
+    });
+}
+
+// Keyboard Shortcut: Ctrl + Shift + D opens Dev Modal
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+        e.preventDefault();
+        openDevModal();
+    }
+});
+
+// Dev Tab Switcher
+const devTabBtns = document.querySelectorAll('.dev-tab-btn');
+const devTabPanes = document.querySelectorAll('.dev-tab-pane');
+
+devTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-dev-tab');
+        
+        devTabBtns.forEach(b => {
+            b.classList.remove('active');
+            b.style.background = 'transparent';
+            b.style.color = '#cbd5e1';
+        });
+        devTabPanes.forEach(p => p.style.display = 'none');
+
+        btn.classList.add('active');
+        btn.style.background = '#1e293b';
+        btn.style.color = '#c084fc';
+
+        const pane = document.getElementById(targetTab);
+        if (pane) pane.style.display = 'block';
+
+        if (targetTab === 'dev-tab-stats') {
+            fetchRagStats();
+        }
+    });
+});
+
+// Dev Status Alert Helper
+function showDevAlert(msg, type = 'success') {
+    const alertEl = document.getElementById('dev-status-alert');
+    if (!alertEl) return;
+    alertEl.style.display = 'block';
+    alertEl.innerText = msg;
+    if (type === 'success') {
+        alertEl.style.background = 'rgba(34, 197, 94, 0.15)';
+        alertEl.style.color = '#4ade80';
+        alertEl.style.border = '1px solid #22c55e';
+    } else {
+        alertEl.style.background = 'rgba(239, 68, 68, 0.15)';
+        alertEl.style.color = '#f87171';
+        alertEl.style.border = '1px solid #ef4444';
+    }
+}
+
+// File Name Display on Selection
+const pdfFileInput = document.getElementById('dev-pdf-file');
+const pdfFilenameDisplay = document.getElementById('dev-pdf-filename');
+
+if (pdfFileInput && pdfFilenameDisplay) {
+    pdfFileInput.addEventListener('change', () => {
+        if (pdfFileInput.files.length > 0) {
+            pdfFilenameDisplay.innerText = `Selected: ${pdfFileInput.files[0].name} (${(pdfFileInput.files[0].size / 1024).toFixed(1)} KB)`;
+            pdfFilenameDisplay.style.color = '#a855f7';
+        } else {
+            pdfFilenameDisplay.innerText = 'No file selected';
+            pdfFilenameDisplay.style.color = '#cbd5e1';
+        }
+    });
+}
+
+// 1. PDF Upload Form Submit
+const devPdfForm = document.getElementById('dev-pdf-form');
+const devPdfBtn = document.getElementById('dev-pdf-submit-btn');
+
+if (devPdfForm) {
+    devPdfForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!pdfFileInput.files.length) {
+            showDevAlert('Please select a PDF file first!', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', pdfFileInput.files[0]);
+
+        if (devPdfBtn) {
+            devPdfBtn.disabled = true;
+            devPdfBtn.innerText = '⌛ Ingesting PDF into Chroma Vector DB...';
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/dev/upload-pdf`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showDevAlert(`🎉 ${data.message}`, 'success');
+                devPdfForm.reset();
+                if (pdfFilenameDisplay) pdfFilenameDisplay.innerText = 'No file selected';
+            } else {
+                showDevAlert(`⚠️ Upload failed: ${data.detail || data.error}`, 'error');
+            }
+        } catch (err) {
+            showDevAlert(`⚠️ Backend Connection Error: ${err.message}`, 'error');
+        } finally {
+            if (devPdfBtn) {
+                devPdfBtn.disabled = false;
+                devPdfBtn.innerText = '⚡ Upload & Ingest PDF into RAG';
+            }
+        }
+    });
+}
+
+// .TXT / .MD File Selection & Auto-Reading
+const txtFileInput = document.getElementById('dev-txt-file');
+const txtFilenameDisplay = document.getElementById('dev-txt-filename');
+const textTitleInput = document.getElementById('dev-text-title');
+const textContentInput = document.getElementById('dev-text-content');
+
+if (txtFileInput) {
+    txtFileInput.addEventListener('change', () => {
+        if (txtFileInput.files.length > 0) {
+            const file = txtFileInput.files[0];
+            if (txtFilenameDisplay) {
+                txtFilenameDisplay.innerText = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                txtFilenameDisplay.style.color = '#a5b4fc';
+            }
+            
+            // Auto-fill title with clean filename
+            if (textTitleInput) {
+                const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '').replace(/[_\-]/g, ' ');
+                textTitleInput.value = nameWithoutExt.charAt(0).toUpperCase() + nameWithoutExt.slice(1);
+            }
+
+            // Read text file contents into textarea using FileReader
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (textContentInput) {
+                    textContentInput.value = e.target.result;
+                    textContentInput.focus();
+                }
+            };
+            reader.readAsText(file);
+        } else {
+            if (txtFilenameDisplay) {
+                txtFilenameDisplay.innerText = 'No file chosen';
+                txtFilenameDisplay.style.color = '#94a3b8';
+            }
+        }
+    });
+}
+
+// 2. Text Notes Form Submit
+const devTextForm = document.getElementById('dev-text-form');
+const devTextBtn = document.getElementById('dev-text-submit-btn');
+
+if (devTextForm) {
+    devTextForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('dev-text-title').value.trim();
+        const content = document.getElementById('dev-text-content').value.trim();
+
+        if (!title || !content) return;
+
+        if (devTextBtn) {
+            devTextBtn.disabled = true;
+            devTextBtn.innerText = '⌛ Ingesting text into RAG...';
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/dev/upload-text`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showDevAlert(`🎉 ${data.message}`, 'success');
+                devTextForm.reset();
+            } else {
+                showDevAlert(`⚠️ Ingestion failed: ${data.detail || data.error}`, 'error');
+            }
+        } catch (err) {
+            showDevAlert(`⚠️ Backend Connection Error: ${err.message}`, 'error');
+        } finally {
+            if (devTextBtn) {
+                devTextBtn.disabled = false;
+                devTextBtn.innerText = 'Save & Ingest Text Document';
+            }
+        }
+    });
+}
+
+// 3. Web Scraper Form Submit
+const devScrapeForm = document.getElementById('dev-scrape-form');
+const devScrapeBtn = document.getElementById('dev-scrape-submit-btn');
+
+if (devScrapeForm) {
+    devScrapeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const url = document.getElementById('dev-scrape-url').value.trim();
+        if (!url) return;
+
+        if (devScrapeBtn) {
+            devScrapeBtn.disabled = true;
+            devScrapeBtn.innerText = '🌐 Scraping web page & chunking...';
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/dev/scrape-url`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showDevAlert(`🎉 ${data.message}`, 'success');
+                devScrapeForm.reset();
+            } else {
+                showDevAlert(`⚠️ Scraping failed: ${data.detail || data.error}`, 'error');
+            }
+        } catch (err) {
+            showDevAlert(`⚠️ Backend Connection Error: ${err.message}`, 'error');
+        } finally {
+            if (devScrapeBtn) {
+                devScrapeBtn.disabled = false;
+                devScrapeBtn.innerText = '🌐 Scrape Web Page & Ingest';
+            }
+        }
+    });
+}
+
+// 4. Fetch RAG Realtime Stats
+async function fetchRagStats() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/dev/rag-stats`);
+        const data = await res.json();
+        if (data.success && data.stats) {
+            const stats = data.stats;
+            const docEl = document.getElementById('rag-stat-documents');
+            const chunkEl = document.getElementById('rag-stat-chunks');
+            const textListEl = document.getElementById('rag-text-list');
+            const pdfListEl = document.getElementById('rag-pdf-list');
+
+            if (docEl) docEl.innerText = stats.total_documents;
+            if (chunkEl) chunkEl.innerText = stats.total_chunks;
+
+            if (textListEl) {
+                textListEl.innerHTML = stats.texts.length > 0 
+                    ? stats.texts.map(t => `<li style="padding: 2px 0;">📄 ${t}</li>`).join('')
+                    : `<li style="color:#64748b;">No text files ingested yet</li>`;
+            }
+
+            if (pdfListEl) {
+                pdfListEl.innerHTML = stats.pdfs.length > 0 
+                    ? stats.pdfs.map(p => `<li style="padding: 2px 0;">📕 ${p}</li>`).join('')
+                    : `<li style="color:#64748b;">No PDF files uploaded yet</li>`;
+            }
+        }
+    } catch (err) {
+        console.warn('Could not load RAG stats:', err);
+    }
+}
+
+const refreshStatsBtn = document.getElementById('dev-refresh-stats-btn');
+if (refreshStatsBtn) {
+    refreshStatsBtn.addEventListener('click', fetchRagStats);
+}
+

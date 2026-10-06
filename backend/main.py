@@ -39,6 +39,7 @@ class ChatRequest(BaseModel):
     model: str = "llama3.3"
     language: str = "hinglish"
     chat_id: Optional[int] = None
+    user_id: Optional[int] = 1
 
 class RegisterRequest(BaseModel):
     name: str
@@ -71,17 +72,84 @@ def register(req: RegisterRequest):
     finally:
         conn.close()
 
-# 3. Student Login API
+# 3. Student / Developer Login API
 @app.post("/api/login")
 def login(req: LoginRequest):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, grade FROM users WHERE email=? AND password=?", (req.email, req.password))
+    cursor.execute("SELECT id, name, grade, role FROM users WHERE email=? AND password=?", (req.email, req.password))
     user = cursor.fetchone()
     conn.close()
     if user:
-        return {"success": True, "user_id": user["id"], "name": user["name"], "grade": user["grade"]}
+        return {
+            "success": True, 
+            "user_id": user["id"], 
+            "name": user["name"], 
+            "grade": user["grade"],
+            "role": user["role"] if "role" in user.keys() else "student"
+        }
     raise HTTPException(status_code=401, detail="Invalid email or password")
+
+# ==========================================
+# DEVELOPER / ADMIN CONTROL PANEL ENDPOINTS
+# ==========================================
+from fastapi import UploadFile, File
+
+try:
+    from backend.rag.ingest import ingest_pdf_bytes, ingest_text_content, scrape_and_ingest_url, get_rag_stats
+except ImportError:
+    from rag.ingest import ingest_pdf_bytes, ingest_text_content, scrape_and_ingest_url, get_rag_stats
+
+class TextIngestRequest(BaseModel):
+    title: str
+    content: str
+
+class ScrapeRequest(BaseModel):
+    url: str
+
+@app.get("/api/dev/rag-stats")
+def dev_rag_stats():
+    """Returns RAG Knowledge Base Stats for Developer Dashboard"""
+    try:
+        stats = get_rag_stats()
+        return {"success": True, "stats": stats}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/dev/upload-pdf")
+async def dev_upload_pdf(file: UploadFile = File(...)):
+    """Uploads a PDF file and ingests it into RAG vector store"""
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+    try:
+        contents = await file.read()
+        res = ingest_pdf_bytes(contents, file.filename)
+        return {"success": True, "message": f"PDF '{file.filename}' ingested into RAG successfully!", "data": res}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF ingestion failed: {str(e)}")
+
+@app.post("/api/dev/upload-text")
+def dev_upload_text(req: TextIngestRequest):
+    """Ingests custom text notes/curriculum into RAG vector store"""
+    if not req.content.strip():
+        raise HTTPException(status_code=400, detail="Content cannot be empty")
+    try:
+        res = ingest_text_content(req.title, req.content)
+        return {"success": True, "message": f"Text document '{req.title}' ingested into RAG successfully!", "data": res}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Text ingestion failed: {str(e)}")
+
+@app.post("/api/dev/scrape-url")
+def dev_scrape_url(req: ScrapeRequest):
+    """Scrapes text content from any website URL and ingests into RAG vector store"""
+    if not req.url.startswith("http"):
+        raise HTTPException(status_code=400, detail="URL must start with http:// or https://")
+    try:
+        res = scrape_and_ingest_url(req.url)
+        return {"success": True, "message": f"Scraped & ingested '{req.url}' into RAG successfully!", "data": res}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Web scraping failed: {str(e)}")
+
 
 # 4. Main Chat API (Save to DB & Return Answer)
 @app.post("/api/chat")
@@ -96,7 +164,8 @@ def chat_with_tutor(request: ChatRequest):
     # Agar naya chat session hai toh chats table me title banao
     if not chat_id:
         title = q[:35] + ("..." if len(q) > 35 else "")
-        cursor.execute("INSERT INTO chats (title, is_pinned) VALUES (?, 0)", (title,))
+        uid = request.user_id if request.user_id else 1
+        cursor.execute("INSERT INTO chats (user_id, title, is_pinned) VALUES (?, ?, 0)", (uid, title))
         chat_id = cursor.lastrowid
 
     # Fetch recent chat history from DB for this chat_id if available
@@ -144,12 +213,13 @@ def chat_with_tutor(request: ChatRequest):
         "reply": reply
     }
 
-# 5. Get All Chats for Sidebar
+# 5. Get All Chats for Sidebar (Filtered per user_id)
 @app.get("/api/chats")
-def get_chats():
+def get_chats(user_id: Optional[int] = 1):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, title, is_pinned, created_at FROM chats ORDER BY created_at DESC")
+    target_uid = user_id if user_id else 1
+    cursor.execute("SELECT id, title, is_pinned, created_at FROM chats WHERE user_id = ? ORDER BY created_at DESC", (target_uid,))
     chats = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return {"chats": chats}
@@ -185,16 +255,20 @@ def delete_chat(chat_id: int):
     conn.close()
     return {"success": True, "deleted_chat_id": chat_id}
 
-# 9. Clear All Chats
+# 9. Clear All Chats for a specific user
 @app.delete("/api/chats")
-def clear_all_chats():
+def clear_all_chats(user_id: Optional[int] = None):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM messages")
-    cursor.execute("DELETE FROM chats")
+    if user_id:
+        cursor.execute("DELETE FROM messages WHERE chat_id IN (SELECT id FROM chats WHERE user_id = ?)", (user_id,))
+        cursor.execute("DELETE FROM chats WHERE user_id = ?", (user_id,))
+    else:
+        cursor.execute("DELETE FROM messages")
+        cursor.execute("DELETE FROM chats")
     conn.commit()
     conn.close()
-    return {"success": True, "message": "All chats cleared"}
+    return {"success": True, "message": "Chats cleared"}
 
 # 10. Rename Chat Title
 @app.put("/api/chats/{chat_id}/title")

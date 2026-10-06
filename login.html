@@ -378,6 +378,11 @@
                 ⚡ Instant Demo Login (Alex)
             </button>
 
+            <!-- Developer Account Button (Admin & RAG Uploads) -->
+            <button type="button" class="demo-btn" id="dev-login-btn" style="background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; margin-top: 8px;">
+                🔑 Developer Account (Admin & RAG Uploads)
+            </button>
+
             <div class="auth-footer">
                 Don't have an account? <a href="register.html">Sign Up</a>
             </div>
@@ -485,6 +490,18 @@
             } else {
                 localStorage.setItem('studentEmail', `${(finalDisplayName || 'student').toLowerCase().replace(/\s+/g, '')}@gmail.com`);
             }
+
+            if (inputVal.toLowerCase() === 'dev@mathstutor.com' || inputVal.toLowerCase() === 'developer') {
+                localStorage.setItem('userRole', 'developer');
+                localStorage.setItem('userId', '1');
+            } else {
+                localStorage.setItem('userRole', 'student');
+                // Calculate simple consistent numeric userId based on name/email
+                let str = (inputVal || 'student').toLowerCase();
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) % 100000;
+                localStorage.setItem('userId', String(hash + 10));
+            }
             window.location.href = 'maths.html';
         });
 
@@ -492,8 +509,22 @@
         demoBtn.addEventListener('click', () => {
             localStorage.setItem('studentName', 'Alex (Student)');
             localStorage.setItem('studentEmail', 'alex.student@ncert.ac.in');
+            localStorage.setItem('userRole', 'student');
+            localStorage.setItem('userId', '2');
             window.location.href = 'maths.html';
         });
+
+        // Developer Account Login (Admin & RAG Uploads)
+        const devBtn = document.getElementById('dev-login-btn');
+        if (devBtn) {
+            devBtn.addEventListener('click', () => {
+                localStorage.setItem('studentName', 'Developer Admin');
+                localStorage.setItem('studentEmail', 'dev@mathstutor.com');
+                localStorage.setItem('userRole', 'developer');
+                localStorage.setItem('userId', '1');
+                window.location.href = 'maths.html';
+            });
+        }
 
         // Open Google Account Chooser Modal
         if (googleBtn && googleModalBackdrop) {
