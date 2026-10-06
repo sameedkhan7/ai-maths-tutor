@@ -61,13 +61,17 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
         else:
             lang_rule = f"RESPONSE LANGUAGE: {req.language}. Write explanations in clear, encouraging English."
 
-        # Add style and question type information to system prompt
+        # Add style, question type, and typo/formatting instructions to system prompt
         system_prompt = (
             f"{MASTER_SYSTEM_PROMPT}\n\n"
             f"CURRENT QUESTION TYPE: {question_type}\n"
             f"EXPLANATION STYLE: {explanation_style}\n"
             f"STUDENT LEVEL: {req.student_level}\n"
-            f"{lang_rule}"
+            f"{lang_rule}\n\n"
+            f"IMPORTANT RESPONSE RULES:\n"
+            f"1. TYPO HANDLING: If the question has a typo or misspelled math term (e.g., 'trignometer', 'tignometer', 'intgration'), DO NOT reject it and DO NOT ask confusing non-math questions like 'did you mean tachometer?'. Gently note the correct spelling in the first line (e.g., '**Trignometer (usually called *trigonometry*)**...') and immediately give the full explanation!\n"
+            f"2. FORMATTING: Use clean Markdown headers (### What it does, ### Core Formulas, ### Why it's useful, ### Simple Example, ---, Summary). Use fenced code blocks (```text ... ```) for fraction ratios or ASCII diagrams so formulas stay perfectly aligned.\n"
+            f"3. DIAGRAMS: If asked 'with diagram' or for geometry/trigonometry, ALWAYS draw a clear ASCII text diagram inside a fenced code block followed by a Markdown table explaining each part."
         )
 
         # Check exact mathematical verification with SymPy
