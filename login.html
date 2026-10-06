@@ -561,6 +561,7 @@
             localStorage.setItem('studentName', name);
             localStorage.setItem('studentEmail', email);
             localStorage.setItem('authProvider', 'google');
+            localStorage.setItem('userRole', email.toLowerCase() === 'dev@mathstutor.com' ? 'developer' : 'student');
 
             setTimeout(() => {
                 window.location.href = 'maths.html';

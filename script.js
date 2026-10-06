@@ -1268,9 +1268,13 @@ if (sidebarToggleBtn) {
 // ⚡ DEVELOPER RAG CONTROL CENTER & ROLE MANAGEMENT
 // ===================================================
 const userRole = localStorage.getItem('userRole') || 'student';
+const popupDevItem = document.getElementById('popup-dev-item');
 
-// Developer Profile Badge Customization
+// Developer Profile Badge & Menu Item Visibility (ONLY for developer accounts)
 if (userRole === 'developer') {
+    if (popupDevItem) {
+        popupDevItem.style.display = 'flex';
+    }
     if (userPlanTagEl) {
         userPlanTagEl.innerHTML = `⚡ <strong style="color:#c084fc;">Developer Admin</strong> · RAG Manager`;
     }
@@ -1279,14 +1283,18 @@ if (userRole === 'developer') {
         popupBadgeEl.innerHTML = `⚡ Developer Admin · Full RAG Access`;
         popupBadgeEl.style.color = `#c084fc`;
     }
+} else {
+    if (popupDevItem) {
+        popupDevItem.style.display = 'none';
+    }
 }
 
 // Dev Modal Controls
 const devModalBackdrop = document.getElementById('dev-modal-backdrop');
 const devModalCloseBtn = document.getElementById('dev-modal-close');
-const popupDevItem = document.getElementById('popup-dev-item');
 
 function openDevModal() {
+    if (userRole !== 'developer') return; // Strict guard: Only developer role can open panel
     if (devModalBackdrop) {
         devModalBackdrop.style.display = 'flex';
         fetchRagStats();
@@ -1316,11 +1324,13 @@ if (devModalBackdrop) {
     });
 }
 
-// Keyboard Shortcut: Ctrl + Shift + D opens Dev Modal
+// Keyboard Shortcut: Ctrl + Shift + D opens Dev Modal ONLY for developer role
 document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
-        e.preventDefault();
-        openDevModal();
+        if (userRole === 'developer') {
+            e.preventDefault();
+            openDevModal();
+        }
     }
 });
 
