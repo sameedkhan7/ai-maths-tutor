@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <!-- 📸 Photo Math OCR Engine (Tesseract.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- 📄 1-Click PDF Notes Export Engine (html2pdf.js) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="dark-mode">
     <div class="app-container">
@@ -109,12 +114,18 @@
         </aside>
         <main class="chat-area">
           <header class="chat-header">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" title="Open Menu">☰</button>
-                <div>
-                    <h3 id="current-topic" style="margin: 0; font-size: 16px;">What is a derivative?</h3>
-                    <span style="font-size: 11px; background-color: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 999px; font-weight: 600; display: inline-block; margin-top: 3px;">NCERT Grounded</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" title="Open Menu">☰</button>
+                    <div>
+                        <h3 id="current-topic" style="margin: 0; font-size: 16px;">What is a derivative?</h3>
+                        <span style="font-size: 11px; background-color: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 999px; font-weight: 600; display: inline-block; margin-top: 3px;">NCERT Grounded</span>
+                    </div>
                 </div>
+                <!-- 📄 Export Chat to PDF Revision Notes -->
+                <button type="button" id="export-pdf-btn" class="export-pdf-btn" title="Export Chat to PDF Notes for Revision">
+                    📄 <span class="export-btn-text">Export PDF Notes</span>
+                </button>
             </div>
         </header>
             <div class="messages-container" id="messages-container">

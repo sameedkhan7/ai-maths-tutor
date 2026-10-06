@@ -119,20 +119,48 @@ if (userInput) {
 }
 
 
-// 2. Plus Button (+ Photo / File Upload)
+// 2. Plus Button (+ Photo / File Upload & Photo Math OCR Vision)
 const plusBtn = document.getElementById('plus-btn');
 const fileInput = document.getElementById('file-input');
 const photoTag = document.getElementById('photo-preview-tag');
 const photoName = document.getElementById('photo-name');
 const removePhoto = document.getElementById('remove-photo');
+let ocrExtractedText = "";
 
 if (plusBtn && fileInput) {
     plusBtn.addEventListener('click', () => fileInput.click());
 
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener('change', async (e) => {
         if (e.target.files.length > 0) {
-            photoName.innerText = e.target.files[0].name;
-            photoTag.style.display = 'inline-flex';
+            const file = e.target.files[0];
+            if (photoTag) photoTag.style.display = 'inline-flex';
+            
+            if (file.type.startsWith('image/')) {
+                if (photoName) photoName.innerText = `⌛ Scanning photo for math equation...`;
+                try {
+                    if (window.Tesseract) {
+                        const res = await Tesseract.recognize(file, 'eng');
+                        if (res && res.data && res.data.text.trim()) {
+                            ocrExtractedText = res.data.text.trim();
+                            const cleanOcr = ocrExtractedText.replace(/\n+/g, ' ');
+                            if (photoName) photoName.innerText = `📸 OCR Recognized: "${cleanOcr.slice(0, 30)}..."`;
+                            if (userInput && !userInput.value.trim()) {
+                                userInput.value = `Solve this math problem from photo: ${cleanOcr}`;
+                                userInput.focus();
+                            }
+                        } else {
+                            if (photoName) photoName.innerText = `📷 Image: ${file.name}`;
+                        }
+                    } else {
+                        if (photoName) photoName.innerText = `📷 Image: ${file.name}`;
+                    }
+                } catch (err) {
+                    console.warn('OCR processing error:', err);
+                    if (photoName) photoName.innerText = `📷 Image: ${file.name}`;
+                }
+            } else {
+                if (photoName) photoName.innerText = `📄 File: ${file.name}`;
+            }
         }
     });
 }
@@ -140,7 +168,8 @@ if (plusBtn && fileInput) {
 if (removePhoto && fileInput) {
     removePhoto.addEventListener('click', () => {
         fileInput.value = '';
-        photoTag.style.display = 'none';
+        ocrExtractedText = "";
+        if (photoTag) photoTag.style.display = 'none';
     });
 }
 
@@ -360,7 +389,191 @@ function renderMarkdown(rawText) {
     return html;
 }
 
-// Helper: Append Message Bubble
+// ==========================================================
+// 🔊 AI VOICE READ-ALOUD (TTS with Clean Hindi/English Math)
+// ==========================================================
+function cleanMathTextForSpeech(text) {
+    if (!text) return '';
+    let str = text;
+
+    // 1. Remove markdown elements
+    str = str.replace(/```[\s\S]*?```/g, '');
+    str = str.replace(/###|##|#/g, '');
+    str = str.replace(/\*\*/g, '').replace(/\*/g, '');
+
+    // 2. Convert LaTeX formulas to speakable Hindi/English phrasing
+    str = str.replace(/\$\$(.*?)\$\$/g, (m, f) => speakableFormula(f));
+    str = str.replace(/\$(.*?)\$/g, (m, f) => speakableFormula(f));
+    str = str.replace(/\\\[(.*?)\\\]/g, (m, f) => speakableFormula(f));
+    str = str.replace(/\\\((.*?)\\\)/g, (m, f) => speakableFormula(f));
+
+    // 3. Clean up leftover LaTeX backslashes & braces
+    str = str.replace(/\\(int|sum|frac|sqrt|theta|pi|infty|times|div|pm)/g, ' $1 ');
+    str = str.replace(/[\{\}\\]/g, ' ');
+
+    return str.replace(/\s+/g, ' ').trim();
+}
+
+function speakableFormula(f) {
+    let s = f;
+    s = s.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1 divided by $2');
+    s = s.replace(/\\sqrt\{([^}]+)\}/g, 'square root of $1');
+    s = s.replace(/\^2/g, ' squared');
+    s = s.replace(/\^3/g, ' cubed');
+    s = s.replace(/\^\{([^}]+)\}/g, ' to the power $1');
+    s = s.replace(/\\int/g, ' integral of ');
+    s = s.replace(/\\pm/g, ' plus or minus ');
+    s = s.replace(/\\times/g, ' multiplied by ');
+    s = s.replace(/\\div/g, ' divided by ');
+    s = s.replace(/\\theta/g, ' theta ');
+    s = s.replace(/\\pi/g, ' pi ');
+    s = s.replace(/\\infty/g, ' infinity ');
+    s = s.replace(/\+/g, ' plus ');
+    s = s.replace(/=/g, ' equals ');
+    return ' ' + s + ' ';
+}
+
+let activeTtsBtn = null;
+
+function toggleSpeech(rawText, btnElement) {
+    if (!('speechSynthesis' in window)) {
+        alert('Voice read-aloud is not supported in this browser.');
+        return;
+    }
+
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        if (activeTtsBtn) {
+            activeTtsBtn.classList.remove('tts-btn-active');
+            activeTtsBtn.innerHTML = '🔊 <span>Listen</span>';
+        }
+        if (activeTtsBtn === btnElement) {
+            activeTtsBtn = null;
+            return;
+        }
+    }
+
+    const cleanText = cleanMathTextForSpeech(rawText);
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 0.92;
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const voice = voices.find(v => v.lang.includes('hi') || v.lang.includes('en-IN') || v.name.includes('India') || v.name.includes('Hindi'));
+    if (voice) utterance.voice = voice;
+
+    activeTtsBtn = btnElement;
+    btnElement.classList.add('tts-btn-active');
+    btnElement.innerHTML = '⏹️ <span>Stop</span>';
+
+    utterance.onend = () => {
+        btnElement.classList.remove('tts-btn-active');
+        btnElement.innerHTML = '🔊 <span>Listen</span>';
+        activeTtsBtn = null;
+    };
+    utterance.onerror = () => {
+        btnElement.classList.remove('tts-btn-active');
+        btnElement.innerHTML = '🔊 <span>Listen</span>';
+        activeTtsBtn = null;
+    };
+
+    window.speechSynthesis.speak(utterance);
+}
+
+// ==========================================================
+// 📄 1-CLICK EXPORT CHAT TO PDF NOTES
+// ==========================================================
+function exportChatToPDF() {
+    const messages = document.querySelectorAll('#messages-container .message');
+    if (!messages || messages.length === 0) {
+        alert('No chat messages available to export as notes!');
+        return;
+    }
+
+    const studentName = localStorage.getItem('studentName') || 'Student';
+    const studentGrade = localStorage.getItem('studentGrade') || 'Class 11';
+    const topicEl = document.getElementById('current-topic');
+    const topicTitle = topicEl ? topicEl.innerText : 'NCERT Maths Notes';
+    const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    const pdfWrapper = document.createElement('div');
+    pdfWrapper.style.padding = '24px';
+    pdfWrapper.style.fontFamily = "'Inter', Arial, sans-serif";
+    pdfWrapper.style.background = '#ffffff';
+    pdfWrapper.style.color = '#0f172a';
+
+    let html = `
+        <div style="border-bottom: 2px solid #6366f1; padding-bottom: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="font-size: 20px; color: #4f46e5; margin: 0;">🎓 AI Maths Tutor — Exam Revision Notes</h1>
+                <p style="font-size: 12.5px; color: #64748b; margin: 4px 0 0 0;">Topic: <strong>${topicTitle}</strong> | ${studentGrade}</p>
+            </div>
+            <div style="text-align: right; font-size: 11.5px; color: #475569;">
+                <div>Student: <strong>${studentName}</strong></div>
+                <div>Date: ${dateStr}</div>
+            </div>
+        </div>
+    `;
+
+    messages.forEach(msg => {
+        const isUser = msg.classList.contains('user');
+        const sender = isUser ? studentName : 'AI Maths Tutor';
+        const bg = isUser ? '#f8fafc' : '#faf5ff';
+        const border = isUser ? '#cbd5e1' : '#a855f7';
+        
+        const bodyEl = msg.querySelector('.message-body');
+        if (!bodyEl) return;
+
+        const clone = bodyEl.cloneNode(true);
+        clone.querySelectorAll('.message-actions').forEach(el => el.remove());
+
+        html += `
+            <div style="background: ${bg}; border-left: 4px solid ${border}; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px;">
+                <div style="font-size: 11.5px; font-weight: bold; color: ${isUser ? '#334155' : '#7e22ce'}; margin-bottom: 6px;">
+                    ${isUser ? '🎓 Question (' + sender + '):' : '👩‍🏫 AI Tutor Solution & Explanation:'}
+                </div>
+                <div style="font-size: 13px; line-height: 1.6; color: #1e293b;">
+                    ${clone.innerHTML}
+                </div>
+            </div>
+        `;
+    });
+
+    html += `
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 20px; text-align: center; font-size: 10.5px; color: #94a3b8;">
+            Generated by AI Maths Tutor · NCERT Grounded Revision Sheet
+        </div>
+    `;
+
+    pdfWrapper.innerHTML = html;
+
+    const opt = {
+        margin: 10,
+        filename: `AI_Maths_Notes_${topicTitle.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 20)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    if (window.html2pdf) {
+        html2pdf().set(opt).from(pdfWrapper).save();
+    } else {
+        const printWin = window.open('', '_blank');
+        printWin.document.write(`<html><head><title>${topicTitle}</title></head><body>${html}</body></html>`);
+        printWin.document.close();
+        printWin.print();
+    }
+}
+
+// Bind Export PDF Button
+const exportPdfBtn = document.getElementById('export-pdf-btn');
+if (exportPdfBtn) {
+    exportPdfBtn.addEventListener('click', exportChatToPDF);
+}
+
+// Helper: Append Message Bubble with Action Toolbar (TTS & Copy)
 function appendMessage(sender, text, type) {
     const welcomeHero = document.getElementById('welcome-hero');
     if (welcomeHero) welcomeHero.remove();
@@ -369,16 +582,49 @@ function appendMessage(sender, text, type) {
     msgDiv.className = `message ${type}`;
     const avatar = type === 'user' ? '🎓' : '👩‍🏫';
 
+    let actionToolbar = '';
+    if (type === 'assistant') {
+        actionToolbar = `
+            <div class="message-actions">
+                <button type="button" class="message-action-btn tts-btn" title="Listen to AI Teacher Voice">
+                    🔊 <span>Listen</span>
+                </button>
+                <button type="button" class="message-action-btn copy-btn" title="Copy Solution">
+                    📋 <span>Copy</span>
+                </button>
+            </div>
+        `;
+    }
+
     msgDiv.innerHTML = `
         <div class="avatar">${avatar}</div>
         <div class="message-content">
             <h4>${sender}</h4>
             <div class="message-body">${type === 'assistant' ? renderMarkdown(text) : text.replace(/\n/g, '<br>')}</div>
+            ${actionToolbar}
         </div>
     `;
 
     messagesContainer.appendChild(msgDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    // Attach Action Listeners (TTS Voice & Copy)
+    if (type === 'assistant') {
+        const ttsBtn = msgDiv.querySelector('.tts-btn');
+        if (ttsBtn) {
+            ttsBtn.addEventListener('click', () => toggleSpeech(text, ttsBtn));
+        }
+        const copyBtn = msgDiv.querySelector('.copy-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                const plainText = text.replace(/<[^>]+>/g, '');
+                navigator.clipboard.writeText(plainText).then(() => {
+                    copyBtn.innerHTML = '✅ <span>Copied</span>';
+                    setTimeout(() => { copyBtn.innerHTML = '📋 <span>Copy</span>'; }, 2000);
+                });
+            });
+        }
+    }
 
     // Message aate hi LaTeX math formulas ko sundar equation me render karo
     if (window.renderMathInElement) {
