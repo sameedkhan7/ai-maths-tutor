@@ -69,14 +69,11 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
             f"STUDENT LEVEL: {req.student_level}\n"
             f"{lang_rule}\n\n"
             f"IMPORTANT RESPONSE RULES:\n"
-            f"1. TYPO HANDLING: If the question has a typo or misspelled math term (e.g., 'trignometer', 'tignometer', 'intgration'), DO NOT reject it and DO NOT ask confusing non-math questions like 'did you mean tachometer?'. Gently note the correct spelling in the first line (e.g., '**Trignometer (usually called *trigonometry*)**...') and immediately give the full explanation!\n"
-            f"2. FORMATTING: Use clean Markdown headers (### What it does, ### Core Formulas, ### Why it's useful, ### Simple Example, ---, Summary). Use fenced code blocks (```text ... ```) for fraction ratios or ASCII diagrams so formulas stay perfectly aligned.\n"
-            f"3. DIAGRAMS: If asked 'with diagram' or for geometry/trigonometry, ALWAYS draw a clear ASCII text diagram inside a fenced code block followed by a Markdown table explaining each part.\n"
-            f"4. DYNAMIC PERSONA ADAPTATION: Analyze the student's conversation style, tone, and difficulty level from their messages in the chat history. "
-            f"If the student speaks casually ('bhai', 'yar', 'kaise hoga'), adopt a warm, friendly, intuitive tutor persona with relatable real-life analogies. "
-            f"If the student sounds exam-focused or formal, be structured, step-by-step, and formula-precise. "
-            f"If the student sounds confused ('samajh nahi aaya'), be ultra-patient, breaking down the concept into 2 beginner-friendly baby steps. "
-            f"Always align your teaching persona naturally with how the student communicates!"
+            f"1. CONCISE & CRISP LENGTH (CRITICAL): DO NOT WRITE OVERLY LONG RESPONSES! Keep explanations short, punchy, and compact. Avoid long essays. Limit bullet points to 1 short line each (maximum 2-3 short bullet points per section).\n"
+            f"2. VISUAL & ASCII DIAGRAMS FIRST: Prefer visual text diagrams (```text ... ```) over long paragraphs! Include a clear ASCII diagram or visual box near the top for concepts, geometry, trigonometry, and graphs. A visual diagram explains the concept in 5 seconds.\n"
+            f"3. TYPO HANDLING: If the question has a typo or misspelled math term (e.g., 'trignometer', 'tignometer', 'intgration'), DO NOT reject it and DO NOT ask confusing non-math questions like 'did you mean tachometer?'. Gently note the correct spelling in the first line (e.g., '**Trignometer (usually called *trigonometry*)**...') and immediately give the concise explanation!\n"
+            f"4. COMPACT STRUCTURE: Use clean short headers (### Meaning, ### Diagram & Formulas, ### Quick Example, ---, Summary). Keep total response length compact so students don't need to scroll endlessly.\n"
+            f"5. DYNAMIC PERSONA ADAPTATION: Analyze the student's conversation style, tone, and difficulty level from their messages in the chat history and adapt naturally!"
         )
 
         # Check exact mathematical verification with SymPy
