@@ -691,7 +691,7 @@ function appendMessage(sender, text, type) {
     messagesContainer.appendChild(msgDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-    // Attach Action Listeners (TTS Voice & Copy)
+    // Attach Action Listeners (TTS Voice, Copy & Smart Interactive Suggestion Chips)
     if (type === 'assistant') {
         const ttsBtn = msgDiv.querySelector('.tts-btn');
         if (ttsBtn) {
@@ -706,6 +706,47 @@ function appendMessage(sender, text, type) {
                     setTimeout(() => { copyBtn.innerHTML = '📋 <span>Copy</span>'; }, 2000);
                 });
             });
+        }
+
+        // 💡 Interactive Suggestion Chips Renderer
+        const msgBody = msgDiv.querySelector('.message-body');
+        if (msgBody) {
+            const listItems = msgBody.querySelectorAll('li, p');
+            const suggestions = [];
+
+            listItems.forEach(el => {
+                const textVal = el.innerText.trim();
+                if ((textVal.includes('?') || textVal.toLowerCase().includes('kya aap') || textVal.toLowerCase().includes('would you like')) && textVal.length < 130) {
+                    const cleanQ = textVal.replace(/^[0-9\.\-\*\•\?\s💡✨]+/, '').trim();
+                    if (cleanQ.length > 5 && !suggestions.includes(cleanQ)) {
+                        suggestions.push(cleanQ);
+                    }
+                }
+            });
+
+            if (suggestions.length > 0) {
+                const chipsWrapper = document.createElement('div');
+                chipsWrapper.className = 'suggestion-chips-wrapper';
+                chipsWrapper.innerHTML = `<div class="chips-title">💡 Next Follow-up Questions (Click to ask):</div><div class="chips-list"></div>`;
+                const chipsList = chipsWrapper.querySelector('.chips-list');
+
+                suggestions.slice(0, 3).forEach(q => {
+                    const chipBtn = document.createElement('button');
+                    chipBtn.type = 'button';
+                    chipBtn.className = 'suggestion-chip';
+                    chipBtn.innerHTML = `✨ ${q}`;
+                    chipBtn.addEventListener('click', () => {
+                        if (userInput) {
+                            userInput.value = q;
+                            userInput.focus();
+                            submitUserMessage();
+                        }
+                    });
+                    chipsList.appendChild(chipBtn);
+                });
+
+                msgBody.appendChild(chipsWrapper);
+            }
         }
     }
 

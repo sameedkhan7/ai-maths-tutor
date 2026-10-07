@@ -1497,6 +1497,72 @@ body.dark-mode .capsule-icon-btn.photo-btn {
 }
 
 /* Antigravity Model Selector Pill */
+/* 💡 Smart Follow-up Suggestion Chips */
+.suggestion-chips-wrapper {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(203, 213, 225, 0.6);
+}
+
+body.dark-mode .suggestion-chips-wrapper {
+    border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.chips-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.dark-mode .chips-title {
+    color: #a5b4fc;
+}
+
+.chips-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.suggestion-chip {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #4f46e5;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    line-height: 1.35;
+}
+
+body.dark-mode .suggestion-chip {
+    background: rgba(129, 140, 248, 0.12);
+    border-color: rgba(129, 140, 248, 0.3);
+    color: #c7d2fe;
+}
+
+.suggestion-chip:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: #6366f1;
+    color: #312e81;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+body.dark-mode .suggestion-chip:hover {
+    background: rgba(129, 140, 248, 0.28);
+    border-color: #818cf8;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(129, 140, 248, 0.4);
+}
+
 .model-picker {
     position: relative;
 }
