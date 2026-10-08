@@ -1,6 +1,12 @@
 import os
+import sys
 import glob
 from pathlib import Path
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
 from backend.rag.config import (
     RAW_PDFS_DIR,
     SAMPLE_DOCS_DIR,
@@ -175,15 +181,30 @@ def scrape_and_ingest_url(url: str):
     ingest_all()
     return {"filename": filename, "source": url, "char_count": len(clean_text)}
 
-def get_rag_stats():
-    """Returns real-time statistics of RAG knowledge base"""
+import json
+
+def get_rag_stats(force_refresh: bool = False):
+    """Returns real-time statistics of RAG knowledge base (instant via metadata cache)"""
     SAMPLE_DOCS_DIR.mkdir(parents=True, exist_ok=True)
     RAW_PDFS_DIR.mkdir(parents=True, exist_ok=True)
     text_files = list(SAMPLE_DOCS_DIR.glob("*.txt"))
     pdf_files = list(RAW_PDFS_DIR.glob("*.pdf"))
+    
+    cache_file = RAW_PDFS_DIR.parent / "rag_stats_cache.json"
+    if not force_refresh and cache_file.exists():
+        try:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                cached = json.load(f)
+            if cached.get("pdf_count") == len(pdf_files) and cached.get("text_count") == len(text_files):
+                cached["pdfs"] = [p.name for p in pdf_files]
+                cached["texts"] = [t.name for t in text_files]
+                return cached
+        except Exception:
+            pass
+
     docs = load_documents()
     chunks = split_text_into_chunks(docs)
-    return {
+    stats = {
         "pdf_count": len(pdf_files),
         "text_count": len(text_files),
         "total_documents": len(docs),
@@ -191,6 +212,12 @@ def get_rag_stats():
         "pdfs": [p.name for p in pdf_files],
         "texts": [t.name for t in text_files]
     }
+    try:
+        with open(cache_file, "w", encoding="utf-8") as f:
+            json.dump(stats, f, indent=2)
+    except Exception:
+        pass
+    return stats
 
 if __name__ == "__main__":
     ingest_all()

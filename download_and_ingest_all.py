@@ -1,19 +1,25 @@
 import os
+import sys
 import urllib.request
 import zipfile
 import subprocess
 from pathlib import Path
 
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
+
 BASE_DIR = Path(__file__).resolve().parent
 TARGET_PDF_DIR = BASE_DIR / "data" / "raw_pdfs"
 TARGET_PDF_DIR.mkdir(parents=True, exist_ok=True)
 
-# 📚 Class 10, 11, 12 Complete Books NCERT Official ZIP URLs
+# 📚 Class 10, 11, 12 Complete Books NCERT Official ZIP URLs (Using HTTP to avoid TLS reset)
 BOOKS_TO_DOWNLOAD = {
-    "Class_10_Maths": "https://ncert.nic.in/textbook/pdf/jemh1dd.zip",
-    "Class_11_Maths": "https://ncert.nic.in/textbook/pdf/kemh1dd.zip",
-    "Class_12_Maths_Part1": "https://ncert.nic.in/textbook/pdf/lemh1dd.zip",
-    "Class_12_Maths_Part2": "https://ncert.nic.in/textbook/pdf/lemh2dd.zip",
+    "Class_10_Maths": "http://ncert.nic.in/textbook/pdf/jemh1dd.zip",
+    "Class_11_Maths": "http://ncert.nic.in/textbook/pdf/kemh1dd.zip",
+    "Class_12_Maths_Part1": "http://ncert.nic.in/textbook/pdf/lemh1dd.zip",
+    "Class_12_Maths_Part2": "http://ncert.nic.in/textbook/pdf/lemh2dd.zip",
 }
 
 HEADERS = {
@@ -27,6 +33,11 @@ def run_download_and_ingest():
     print("=" * 65)
 
     for book_name, url in BOOKS_TO_DOWNLOAD.items():
+        existing_files = list(TARGET_PDF_DIR.glob(f"{book_name}_*.pdf"))
+        if len(existing_files) > 5:
+            print(f"⏩ {book_name} already exists ({len(existing_files)} chapters found). Skipping download.")
+            continue
+
         temp_zip = BASE_DIR / f"{book_name}.zip"
         print(f"\n📥 Downloading {book_name}...")
         try:
