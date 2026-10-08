@@ -343,6 +343,27 @@ function submitUserMessage() {
     appendMessage('You', displayQuestion, 'user');
     userInput.value = '';
 
+    // ⏳ Animated Thinking Indicator
+    const thinkingEl = document.createElement('div');
+    thinkingEl.id = 'ai-thinking-indicator';
+    thinkingEl.className = 'message assistant thinking-bubble-msg';
+    thinkingEl.innerHTML = `
+        <div class="avatar">👩‍🏫</div>
+        <div class="message-content">
+            <h4>AI Maths Tutor</h4>
+            <div class="thinking-row">
+                <span class="thinking-dot"></span>
+                <span class="thinking-dot"></span>
+                <span class="thinking-dot"></span>
+                <span class="thinking-label">Thinking & searching NCERT...</span>
+            </div>
+        </div>
+    `;
+    if (messagesContainer) {
+        messagesContainer.appendChild(thinkingEl);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
     const selectedLanguage = localStorage.getItem('tutorLanguage') || 'hinglish';
     const isNewSession = !currentChatId;
 
@@ -361,6 +382,10 @@ function submitUserMessage() {
     })
     .then(response => response.json())
     .then(data => {
+        // Remove thinking indicator
+        const ind = document.getElementById('ai-thinking-indicator');
+        if (ind) ind.remove();
+
         if (data.reply) {
             appendMessage('AI Maths Tutor', data.reply, 'assistant');
         }
@@ -387,6 +412,10 @@ function submitUserMessage() {
     })
     .catch(error => {
         console.error('Error:', error);
+        // Remove thinking indicator
+        const ind = document.getElementById('ai-thinking-indicator');
+        if (ind) ind.remove();
+
         // Fallback offline simulation so user experience is never broken
         const offlineChatId = currentChatId || Date.now();
         currentChatId = offlineChatId;
