@@ -16,9 +16,9 @@ from backend.rag.config import (
 )
 from backend.rag.embeddings import get_embeddings
 
-def load_documents():
+def load_documents(include_pdfs: bool = False):
     """
-    Loads documents from data/raw_pdfs/ (PDFs) and data/sample_docs/ (Text files).
+    Loads documents from data/sample_docs/ (Text files) and optionally data/raw_pdfs/ (PDFs).
     """
     documents = []
     
@@ -43,26 +43,27 @@ def load_documents():
         except Exception as e:
             print(f"Error reading {file_path}: {e}")
 
-    # 2. Load PDF files from raw_pdfs
-    pdf_files = list(RAW_PDFS_DIR.glob("*.pdf"))
-    if pdf_files:
-        try:
-            from pypdf import PdfReader
-            for pdf_path in pdf_files:
-                reader = PdfReader(str(pdf_path))
-                for page_num, page in enumerate(reader.pages):
-                    page_text = page.extract_text() or ""
-                    if page_text.strip():
-                        documents.append({
-                            "text": page_text,
-                            "metadata": {
-                                "source": pdf_path.name,
-                                "page": page_num + 1,
-                                "type": "pdf"
-                            }
-                        })
-        except Exception as e:
-            print(f"PDF reading error: {e}")
+    # 2. Load PDF files from raw_pdfs (only when include_pdfs is requested)
+    if include_pdfs:
+        pdf_files = list(RAW_PDFS_DIR.glob("*.pdf"))
+        if pdf_files:
+            try:
+                from pypdf import PdfReader
+                for pdf_path in pdf_files:
+                    reader = PdfReader(str(pdf_path))
+                    for page_num, page in enumerate(reader.pages):
+                        page_text = page.extract_text() or ""
+                        if page_text.strip():
+                            documents.append({
+                                "text": page_text,
+                                "metadata": {
+                                    "source": pdf_path.name,
+                                    "page": page_num + 1,
+                                    "type": "pdf"
+                                }
+                            })
+            except Exception as e:
+                print(f"PDF reading error: {e}")
 
     return documents
 
@@ -96,7 +97,7 @@ def ingest_all():
     Ingests all NCERT math documents into Chroma vector store.
     """
     print("Loading NCERT curriculum documents...")
-    docs = load_documents()
+    docs = load_documents(include_pdfs=True)
     print(f"Loaded {len(docs)} documents.")
 
     chunks = split_text_into_chunks(docs)

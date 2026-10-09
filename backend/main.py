@@ -36,7 +36,7 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     question: str
     style: str = "simple"
-    model: str = "llama3.3"
+    model: str = "openai/gpt-oss-120b"
     language: str = "hinglish"
     chat_id: Optional[int] = None
     user_id: Optional[int] = 1
@@ -282,7 +282,7 @@ def chat_with_tutor(request: ChatRequest):
             chat_history=chat_history_msgs,
             explanation_style=style,
             language=request.language if request.language in ["english", "hindi", "hinglish", "urdu"] else "hinglish",
-            model=request.model or "llama-3.3-70b-versatile"
+            model=request.model or "openai/gpt-oss-120b"
         )
         tutor_res = generate_tutor_response(tutor_req)
         reply = tutor_res.answer
@@ -308,7 +308,7 @@ def chat_with_tutor(request: ChatRequest):
     return {
         "success": True,
         "chat_id": chat_id,
-        "question": q,
+        "question": raw_q,
         "style": style,
         "reply": reply
     }
