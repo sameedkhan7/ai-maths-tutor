@@ -1711,22 +1711,24 @@ body.dark-mode .menu-item-subtitle {
     color: #94a3b8;
 }
 
-/* Center: Textarea */
+/* Center: Textarea (Fixed Full Visibility - No Text Cutoff) */
 .sleek-rect-card textarea {
     flex: 1;
     min-width: 80px;
     border: none;
     outline: none;
-    font-size: 13.5px;
+    font-size: 14px;
     background: transparent !important;
     resize: none;
     color: #1e293b;
-    line-height: 22px;
-    height: 24px;
-    padding: 1px 6px;
-    min-height: 22px;
+    line-height: 26px;
+    height: 30px;
+    padding: 2px 6px;
+    min-height: 28px;
     max-height: 110px;
     overflow-y: hidden;
+    box-sizing: border-box;
+    display: block;
 }
 
 body.dark-mode .sleek-rect-card textarea {
@@ -1735,6 +1737,7 @@ body.dark-mode .sleek-rect-card textarea {
 
 .sleek-rect-card textarea::placeholder {
     color: #94a3b8;
+    line-height: 26px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2031,10 +2034,13 @@ body.dark-mode .icon-toggle-btn:hover {
     background-color: #334155;
 }
 
-/* Jab Sidebar CHHOTA (Collapsed) ho */
+/* Jab Sidebar CHHOTA (Collapsed) ho - Pixel-Perfect Centered */
 .sidebar.collapsed {
     width: 68px !important;
-    padding: 16px 10px !important;
+    min-width: 68px !important;
+    max-width: 68px !important;
+    padding: 14px 8px !important;
+    align-items: center !important;
 }
 
 /* Chhote sidebar me saara text hide ho jaye */
@@ -2042,31 +2048,68 @@ body.dark-mode .icon-toggle-btn:hover {
     display: none !important;
 }
 
+/* Header container centering in collapsed mode */
+.sidebar.collapsed > div:first-child {
+    justify-content: center !important;
+    width: 100% !important;
+    margin-bottom: 14px !important;
+}
+
+.sidebar.collapsed #sidebar-toggle-btn {
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+}
+
 .sidebar.collapsed #new-chat-btn {
-    width: 44px;
-    padding: 10px 0;
-    margin: 0 auto 16px auto;
-    display: flex;
-    justify-content: center;
+    width: 44px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    margin: 0 auto 14px auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
 }
 
-.sidebar.collapsed .sidebar-footer {
-    justify-content: center;
-    padding: 10px 0;
+/* Quick Navigation Menu in Collapsed Sidebar */
+.sidebar.collapsed .sidebar-nav-menu {
+    width: 100% !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
 }
 
-.sidebar.collapsed .footer-actions {
-    display: none;
+.sidebar.collapsed .nav-menu-item {
+    width: 44px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    justify-content: center !important;
+    align-items: center !important;
+    border-radius: 8px !important;
 }
 
-.sidebar.collapsed .user-profile-card {
-    justify-content: center;
-    padding: 0;
+.sidebar.collapsed .nav-item-icon {
+    margin: 0 !important;
+    width: auto !important;
+    font-size: 16px !important;
 }
 
-.sidebar.collapsed .profile-popup-menu {
-    left: 74px !important;
-    bottom: 12px !important;
+.sidebar.collapsed .sidebar-divider {
+    width: 36px !important;
+    margin: 8px auto 10px auto !important;
+}
+
+.sidebar.collapsed .history-container {
+    width: 100% !important;
+    align-items: center !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
 }
 
 /* Pinned & Recents Section Headers */
@@ -2085,21 +2128,71 @@ body.dark-mode .icon-toggle-btn:hover {
 
 /* Chhote (Collapsed) Sidebar me Icons Center align hon */
 .sidebar.collapsed .section-header {
-    justify-content: center;
-    padding: 8px 0;
+    width: 44px !important;
+    height: 36px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin: 6px auto !important;
+    border-radius: 8px !important;
+}
+
+.sidebar.collapsed .section-icon {
+    font-size: 16px !important;
+    margin: 0 !important;
 }
 
 .sidebar.collapsed .history-item {
-    justify-content: center;
+    width: 44px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    margin: 3px auto !important;
+    justify-content: center !important;
+    align-items: center !important;
+    border-radius: 8px !important;
+}
+
+.sidebar.collapsed .history-item span {
+    margin: 0 !important;
 }
 
 .sidebar.collapsed .history-item .pin-toggle-btn {
-    display: none;
+    display: none !important;
 }
 
 /* Chhote mode me chat ka lamba text chhip jaye, sirf 💬 icon dikhe */
 .sidebar.collapsed .chat-item-title {
     display: none !important;
+}
+
+.sidebar.collapsed .sidebar-footer {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 8px 0 !important;
+    align-items: center !important;
+}
+
+.sidebar.collapsed .footer-actions {
+    display: none !important;
+}
+
+.sidebar.collapsed .user-profile-card {
+    width: 44px !important;
+    height: 44px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    border-radius: 50% !important;
+}
+
+.sidebar.collapsed .user-avatar-circle {
+    margin: 0 !important;
+}
+
+.sidebar.collapsed .profile-popup-menu {
+    left: 74px !important;
+    bottom: 12px !important;
 }
 
 /* ============================================== */

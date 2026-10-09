@@ -1759,7 +1759,7 @@ function toggleSidebarCollapse() {
     if (!sidebar) return;
     const isCollapsed = sidebar.classList.toggle('collapsed');
     if (isCollapsed) {
-        sidebar.style.width = '';
+        sidebar.style.removeProperty('width');
     } else {
         const savedW = localStorage.getItem('sidebarCustomWidth');
         sidebar.style.width = savedW ? `${savedW}px` : '260px';
@@ -1802,7 +1802,7 @@ if (sidebarResizer && sidebar) {
         if (newWidth < 120) {
             if (!sidebar.classList.contains('collapsed')) {
                 sidebar.classList.add('collapsed');
-                sidebar.style.width = '';
+                sidebar.style.removeProperty('width');
             }
         } else {
             if (sidebar.classList.contains('collapsed')) {
