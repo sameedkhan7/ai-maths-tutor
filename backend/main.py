@@ -40,6 +40,8 @@ class ChatRequest(BaseModel):
     language: str = "hinglish"
     chat_id: Optional[int] = None
     user_id: Optional[int] = 1
+    attachment_name: Optional[str] = None
+    attachment_text: Optional[str] = None
 
 class RegisterRequest(BaseModel):
     name: str
@@ -184,19 +186,83 @@ def dev_change_password(req: PasswordChangeRequest):
         raise HTTPException(status_code=500, detail=f"Failed to update password: {str(e)}")
 
 
-# 4. Main Chat API (Save to DB & Return Answer)
+# 4. Student Chat File Parser API (Supports PDF, TXT, ZIP, Images)
+@app.post("/api/chat/parse-file")
+async def chat_parse_file(file: UploadFile = File(...)):
+    """Parses student uploaded file (PDF, TXT, DOC, ZIP, Image) for AI tutor context"""
+    filename = file.filename.lower()
+    contents = await file.read()
+    extracted_text = ""
+    file_type = "file"
+
+    if filename.endswith(".pdf"):
+        file_type = "pdf"
+        try:
+            import io
+            from pypdf import PdfReader
+            reader = PdfReader(io.BytesIO(contents))
+            pages_text = []
+            for p in reader.pages[:10]:
+                t = p.extract_text()
+                if t: pages_text.append(t)
+            extracted_text = "\n".join(pages_text).strip()
+        except Exception as e:
+            extracted_text = f"Error reading PDF: {e}"
+
+    elif filename.endswith((".txt", ".md", ".py", ".csv", ".json")):
+        file_type = "text"
+        try:
+            extracted_text = contents.decode("utf-8", errors="ignore").strip()
+        except Exception as e:
+            extracted_text = str(e)
+
+    elif filename.endswith(".zip"):
+        file_type = "zip"
+        try:
+            import io, zipfile
+            with zipfile.ZipFile(io.BytesIO(contents)) as z:
+                names = z.namelist()
+                extracted_text = f"ZIP Archive containing {len(names)} files: " + ", ".join(names[:10])
+        except Exception as e:
+            extracted_text = f"Error reading ZIP: {e}"
+
+    elif filename.endswith((".png", ".jpg", ".jpeg", ".webp")):
+        file_type = "image"
+        extracted_text = ""
+
+    size_kb = round(len(contents) / 1024, 1)
+    size_str = f"{size_kb} KB" if size_kb < 1024 else f"{round(size_kb/1024, 2)} MB"
+
+    return {
+        "success": True,
+        "filename": file.filename,
+        "file_type": file_type,
+        "size_str": size_str,
+        "extracted_text": extracted_text[:5000]
+    }
+
+
+# 5. Main Chat API (Save to DB & Return Answer)
 @app.post("/api/chat")
 def chat_with_tutor(request: ChatRequest):
-    q = request.question.strip()
+    raw_q = request.question.strip()
     style = request.style
     chat_id = request.chat_id
+
+    # If student attached a file, combine with question prompt
+    if request.attachment_text:
+        doc_header = f"[Student Attached Document/Homework: {request.attachment_name or 'File'}]\nDocument Content:\n{request.attachment_text.strip()}\n\n"
+        ai_query = doc_header + (f"Student Question: {raw_q}" if raw_q else "Please explain and solve the math problems in this document step by step.")
+    else:
+        ai_query = raw_q
 
     conn = get_connection()
     cursor = conn.cursor()
 
     # Agar naya chat session hai toh chats table me title banao
     if not chat_id:
-        title = q[:35] + ("..." if len(q) > 35 else "")
+        title_source = raw_q or (f"File: {request.attachment_name}" if request.attachment_name else "Maths Question")
+        title = title_source[:35] + ("..." if len(title_source) > 35 else "")
         uid = request.user_id if request.user_id else 1
         cursor.execute("INSERT INTO chats (user_id, title, is_pinned) VALUES (?, ?, 0)", (uid, title))
         chat_id = cursor.lastrowid
@@ -212,7 +278,7 @@ def chat_with_tutor(request: ChatRequest):
     # 🚀 Call Real Groq LLaMA 3.3 AI Tutor Engine
     try:
         tutor_req = TutorRequest(
-            question=q,
+            question=ai_query,
             chat_history=chat_history_msgs,
             explanation_style=style,
             language=request.language if request.language in ["english", "hindi", "hinglish", "urdu"] else "hinglish",
@@ -223,15 +289,16 @@ def chat_with_tutor(request: ChatRequest):
     except Exception as e:
         print(f"AI Generation Error (Fallback used): {e}")
         if style == "sports":
-            reply = f"🏏 **Cricket Analogy for \"{q}\":**\nSochiye jaise batsman boundary hit karne ke liye angle calculate karta hai, waise hi mathematics mein trajectory solve hoti hai!\n\nFormula: $v^2 = u^2 + 2as$\n\n🎯 **Try it yourself:** Kya aap initial velocity $u$ find kar sakte hain?"
+            reply = f"🏏 **Cricket Analogy for \"{raw_q}\":**\nSochiye jaise batsman boundary hit karne ke liye angle calculate karta hai, waise hi mathematics mein trajectory solve hoti hai!\n\nFormula: $v^2 = u^2 + 2as$\n\n🎯 **Try it yourself:** Kya aap initial velocity $u$ find kar sakte hain?"
         elif style == "step-by-step":
-            reply = f"🔢 **Step-by-Step Solution for \"{q}\":**\n1. Given data identify karein.\n2. Standard formula apply karein: $x = \\frac{{-b \\pm \\sqrt{{b^2 - 4ac}}}}{{2a}}$\n3. Values substitute karke final answer simplify karein.\n\n🎯 **Try it yourself:** Iska agla step calculate karke bataiye!"
+            reply = f"🔢 **Step-by-Step Solution for \"{raw_q}\":**\n1. Given data identify karein.\n2. Standard formula apply karein: $x = \\frac{{-b \\pm \\sqrt{{b^2 - 4ac}}}}{{2a}}$\n3. Values substitute karke final answer simplify karein.\n\n🎯 **Try it yourself:** Iska agla step calculate karke bataiye!"
         else:
-            reply = f"💡 **Concept Explanation for \"{q}\":**\nMathematics mein kisi bhi problem ko pehle visualize karein, fir standard NCERT formula apply karein!\n\nStandard Result: $\\int x^n dx = \\frac{{x^{{n+1}}}}{{n+1}} + C$\n\n🎯 **Try it yourself:** Kya aap $x = 2$ rakh kar answer nikaal sakte hain?"
+            reply = f"💡 **Concept Explanation for \"{raw_q}\":**\nMathematics mein kisi bhi problem ko pehle visualize karein, fir standard NCERT formula apply karein!\n\nStandard Result: $\\int x^n dx = \\frac{{x^{{n+1}}}}{{n+1}} + C$\n\n🎯 **Try it yourself:** Kya aap $x = 2$ rakh kar answer nikaal sakte hain?"
 
     # Sawaal aur Jawab dono messages table me save karo
+    user_saved_text = f"📎 [{request.attachment_name}]\n{raw_q}" if request.attachment_name and raw_q else (f"📎 [{request.attachment_name}]" if request.attachment_name else raw_q)
     cursor.execute("INSERT INTO messages (chat_id, sender, text, style) VALUES (?, ?, ?, ?)",
-                   (chat_id, "user", q, style))
+                   (chat_id, "user", user_saved_text, style))
     cursor.execute("INSERT INTO messages (chat_id, sender, text, style) VALUES (?, ?, ?, ?)",
                    (chat_id, "assistant", reply, style))
 

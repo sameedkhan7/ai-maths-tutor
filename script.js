@@ -132,57 +132,173 @@ if (userInput) {
 }
 
 
-// 2. Plus Button (+ Photo / File Upload & Photo Math OCR Vision)
+// 2. Plus Button (+ ChatGPT Style Attachment Popup Menu & Multi-format File Upload)
 const plusBtn = document.getElementById('plus-btn');
+const attachDropdown = document.getElementById('attach-dropdown-menu');
 const fileInput = document.getElementById('file-input');
-const photoTag = document.getElementById('photo-preview-tag');
-const photoName = document.getElementById('photo-name');
-const removePhoto = document.getElementById('remove-photo');
+const attachedFilesContainer = document.getElementById('attached-files-container');
+const fileChipIcon = document.getElementById('file-chip-icon');
+const fileChipName = document.getElementById('file-chip-name');
+const fileChipMeta = document.getElementById('file-chip-meta');
+const fileChipRemove = document.getElementById('file-chip-remove');
+
+let currentAttachedFileName = "";
+let currentAttachedFileText = "";
 let ocrExtractedText = "";
 
-if (plusBtn && fileInput) {
-    plusBtn.addEventListener('click', () => fileInput.click());
+function clearAttachedFile() {
+    currentAttachedFileName = "";
+    currentAttachedFileText = "";
+    ocrExtractedText = "";
+    if (fileInput) fileInput.value = '';
+    if (attachedFilesContainer) attachedFilesContainer.style.display = 'none';
+}
 
+if (fileChipRemove) {
+    fileChipRemove.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearAttachedFile();
+    });
+}
+
+// Toggle ChatGPT Attachment Popup Menu
+if (plusBtn && attachDropdown) {
+    plusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = attachDropdown.style.display === 'none' || attachDropdown.style.display === '';
+        attachDropdown.style.display = isHidden ? 'block' : 'none';
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!attachDropdown.contains(e.target) && e.target !== plusBtn) {
+            attachDropdown.style.display = 'none';
+        }
+    });
+}
+
+// Popup Menu Item 1: Upload Photos & Files (PDF, Image, ZIP, Docs)
+const menuUploadFiles = document.getElementById('menu-upload-photos-files');
+if (menuUploadFiles && fileInput) {
+    menuUploadFiles.addEventListener('click', () => {
+        if (attachDropdown) attachDropdown.style.display = 'none';
+        fileInput.click();
+    });
+}
+
+// Popup Menu Item 2: Math OCR & Photo Scan
+const menuCameraOcr = document.getElementById('menu-camera-ocr');
+if (menuCameraOcr && fileInput) {
+    menuCameraOcr.addEventListener('click', () => {
+        if (attachDropdown) attachDropdown.style.display = 'none';
+        fileInput.click();
+    });
+}
+
+// Popup Menu Item 3: NCERT Book Library
+const menuNcertLibrary = document.getElementById('menu-ncert-library');
+if (menuNcertLibrary) {
+    menuNcertLibrary.addEventListener('click', () => {
+        if (attachDropdown) attachDropdown.style.display = 'none';
+        const devModal = document.getElementById('dev-admin-modal-backdrop');
+        if (devModal) {
+            devModal.style.display = 'flex';
+            if (typeof fetchRagStats === 'function') fetchRagStats();
+        } else if (userInput) {
+            userInput.value = "Explain NCERT Class 10/11/12 key concept: ";
+            userInput.focus();
+        }
+    });
+}
+
+// Popup Menu Item 4: Board Exam Formulas
+const menuBoardFormulas = document.getElementById('menu-board-formulas');
+if (menuBoardFormulas) {
+    menuBoardFormulas.addEventListener('click', () => {
+        if (attachDropdown) attachDropdown.style.display = 'none';
+        if (userInput) {
+            userInput.value = "Provide the complete Board Exam Formula Sheet with theorems and scoring tips for: ";
+            userInput.focus();
+        }
+    });
+}
+
+// File Input Change Handler (Supports Images, PDF, ZIP, TXT)
+if (fileInput) {
     fileInput.addEventListener('change', async (e) => {
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
-            if (photoTag) photoTag.style.display = 'inline-flex';
-            
+            currentAttachedFileName = file.name;
+
+            // Show attached preview chip
+            if (attachedFilesContainer) attachedFilesContainer.style.display = 'block';
+            if (fileChipName) fileChipName.innerText = file.name;
+
+            // Determine Icon & Initial Meta
+            const lower = file.name.toLowerCase();
+            let icon = "📄";
+            let typeLabel = "Document";
+            if (lower.endsWith('.pdf')) {
+                icon = "📄";
+                typeLabel = "PDF";
+            } else if (lower.match(/\.(png|jpg|jpeg|webp|gif)$/)) {
+                icon = "🖼️";
+                typeLabel = "Image";
+            } else if (lower.endsWith('.zip')) {
+                icon = "📦";
+                typeLabel = "ZIP";
+            } else if (lower.match(/\.(txt|md|csv)$/)) {
+                icon = "📝";
+                typeLabel = "Text";
+            }
+
+            if (fileChipIcon) fileChipIcon.innerText = icon;
+            const sizeKb = Math.round(file.size / 1024);
+            const sizeStr = sizeKb < 1024 ? `${sizeKb} KB` : `${(sizeKb / 1024).toFixed(1)} MB`;
+            if (fileChipMeta) fileChipMeta.innerText = `${typeLabel} · ${sizeStr}`;
+
+            // 1. Call Backend /api/chat/parse-file to extract PDF / Text / Zip contents
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                const parseRes = await fetch(`${API_BASE_URL}/api/chat/parse-file`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const parseData = await parseRes.json();
+                if (parseData.success && parseData.extracted_text) {
+                    currentAttachedFileText = parseData.extracted_text;
+                    if (fileChipMeta) fileChipMeta.innerText = `${typeLabel} · ${parseData.size_str} (Parsed & Ready)`;
+                }
+            } catch (err) {
+                console.warn('Backend file parse failed (client fallback used):', err);
+            }
+
+            // 2. If Image, run Tesseract OCR for Math formulas
             if (file.type.startsWith('image/')) {
-                if (photoName) photoName.innerText = `⌛ Scanning photo for math equation...`;
+                if (fileChipMeta) fileChipMeta.innerText = `Image · ${sizeStr} (⌛ Scanning OCR...)`;
                 try {
                     if (window.Tesseract) {
                         const res = await Tesseract.recognize(file, 'eng');
                         if (res && res.data && res.data.text.trim()) {
                             ocrExtractedText = res.data.text.trim();
+                            currentAttachedFileText = ocrExtractedText;
                             const cleanOcr = ocrExtractedText.replace(/\n+/g, ' ');
-                            if (photoName) photoName.innerText = `📸 OCR Recognized: "${cleanOcr.slice(0, 30)}..."`;
+                            if (fileChipMeta) fileChipMeta.innerText = `Image · OCR Scanned: "${cleanOcr.slice(0, 24)}..."`;
                             if (userInput && !userInput.value.trim()) {
                                 userInput.value = `Solve this math problem from photo: ${cleanOcr}`;
                                 userInput.focus();
                             }
                         } else {
-                            if (photoName) photoName.innerText = `📷 Image: ${file.name}`;
+                            if (fileChipMeta) fileChipMeta.innerText = `Image · ${sizeStr}`;
                         }
-                    } else {
-                        if (photoName) photoName.innerText = `📷 Image: ${file.name}`;
                     }
-                } catch (err) {
-                    console.warn('OCR processing error:', err);
-                    if (photoName) photoName.innerText = `📷 Image: ${file.name}`;
+                } catch (ocrErr) {
+                    console.warn('OCR error:', ocrErr);
+                    if (fileChipMeta) fileChipMeta.innerText = `Image · ${sizeStr}`;
                 }
-            } else {
-                if (photoName) photoName.innerText = `📄 File: ${file.name}`;
             }
         }
-    });
-}
-
-if (removePhoto && fileInput) {
-    removePhoto.addEventListener('click', () => {
-        fileInput.value = '';
-        ocrExtractedText = "";
-        if (photoTag) photoTag.style.display = 'none';
     });
 }
 
@@ -330,18 +446,20 @@ if (micBtn) {
 function submitUserMessage() {
     if (!userInput) return;
     const question = userInput.value.trim();
-    if (!question && (!fileInput || !fileInput.files.length)) return;
+    if (!question && !currentAttachedFileName) return;
 
     let displayQuestion = question;
-    if (fileInput && fileInput.files.length > 0) {
-        displayQuestion = `📷 [Uploaded: ${fileInput.files[0].name}]<br>` + question;
-        fileInput.value = '';
-        if (photoTag) photoTag.style.display = 'none';
+    if (currentAttachedFileName) {
+        displayQuestion = `📎 [Attached: ${currentAttachedFileName}]<br>` + (question || "Solve and explain the problems in this file step by step");
     }
+
+    const sendingFileName = currentAttachedFileName;
+    const sendingFileText = currentAttachedFileText;
 
     // Student message bubble
     appendMessage('You', displayQuestion, 'user');
     userInput.value = '';
+    clearAttachedFile();
 
     // ⏳ Animated Thinking Indicator
     const thinkingEl = document.createElement('div');
@@ -377,7 +495,9 @@ function submitUserMessage() {
             language: selectedLanguage,
             model: currentModel,
             chat_id: currentChatId,
-            user_id: getUserId()
+            user_id: getUserId(),
+            attachment_name: sendingFileName,
+            attachment_text: sendingFileText
         })
     })
     .then(response => response.json())

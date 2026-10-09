@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=75">
+    <link rel="stylesheet" href="style.css?v=80">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -224,9 +224,9 @@
                 </div>
             </div>
 
-            <!-- Floating Neon Capsule Input Area -->
+            <!-- Floating Slim Squarish-Rectangular Chat Input Area (ChatGPT & Antigravity Style) -->
             <div class="chat-input-wrapper">
-                <!-- Math Shortcuts Toolbar (Centered Floating Glass Pill) -->
+                <!-- Math Shortcuts Toolbar (Centered Floating Glass Pill - preserved as requested) -->
                 <div class="math-toolbar">
                     <button type="button" class="sym-btn">x²</button>
                     <button type="button" class="sym-btn">√</button>
@@ -238,48 +238,95 @@
                     <button type="button" class="sym-btn">±</button>
                 </div>
 
-                <!-- ChatGPT / Nexus AI Glowing Capsule Input Form -->
-                <form id="chat-form" class="chat-input-card glowing-neon-capsule">
-                    <!-- Textarea input -->
-                    <textarea id="user-input" placeholder="Ask any math equation or concept..." rows="1"></textarea>
+                <!-- Slim Squarish-Rectangular Input Card (Rounded ~16px) -->
+                <form id="chat-form" class="chat-input-card sleek-rect-card">
+                    <!-- File / Homework Attachment Preview Badge (Appears when student attaches a file) -->
+                    <div id="attached-files-container" class="attached-files-container" style="display: none;">
+                        <div class="file-chip-badge">
+                            <span class="file-chip-icon" id="file-chip-icon">📄</span>
+                            <div class="file-chip-details">
+                                <span class="file-chip-name" id="file-chip-name">homework.pdf</span>
+                                <span class="file-chip-meta" id="file-chip-meta">PDF · 1.2 MB</span>
+                            </div>
+                            <button type="button" class="file-chip-close-btn" id="file-chip-remove" title="Remove attached file">✕</button>
+                        </div>
+                    </div>
 
-                    <!-- Right action tools inside capsule -->
-                    <div class="capsule-tools-bar">
-                        <!-- ⚡ Model Selector Pill -->
-                        <div class="model-picker">
-                            <button type="button" id="model-pill-btn" class="model-pill-btn">
-                                ⚡ <span id="selected-model-text">Groq · LLaMA 3.3</span> ▾
+                    <div class="input-inner-row">
+                        <!-- Left: ChatGPT Style '+' Attach Button & Floating Popup Menu -->
+                        <div class="attach-container">
+                            <button type="button" id="plus-btn" class="chatgpt-plus-btn" title="Add photos & files">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
                             </button>
-                            <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
-                                <div class="menu-item active" data-model="openai/gpt-oss-120b" data-text="Groq · GPT-OSS (120B)">⚡ Groq · GPT-OSS (120B Versatile)</div>
-                                <div class="menu-item" data-model="openai/gpt-oss-20b" data-text="Groq · GPT-OSS (20B)">🚀 Groq · GPT-OSS (20B Fast)</div>
-                                <div class="menu-item" data-model="qwen/qwen3.8-27b" data-text="Groq · Qwen 3.8 (27B)">🧠 Groq · Qwen 3.8 (27B Math)</div>
-                                <div class="menu-item" data-model="allam-2-7b" data-text="Groq · Allam (7B)">🌍 Groq · Allam (7B)</div>
+                            <!-- Hidden multi-format file input -->
+                            <input type="file" id="file-input" style="display:none;" accept="image/*,application/pdf,.zip,.txt,.docx" />
+
+                            <!-- ChatGPT Attachment Popup Menu (Exact replica of Screenshot 4) -->
+                            <div id="attach-dropdown-menu" class="chatgpt-attach-popup" style="display: none;">
+                                <div class="attach-menu-item" id="menu-upload-photos-files">
+                                    <div class="menu-item-icon">📎</div>
+                                    <div class="menu-item-content">
+                                        <div class="menu-item-title">Add photos & files</div>
+                                        <div class="menu-item-subtitle">Upload from computer (PDF, PNG, JPG, ZIP)</div>
+                                    </div>
+                                </div>
+                                <div class="attach-menu-item" id="menu-camera-ocr">
+                                    <div class="menu-item-icon">📸</div>
+                                    <div class="menu-item-content">
+                                        <div class="menu-item-title">Math OCR & Photo Scan</div>
+                                        <div class="menu-item-subtitle">Scan handwritten equation from notebook</div>
+                                    </div>
+                                </div>
+                                <div class="attach-menu-item" id="menu-ncert-library">
+                                    <div class="menu-item-icon">📚</div>
+                                    <div class="menu-item-content">
+                                        <div class="menu-item-title">NCERT Book Library</div>
+                                        <div class="menu-item-subtitle">Attach Class 9 - 12 textbook chapter</div>
+                                    </div>
+                                </div>
+                                <div class="attach-menu-item" id="menu-board-formulas">
+                                    <div class="menu-item-icon">📐</div>
+                                    <div class="menu-item-content">
+                                        <div class="menu-item-title">Exam Formula Sheet</div>
+                                        <div class="menu-item-subtitle">Direct standard formulas & theorems</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 📷 Photo Upload Pill Button -->
-                        <button type="button" id="plus-btn" class="capsule-icon-btn photo-btn" title="Add photo or formula image">
-                            🖼️
-                        </button>
-                        <input type="file" id="file-input" style="display:none;" accept="image/*,.pdf" />
+                        <!-- Center: Slim Auto-Expanding Textarea -->
+                        <textarea id="user-input" placeholder="Ask any math equation or concept..." rows="1"></textarea>
 
-                        <!-- 🎙️ Mic Button -->
-                        <button type="button" id="mic-btn" class="capsule-icon-btn mic-btn" title="Speak to Tutor">
-                            🎙️
-                        </button>
+                        <!-- Right: Action Controls Toolbar (Model Pill, Mic, Send) -->
+                        <div class="input-right-tools">
+                            <!-- ⚡ Model Selector Pill -->
+                            <div class="model-picker">
+                                <button type="button" id="model-pill-btn" class="model-pill-btn" title="Choose AI Model">
+                                    ⚡ <span id="selected-model-text">Groq · LLaMA 3.3</span> ▾
+                                </button>
+                                <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
+                                    <div class="menu-item active" data-model="openai/gpt-oss-120b" data-text="Groq · GPT-OSS (120B)">⚡ Groq · GPT-OSS (120B Versatile)</div>
+                                    <div class="menu-item" data-model="openai/gpt-oss-20b" data-text="Groq · GPT-OSS (20B)">🚀 Groq · GPT-OSS (20B Fast)</div>
+                                    <div class="menu-item" data-model="qwen/qwen3.8-27b" data-text="Groq · Qwen 3.8 (27B)">🧠 Groq · Qwen 3.8 (27B Math)</div>
+                                    <div class="menu-item" data-model="allam-2-7b" data-text="Groq · Allam (7B)">🌍 Groq · Allam (7B)</div>
+                                </div>
+                            </div>
 
-                        <!-- ➤ Cyan Glowing Send Button -->
-                        <button type="submit" id="send-btn" class="send-action-btn" title="Send question">
-                            ➤
-                        </button>
+                            <!-- 🎙️ Voice Mic Button -->
+                            <button type="button" id="mic-btn" class="tool-circle-btn mic-btn" title="Speak to Tutor">
+                                🎙️
+                            </button>
+
+                            <!-- ➤ Send Button -->
+                            <button type="submit" id="send-btn" class="send-circle-btn" title="Send question">
+                                ➤
+                            </button>
+                        </div>
                     </div>
                 </form>
-
-                <!-- Photo Tag (Jab student photo upload kare) -->
-                <div id="photo-preview-tag" class="photo-tag" style="display: none; margin-top: 6px;">
-                    📷 <span id="photo-name"></span> <b id="remove-photo" style="cursor:pointer; margin-left:6px;">✕</b>
-                </div>
             </div>
         </main>
     </div>
@@ -663,6 +710,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=40"></script>
+    <script src="script.js?v=80"></script>
 </body>
 </html>
