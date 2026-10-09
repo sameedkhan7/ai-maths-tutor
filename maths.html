@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=80">
+    <link rel="stylesheet" href="style.css?v=85">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -125,6 +125,15 @@
                 </div>
             </div>
         </aside>
+
+        <!-- Sidebar Drag Resizer Handle (Like Claude / ChatGPT in Screenshot 1) -->
+        <div id="sidebar-resizer" class="sidebar-resizer" title="Drag to resize · Click to toggle (Ctrl+B)">
+            <div class="resizer-tooltip">
+                <span class="tooltip-title">Hide sidebar <kbd>Ctrl+B</kbd></span>
+                <span class="tooltip-sub">Drag to resize</span>
+            </div>
+        </div>
+
         <main class="chat-area">
           <header class="chat-header">
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
@@ -298,7 +307,7 @@
                         </div>
 
                         <!-- Center: Slim Auto-Expanding Textarea -->
-                        <textarea id="user-input" placeholder="Ask any math equation or concept..." rows="1"></textarea>
+                        <textarea id="user-input" placeholder="Ask any math equation..." rows="1"></textarea>
 
                         <!-- Right: Action Controls Toolbar (Model Pill, Mic, Send) -->
                         <div class="input-right-tools">
@@ -710,6 +719,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=80"></script>
+    <script src="script.js?v=85"></script>
 </body>
 </html>

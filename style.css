@@ -19,11 +19,112 @@ body {
 
 .sidebar {
     width: 260px;
+    min-width: 170px;
+    max-width: 520px;
     background-color: #ffffff;
     border-right: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
     padding: 20px;
+    position: relative;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+/* Sidebar Resizer Handle (Claude & ChatGPT Style Screenshot 1) */
+.sidebar-resizer {
+    width: 8px;
+    margin-left: -4px;
+    margin-right: -4px;
+    height: 100vh;
+    cursor: col-resize;
+    position: relative;
+    z-index: 80;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition: background 0.18s ease;
+}
+
+.sidebar-resizer::after {
+    content: '';
+    width: 2px;
+    height: 100%;
+    background: transparent;
+    transition: background 0.18s ease;
+}
+
+.sidebar-resizer:hover::after,
+.sidebar-resizer.is-dragging::after {
+    background: #6366f1;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+}
+
+body.dark-mode .sidebar-resizer:hover::after,
+body.dark-mode .sidebar-resizer.is-dragging::after {
+    background: #818cf8;
+    box-shadow: 0 0 12px rgba(129, 140, 248, 0.8);
+}
+
+/* Floating Tooltip: Hide sidebar Ctrl+B / Drag to resize */
+.resizer-tooltip {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%) translateX(6px);
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    padding: 6px 11px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+    color: #f8fafc;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 100;
+}
+
+body:not(.dark-mode) .resizer-tooltip {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.resizer-tooltip .tooltip-title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.resizer-tooltip kbd {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 10.5px;
+    font-family: inherit;
+    color: #cbd5e1;
+}
+
+.resizer-tooltip .tooltip-sub {
+    display: block;
+    font-size: 10.5px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.sidebar-resizer:hover .resizer-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(10px);
+}
+
+.sidebar-resizer.is-dragging .resizer-tooltip {
+    opacity: 0;
 }
 
 .chat-area {
@@ -1341,44 +1442,66 @@ body.dark-mode .sym-btn:hover {
     box-shadow: 0 0 14px rgba(99, 102, 241, 0.6);
 }
 
-/* 🌟 Sleek Squarish-Rectangular Chat Input Card (Slim ChatGPT & Antigravity / Claude Style) */
+/* 🌟 Sleek Squarish-Rectangular Chat Input Card with Radiant Multi-Color Neon Lighting Aura (Screenshot 2 & 3) */
 .sleek-rect-card {
     width: 100%;
     display: flex;
     flex-direction: column;
     border-radius: 16px;
-    padding: 7px 10px;
+    padding: 7px 12px;
     position: relative;
     background: #ffffff;
-    border: 1px solid #cbd5e1;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1.5px solid #cbd5e1;
+    box-shadow: 
+        -14px 0 28px -4px rgba(249, 115, 22, 0.28),
+        14px 0 28px -4px rgba(6, 182, 212, 0.32),
+        0 0 22px 1px rgba(168, 85, 247, 0.22),
+        0 4px 14px rgba(0, 0, 0, 0.08);
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.dark-mode .sleek-rect-card {
-    background: #18181b;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 6px 26px rgba(0, 0, 0, 0.45);
+    background: linear-gradient(135deg, rgba(20, 24, 34, 0.96), rgba(11, 17, 32, 0.98)) padding-box,
+                linear-gradient(90deg, rgba(249, 115, 22, 0.75) 0%, rgba(236, 72, 153, 0.65) 45%, rgba(168, 85, 247, 0.75) 68%, rgba(6, 182, 212, 0.75) 100%) border-box;
+    border: 1.5px solid transparent;
+    border-radius: 16px;
+    box-shadow: 
+        -18px 0 36px -6px rgba(249, 115, 22, 0.45),
+        18px 0 36px -6px rgba(6, 182, 212, 0.48),
+        0 0 28px 2px rgba(217, 70, 239, 0.38),
+        0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
 .sleek-rect-card:hover {
-    border-color: #94a3b8;
-    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.08);
+    box-shadow: 
+        -18px 0 34px -3px rgba(249, 115, 22, 0.38),
+        18px 0 34px -3px rgba(6, 182, 212, 0.42),
+        0 0 26px 3px rgba(168, 85, 247, 0.32),
+        0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 body.dark-mode .sleek-rect-card:hover {
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55);
+    box-shadow: 
+        -22px 0 44px -4px rgba(249, 115, 22, 0.55),
+        22px 0 44px -4px rgba(6, 182, 212, 0.58),
+        0 0 34px 4px rgba(217, 70, 239, 0.48),
+        0 8px 22px rgba(0, 0, 0, 0.55);
 }
 
 .sleek-rect-card:focus-within {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25), 0 8px 24px rgba(0, 0, 0, 0.1);
+    box-shadow: 
+        -22px 0 40px -2px rgba(249, 115, 22, 0.48),
+        22px 0 40px -2px rgba(6, 182, 212, 0.54),
+        0 0 30px 4px rgba(168, 85, 247, 0.42),
+        0 8px 22px rgba(0, 0, 0, 0.15);
 }
 
 body.dark-mode .sleek-rect-card:focus-within {
-    border-color: #818cf8;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.35), 0 10px 32px rgba(0, 0, 0, 0.6);
+    box-shadow: 
+        -26px 0 50px -2px rgba(249, 115, 22, 0.65),
+        26px 0 50px -2px rgba(6, 182, 212, 0.70),
+        0 0 40px 6px rgba(217, 70, 239, 0.58),
+        0 10px 28px rgba(0, 0, 0, 0.65);
 }
 
 /* Inner Single Row for Controls & Input */
@@ -1591,16 +1714,19 @@ body.dark-mode .menu-item-subtitle {
 /* Center: Textarea */
 .sleek-rect-card textarea {
     flex: 1;
+    min-width: 80px;
     border: none;
     outline: none;
     font-size: 13.5px;
     background: transparent !important;
     resize: none;
     color: #1e293b;
-    line-height: 1.4;
-    padding: 4px 6px;
-    min-height: 24px;
+    line-height: 22px;
+    height: 24px;
+    padding: 1px 6px;
+    min-height: 22px;
     max-height: 110px;
+    overflow-y: hidden;
 }
 
 body.dark-mode .sleek-rect-card textarea {
@@ -1609,6 +1735,9 @@ body.dark-mode .sleek-rect-card textarea {
 
 .sleek-rect-card textarea::placeholder {
     color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Right: Tools Bar */

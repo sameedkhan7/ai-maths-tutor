@@ -1741,13 +1741,91 @@ if (settingsLogoutBtn) {
     });
 }
 
-// 9. Sidebar Collapse / Expand Toggle
+// 9. Sidebar Collapse / Expand Toggle & Drag-to-Resize (Claude & ChatGPT Style)
 const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
 const sidebar = document.querySelector('.sidebar');
+const sidebarResizer = document.getElementById('sidebar-resizer');
 
-if (sidebarToggleBtn && sidebar) {
-    sidebarToggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
+// Restore saved sidebar width on page load
+const savedSidebarWidth = localStorage.getItem('sidebarCustomWidth');
+if (savedSidebarWidth && sidebar && !sidebar.classList.contains('collapsed')) {
+    const widthNum = parseInt(savedSidebarWidth, 10);
+    if (widthNum >= 170 && widthNum <= 520) {
+        sidebar.style.width = `${widthNum}px`;
+    }
+}
+
+function toggleSidebarCollapse() {
+    if (!sidebar) return;
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    if (isCollapsed) {
+        sidebar.style.width = '';
+    } else {
+        const savedW = localStorage.getItem('sidebarCustomWidth');
+        sidebar.style.width = savedW ? `${savedW}px` : '260px';
+    }
+}
+
+if (sidebarToggleBtn) {
+    sidebarToggleBtn.addEventListener('click', toggleSidebarCollapse);
+}
+
+// Keyboard Shortcut: Ctrl+B or Cmd+B to toggle sidebar
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+        e.preventDefault();
+        toggleSidebarCollapse();
+    }
+});
+
+// Drag to Resize Sidebar Handle
+if (sidebarResizer && sidebar) {
+    let isDragging = false;
+    let startX = 0;
+    let hasMoved = false;
+
+    sidebarResizer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        hasMoved = false;
+        startX = e.clientX;
+        sidebarResizer.classList.add('is-dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const delta = Math.abs(e.clientX - startX);
+        if (delta > 3) hasMoved = true;
+
+        const newWidth = e.clientX;
+        if (newWidth < 120) {
+            if (!sidebar.classList.contains('collapsed')) {
+                sidebar.classList.add('collapsed');
+                sidebar.style.width = '';
+            }
+        } else {
+            if (sidebar.classList.contains('collapsed')) {
+                sidebar.classList.remove('collapsed');
+            }
+            const clampedWidth = Math.max(170, Math.min(520, newWidth));
+            sidebar.style.width = `${clampedWidth}px`;
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            sidebarResizer.classList.remove('is-dragging');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+
+            if (!hasMoved) {
+                toggleSidebarCollapse();
+            } else if (!sidebar.classList.contains('collapsed')) {
+                localStorage.setItem('sidebarCustomWidth', sidebar.offsetWidth);
+            }
+        }
     });
 }
 
