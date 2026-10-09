@@ -454,10 +454,19 @@
         const googleModalClose = document.getElementById('google-modal-close');
         const googleBtn = document.getElementById('google-login-btn');
 
-        // API Base URL helper for login
-        const API_BASE_URL = (window.location.protocol === 'https:' || (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost'))
-            ? 'https://since-energy-coated-minus.trycloudflare.com'
-            : 'http://127.0.0.1:8000';
+        // Dynamic API Base URL helper for login
+        function getApiBaseUrl() {
+            const saved = localStorage.getItem('customApiBaseUrl');
+            if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
+            if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+                return 'http://127.0.0.1:8000';
+            }
+            if (window.location.protocol === 'http:' && /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname)) {
+                return `http://${window.location.hostname}:8000`;
+            }
+            return (window.location.protocol === 'https:') ? '' : 'http://127.0.0.1:8000';
+        }
+        const API_BASE_URL = getApiBaseUrl();
 
         // Form Submit (Integrated Developer Admin & Student Authentication)
         loginForm.addEventListener('submit', async (e) => {

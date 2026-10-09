@@ -7,10 +7,19 @@ let currentStyle = 'simple';
 let currentChatId = null;
 let allChatsCache = [];
 
-// 🌐 Dynamic API URL (Automatically switches to public HTTPS tunnel on GitHub Pages / Phone)
-const API_BASE_URL = (window.location.protocol === 'https:' || (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost'))
-    ? 'https://michigan-stud-alt-lawyer.trycloudflare.com'
-    : 'http://127.0.0.1:8000';
+// 🌐 Dynamic API URL (Automatically connects to local 8000 on laptop, phone Wi-Fi LAN IP, or custom tunnel)
+function getApiBaseUrl() {
+    const saved = localStorage.getItem('customApiBaseUrl');
+    if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+        return 'http://127.0.0.1:8000';
+    }
+    if (window.location.protocol === 'http:' && /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname)) {
+        return `http://${window.location.hostname}:8000`;
+    }
+    return (window.location.protocol === 'https:') ? '' : 'http://127.0.0.1:8000';
+}
+const API_BASE_URL = getApiBaseUrl();
 
 // 0. Student Profile Initialization (ChatGPT & Claude Style)
 const currentStudentName = localStorage.getItem('studentName') || 'Sameed Khan';
@@ -116,13 +125,28 @@ symButtons.forEach(button => {
     button.addEventListener('click', () => {
         if (userInput) {
             userInput.value += button.innerText;
+            autoResizeInput();
             userInput.focus();
         }
     });
 });
 
+// 📝 Auto-Expanding Dynamic Textarea (Exact ChatGPT Style)
+function autoResizeInput() {
+    if (!userInput) return;
+    userInput.style.height = 'auto';
+    const computedHeight = Math.min(Math.max(userInput.scrollHeight, 28), 150);
+    userInput.style.height = computedHeight + 'px';
+    if (userInput.scrollHeight > 150) {
+        userInput.style.overflowY = 'auto';
+    } else {
+        userInput.style.overflowY = 'hidden';
+    }
+}
+
 // ⌨️ Enter Key to Send Message (Shift+Enter for newline)
 if (userInput) {
+    userInput.addEventListener('input', autoResizeInput);
     userInput.addEventListener('keydown', function (e) {
         if ((e.key === 'Enter' || e.keyCode === 13) && !e.shiftKey && !e.ctrlKey && !e.altKey) {
             e.preventDefault();
@@ -206,6 +230,7 @@ if (menuNcertLibrary) {
             if (typeof fetchRagStats === 'function') fetchRagStats();
         } else if (userInput) {
             userInput.value = "Explain NCERT Class 10/11/12 key concept: ";
+            autoResizeInput();
             userInput.focus();
         }
     });
@@ -218,6 +243,7 @@ if (menuBoardFormulas) {
         if (attachDropdown) attachDropdown.style.display = 'none';
         if (userInput) {
             userInput.value = "Provide the complete Board Exam Formula Sheet with theorems and scoring tips for: ";
+            autoResizeInput();
             userInput.focus();
         }
     });
@@ -287,6 +313,7 @@ if (fileInput) {
                             if (fileChipMeta) fileChipMeta.innerText = `Image · OCR Scanned: "${cleanOcr.slice(0, 24)}..."`;
                             if (userInput && !userInput.value.trim()) {
                                 userInput.value = `Solve this math problem from photo: ${cleanOcr}`;
+                                autoResizeInput();
                                 userInput.focus();
                             }
                         } else {
@@ -318,7 +345,8 @@ if (selectedModelText && currentModel) {
         if (item.getAttribute('data-model') === currentModel) {
             menuItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-            selectedModelText.innerText = item.getAttribute('data-text');
+            selectedModelText.innerText = 'Groq';
+            if (modelPillBtn) modelPillBtn.title = `Current Model: ${item.innerText.trim()}`;
             found = true;
         }
     });
@@ -347,7 +375,10 @@ menuItems.forEach(item => {
         currentModel = item.getAttribute('data-model') || 'openai/gpt-oss-120b';
         localStorage.setItem('tutorModel', currentModel);
         if (selectedModelText) {
-            selectedModelText.innerText = item.getAttribute('data-text');
+            selectedModelText.innerText = 'Groq';
+        }
+        if (modelPillBtn) {
+            modelPillBtn.title = `Current Model: ${item.innerText.trim()}`;
         }
         modelDropdown.style.display = 'none';
     });
@@ -459,6 +490,8 @@ function submitUserMessage() {
     // Student message bubble
     appendMessage('You', displayQuestion, 'user');
     userInput.value = '';
+    userInput.style.height = '28px';
+    userInput.style.overflowY = 'hidden';
     clearAttachedFile();
 
     // ⏳ Animated Thinking Indicator
@@ -1556,7 +1589,28 @@ function openSettingsModal() {
     if (accUserInput) accUserInput.value = localStorage.getItem('studentUsername') || `@${currentStudentName.toLowerCase().replace(/\s+/g, '')}`;
     if (accEmailEl) accEmailEl.innerText = localStorage.getItem('studentEmail') || `${currentStudentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`;
 
+    const customApiInput = document.getElementById('setting-custom-api-url');
+    if (customApiInput) customApiInput.value = localStorage.getItem('customApiBaseUrl') || '';
+
     applyFontSize(currentFontSizeLevel);
+}
+
+// Save Custom Backend API URL (Cloudflare Tunnel or Local LAN)
+const saveCustomApiBtn = document.getElementById('save-custom-api-btn');
+if (saveCustomApiBtn) {
+    saveCustomApiBtn.addEventListener('click', () => {
+        const customApiInput = document.getElementById('setting-custom-api-url');
+        const val = customApiInput ? customApiInput.value.trim() : '';
+        if (val) {
+            localStorage.setItem('customApiBaseUrl', val.replace(/\/+$/, ''));
+            alert('🚀 Custom Backend API URL saved! Reloading...');
+            window.location.reload();
+        } else {
+            localStorage.removeItem('customApiBaseUrl');
+            alert('Custom API URL cleared! Using default auto-detect.');
+            window.location.reload();
+        }
+    });
 }
 
 // Save Account Details
@@ -1904,13 +1958,10 @@ if (sidebarToggleBtn) {
 // ===================================================
 const userRole = localStorage.getItem('userRole') || 'student';
 const popupDevItem = document.getElementById('popup-dev-item');
-const popupDevToggleHistoryItem = document.getElementById('popup-dev-toggle-history-item');
-const devToggleHistoryText = document.getElementById('dev-toggle-history-text');
 
 // Developer Profile Badge & Menu Item Visibility (ONLY for developer accounts)
 if (userRole === 'developer') {
     if (popupDevItem) popupDevItem.style.display = 'flex';
-    if (popupDevToggleHistoryItem) popupDevToggleHistoryItem.style.display = 'flex';
     if (userPlanTagEl) {
         userPlanTagEl.innerHTML = `⚡ <strong style="color:#c084fc;">Developer Admin</strong> · RAG Manager`;
     }
@@ -1921,18 +1972,6 @@ if (userRole === 'developer') {
     }
 } else {
     if (popupDevItem) popupDevItem.style.display = 'none';
-    if (popupDevToggleHistoryItem) popupDevToggleHistoryItem.style.display = 'none';
-}
-
-if (popupDevToggleHistoryItem) {
-    popupDevToggleHistoryItem.addEventListener('click', () => {
-        if (profilePopupMenu) profilePopupMenu.style.display = 'none';
-        devShowAllUsersHistory = !devShowAllUsersHistory;
-        if (devToggleHistoryText) {
-            devToggleHistoryText.innerText = devShowAllUsersHistory ? "👥 Showing All Users' Chats" : "👤 Showing My History Only";
-        }
-        fetchAndRenderSidebarChats();
-    });
 }
 
 // Dev Modal Controls

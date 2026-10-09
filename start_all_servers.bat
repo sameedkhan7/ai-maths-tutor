@@ -7,7 +7,7 @@ echo ========================================================
 echo.
 
 echo [1/3] Starting FastAPI Backend AI Engine (Port 8000)...
-start "1. AI Maths Backend Server" cmd /k "set PYTHONPATH=C:\Users\SK\OneDrive\Desktop\maths project&& cd /d C:\Users\SK\OneDrive\Desktop\maths project\backend&& python -m uvicorn main:app --reload --port 8000"
+start "1. AI Maths Backend Server" cmd /k "set PYTHONPATH=C:\Users\SK\OneDrive\Desktop\maths project&& cd /d C:\Users\SK\OneDrive\Desktop\maths project\backend&& python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000"
 
 timeout /t 2 >nul
 
@@ -17,7 +17,7 @@ start "2. Cloudflare Public HTTPS Tunnel" cmd /k "cd /d C:\Users\SK\OneDrive\Des
 timeout /t 2 >nul
 
 echo [3/3] Starting Local Frontend Server (Port 5500)...
-start "3. AI Maths Frontend Server" cmd /k "cd /d C:\Users\SK\OneDrive\Desktop\maths project&& python -m http.server 5500"
+start "3. AI Maths Frontend Server" cmd /k "cd /d C:\Users\SK\OneDrive\Desktop\maths project&& python -m http.server 5500 --bind 0.0.0.0"
 
 echo.
 echo ========================================================

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=95">
+    <link rel="stylesheet" href="style.css?v=100">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -98,11 +98,6 @@
                     <span class="popup-item-text">Dev RAG Control Panel</span>
                 </div>
 
-                <!-- Developer Toggle View All Histories (Developer Only) -->
-                <div class="popup-item" id="popup-dev-toggle-history-item" style="display: none; color: #38bdf8;">
-                    <span class="popup-item-icon">👥</span>
-                    <span class="popup-item-text" id="dev-toggle-history-text">View All Users' History</span>
-                </div>
 
                 <div class="popup-divider"></div>
 
@@ -314,7 +309,7 @@
                             <!-- ⚡ Model Selector Pill -->
                             <div class="model-picker">
                                 <button type="button" id="model-pill-btn" class="model-pill-btn" title="Choose AI Model">
-                                    ⚡ <span id="selected-model-text">Groq · LLaMA 3.3</span> ▾
+                                    ⚡ <span id="selected-model-text">Groq</span> ▾
                                 </button>
                                 <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
                                     <div class="menu-item active" data-model="openai/gpt-oss-120b" data-text="Groq · GPT-OSS (120B)">⚡ Groq · GPT-OSS (120B Versatile)</div>
@@ -402,6 +397,17 @@
                                     <option value="dark">Dark</option>
                                     <option value="system">System</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-row">
+                            <div class="setting-info">
+                                <span class="setting-name">Backend API Server</span>
+                                <span class="setting-desc">Local IP (http://127.0.0.1:8000) or Cloudflare Tunnel URL for mobile</span>
+                            </div>
+                            <div class="setting-control" style="display: flex; gap: 8px;">
+                                <input type="text" id="setting-custom-api-url" class="settings-select" style="padding: 6px 10px; min-width: 200px;" placeholder="https://xyz.trycloudflare.com">
+                                <button type="button" id="save-custom-api-btn" style="padding: 6px 12px; background: #6366f1; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Save</button>
                             </div>
                         </div>
 
@@ -719,6 +725,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=95"></script>
+    <script src="script.js?v=100"></script>
 </body>
 </html>
