@@ -1746,13 +1746,19 @@ const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
 const sidebar = document.querySelector('.sidebar');
 const sidebarResizer = document.getElementById('sidebar-resizer');
 
+const DEFAULT_SIDEBAR_WIDTH = 285;
+
 // Restore saved sidebar width on page load
 const savedSidebarWidth = localStorage.getItem('sidebarCustomWidth');
 if (savedSidebarWidth && sidebar && !sidebar.classList.contains('collapsed')) {
     const widthNum = parseInt(savedSidebarWidth, 10);
-    if (widthNum >= 170 && widthNum <= 520) {
+    if (widthNum >= 220 && widthNum <= 520) {
         sidebar.style.width = `${widthNum}px`;
+    } else {
+        sidebar.style.width = `${DEFAULT_SIDEBAR_WIDTH}px`;
     }
+} else if (sidebar && !sidebar.classList.contains('collapsed')) {
+    sidebar.style.width = `${DEFAULT_SIDEBAR_WIDTH}px`;
 }
 
 function toggleSidebarCollapse() {
@@ -1762,7 +1768,8 @@ function toggleSidebarCollapse() {
         sidebar.style.removeProperty('width');
     } else {
         const savedW = localStorage.getItem('sidebarCustomWidth');
-        sidebar.style.width = savedW ? `${savedW}px` : '260px';
+        const targetW = (savedW && parseInt(savedW, 10) >= 240) ? parseInt(savedW, 10) : DEFAULT_SIDEBAR_WIDTH;
+        sidebar.style.width = `${targetW}px`;
     }
 }
 
