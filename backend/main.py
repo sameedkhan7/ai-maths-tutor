@@ -1,3 +1,9 @@
+import sys
+import os
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(line_buffering=True)
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(line_buffering=True)
 import re
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +17,10 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database import get_connection, init_db
+try:
+    from backend.database import get_connection, init_db
+except ImportError:
+    from database import get_connection, init_db
 
 try:
     from backend.ai.tutor import generate_tutor_response
@@ -872,4 +881,4 @@ if __name__ == '__main__':
     import uvicorn
     port = int(os.environ.get('PORT', 10000))
     print(f'[Server] Starting on port {port}...')
-    uvicorn.run('backend.main:app', host='0.0.0.0', port=port)
+    uvicorn.run(app, host='0.0.0.0', port=port)
