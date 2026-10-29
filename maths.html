@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css?v=100">
+    <link rel="stylesheet" href="style.css?v=158">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Maths Tutore</title>
@@ -139,17 +139,19 @@
                         <span style="font-size: 11px; background-color: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 999px; font-weight: 600; display: inline-block; margin-top: 3px;">NCERT Grounded</span>
                     </div>
                 </div>
-                <!-- 📄 Export Chat to PDF Revision Notes -->
-                <button type="button" id="export-pdf-btn" class="export-pdf-btn" title="Export Chat to PDF Notes for Revision">
-                    📄 <span class="export-btn-text">Export PDF Notes</span>
-                </button>
+                <div>
+                    <!-- 📄 Export Chat to PDF Revision Notes -->
+                    <button type="button" id="export-pdf-btn" class="export-pdf-btn" title="Export Chat to PDF Notes for Revision">
+                        📄 <span class="export-btn-text">PDF</span>
+                    </button>
+                </div>
             </div>
         </header>
             <div class="messages-container" id="messages-container">
                 <!-- 3D Holographic Math Orb Welcome Hero -->
                 <div class="welcome-hero" id="welcome-hero">
                     <h2 class="welcome-greeting" id="welcome-greeting">Hello Sameed!</h2>
-                    <p class="welcome-subtitle">How can I help with <strong>NCERT Maths</strong> today?</p>
+                    <p class="welcome-subtitle">Welcome to AI Maths Tutor!<br>How would you like me to teach you today?</p>
                     
                     <!-- 🔮 Center 3D Holographic Math Orb with Orbiting Math Symbols -->
                     <div class="math-orb-system">
@@ -242,11 +244,126 @@
                     <button type="button" class="sym-btn">±</button>
                 </div>
 
+                <!-- 🧠 Smart Tutor Mode Selector (Native Inline Chat Component) -->
+                <div id="smart-tutor-mode-selector" class="smart-mode-selector" style="display: none;" role="region" aria-label="Tutor Teaching Style Selector">
+                    <div class="mode-selector-header">
+                        <div class="mode-selector-title">
+                            <span class="mode-sparkle">✨</span>
+                            <span class="mode-title-main">Choose Teaching Style</span>
+                            <span class="mode-title-sub">Select how you want your question explained</span>
+                        </div>
+                        <button type="button" id="mode-selector-close-btn" class="mode-close-btn" title="Dismiss selector" aria-label="Dismiss selector">✕</button>
+                    </div>
+
+                    <div class="mode-options-grid" id="mode-options-grid" role="radiogroup" aria-label="Teaching Style Options">
+                        <!-- 1. Quick Answer -->
+                        <div class="mode-card active" data-style="quick" role="radio" aria-checked="true" tabindex="0">
+                            <div class="mode-card-header">
+                                <span class="mode-icon">⚡</span>
+                                <span class="mode-name">Quick Answer</span>
+                            </div>
+                            <p class="mode-desc">Direct result & minimal essential working</p>
+                        </div>
+
+                        <!-- 2. Concept First -->
+                        <div class="mode-card" data-style="simple" role="radio" aria-checked="false" tabindex="0">
+                            <div class="mode-card-header">
+                                <span class="mode-icon">💡</span>
+                                <span class="mode-name">Concept First</span>
+                            </div>
+                            <p class="mode-desc">Core idea & formula before calculation</p>
+                        </div>
+
+                        <!-- 3. Step-by-Step -->
+                        <div class="mode-card" data-style="step_by_step" role="radio" aria-checked="false" tabindex="0">
+                            <div class="mode-card-header">
+                                <span class="mode-icon">🔢</span>
+                                <span class="mode-name">Step-by-Step</span>
+                            </div>
+                            <p class="mode-desc">Numbered steps & explicit calculations</p>
+                        </div>
+
+                        <!-- 4. Exam-Oriented -->
+                        <div class="mode-card" data-style="exam" role="radio" aria-checked="false" tabindex="0">
+                            <div class="mode-card-header">
+                                <span class="mode-icon">🎯</span>
+                                <span class="mode-name">Exam-Oriented</span>
+                            </div>
+                            <p class="mode-desc">CBSE/NCERT marking scheme format</p>
+                        </div>
+
+                        <!-- 5. Sports Mode -->
+                        <div class="mode-card" data-style="sports" role="radio" aria-checked="false" tabindex="0">
+                            <div class="mode-card-header">
+                                <span class="mode-icon">🏏</span>
+                                <span class="mode-name">Sports Mode</span>
+                            </div>
+                            <p class="mode-desc">Cricket & athletic real-game analogies</p>
+                        </div>
+
+                        <!-- 6. Real-Life Mode -->
+                        <div class="mode-card" data-style="analogy" role="radio" aria-checked="false" tabindex="0">
+                            <div class="mode-card-header">
+                                <span class="mode-icon">🌍</span>
+                                <span class="mode-name">Real-Life Mode</span>
+                            </div>
+                            <p class="mode-desc">Practical everyday relatable examples</p>
+                        </div>
+
+                        <!-- 7. Story Mode -->
+                        <div class="mode-card" data-style="story" role="radio" aria-checked="false" tabindex="0">
+                            <div class="mode-card-header">
+                                <span class="mode-icon">📖</span>
+                                <span class="mode-name">Story Mode</span>
+                            </div>
+                            <p class="mode-desc">Engaging narrative with characters</p>
+                        </div>
+
+                        <!-- 8. Social Mode -->
+                        <div class="mode-card" data-style="social" role="radio" aria-checked="false" tabindex="0">
+                            <div class="mode-card-header">
+                                <span class="mode-icon">💬</span>
+                                <span class="mode-name">Social Mode</span>
+                            </div>
+                            <p class="mode-desc">Friendly peer study buddy chat</p>
+                        </div>
+
+                        <!-- 9. Socratic Mode -->
+                        <div class="mode-card" data-style="socratic" role="radio" aria-checked="false" tabindex="0">
+                            <div class="mode-card-header">
+                                <span class="mode-icon">🧭</span>
+                                <span class="mode-name">Socratic Mode</span>
+                            </div>
+                            <p class="mode-desc">Guided hints & discovery questions</p>
+                        </div>
+                    </div>
+
+                    <div class="mode-selector-footer">
+                        <div class="mode-status-info">
+                            <span>Selected:</span>
+                            <span id="mode-selected-badge" class="mode-badge-pill">⚡ Quick Answer</span>
+                        </div>
+                        <button type="button" id="mode-solve-btn" class="mode-solve-action-btn" title="Solve using selected style">
+                            <span>Solve</span> <span class="solve-btn-arrow">➤</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 🎛️ Active Mode Quick Switcher Bar (Always accessible near input) -->
+                <div class="active-mode-bar" id="active-mode-bar">
+                    <button type="button" id="active-mode-toggle-btn" class="active-mode-chip-btn" title="Click to change teaching style">
+                        <span id="active-mode-chip-icon" class="mode-chip-icon">⚡</span>
+                        <span class="mode-chip-text">Tutor Mode: <strong id="active-mode-chip-name">Quick Answer</strong></span>
+                        <span class="mode-chip-chevron">▾</span>
+                    </button>
+                </div>
+
                 <!-- Slim Squarish-Rectangular Input Card (Rounded ~16px) -->
                 <form id="chat-form" class="chat-input-card sleek-rect-card">
-                    <!-- File / Homework Attachment Preview Badge (Appears when student attaches a file) -->
+                    <!-- File / Homework Attachment Preview Badge -->
                     <div id="attached-files-container" class="attached-files-container" style="display: none;">
-                        <div class="file-chip-badge">
+                        <div class="file-chip-badge" style="display: flex; align-items: center; gap: 8px;">
+                            <img id="file-chip-thumb" src="" alt="preview" style="display: none; width: 34px; height: 34px; object-fit: cover; border-radius: 6px; border: 1px solid #475569;" />
                             <span class="file-chip-icon" id="file-chip-icon">📄</span>
                             <div class="file-chip-details">
                                 <span class="file-chip-name" id="file-chip-name">homework.pdf</span>
@@ -256,79 +373,79 @@
                         </div>
                     </div>
 
-                    <div class="input-inner-row">
-                        <!-- Left: ChatGPT Style '+' Attach Button & Floating Popup Menu -->
-                        <div class="attach-container">
-                            <button type="button" id="plus-btn" class="chatgpt-plus-btn" title="Add photos & files">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
-                            </button>
-                            <!-- Hidden multi-format file input -->
-                            <input type="file" id="file-input" style="display:none;" accept="image/*,application/pdf,.zip,.txt,.docx" />
+                    <!-- Left: ChatGPT Style '+' Attach Button & Floating Popup Menu -->
+                    <div class="attach-container">
+                        <button type="button" id="plus-btn" class="chatgpt-plus-btn" title="Add photos & files">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                        <!-- Hidden multi-format file input -->
+                        <input type="file" id="file-input" style="display:none;" accept="image/*,application/pdf,.zip,.txt,.docx" />
+                        <!-- Hidden direct camera capture input for Mobile Phones -->
+                        <input type="file" id="camera-capture-input" style="display:none;" accept="image/*" capture="environment" />
 
-                            <!-- ChatGPT Attachment Popup Menu (Exact replica of Screenshot 4) -->
-                            <div id="attach-dropdown-menu" class="chatgpt-attach-popup" style="display: none;">
-                                <div class="attach-menu-item" id="menu-upload-photos-files">
-                                    <div class="menu-item-icon">📎</div>
-                                    <div class="menu-item-content">
-                                        <div class="menu-item-title">Add photos & files</div>
-                                        <div class="menu-item-subtitle">Upload from computer (PDF, PNG, JPG, ZIP)</div>
-                                    </div>
+                        <!-- ChatGPT Attachment Popup Menu with Direct Camera Option -->
+                        <div id="attach-dropdown-menu" class="chatgpt-attach-popup" style="display: none;">
+                            <div class="attach-menu-item" id="menu-camera-snap">
+                                <div class="menu-item-icon">📸</div>
+                                <div class="menu-item-content">
+                                    <div class="menu-item-title">Take Photo / Open Camera</div>
+                                    <div class="menu-item-subtitle">Snap notebook or book question with camera</div>
                                 </div>
-                                <div class="attach-menu-item" id="menu-camera-ocr">
-                                    <div class="menu-item-icon">📸</div>
-                                    <div class="menu-item-content">
-                                        <div class="menu-item-title">Math OCR & Photo Scan</div>
-                                        <div class="menu-item-subtitle">Scan handwritten equation from notebook</div>
-                                    </div>
+                            </div>
+                            <div class="attach-menu-item" id="menu-upload-photos-files">
+                                <div class="menu-item-icon">📎</div>
+                                <div class="menu-item-content">
+                                    <div class="menu-item-title">Add photos & files</div>
+                                    <div class="menu-item-subtitle">Upload from computer or gallery (PDF, Images, ZIP)</div>
                                 </div>
-                                <div class="attach-menu-item" id="menu-ncert-library">
-                                    <div class="menu-item-icon">📚</div>
-                                    <div class="menu-item-content">
-                                        <div class="menu-item-title">NCERT Book Library</div>
-                                        <div class="menu-item-subtitle">Attach Class 9 - 12 textbook chapter</div>
-                                    </div>
+                            </div>
+                            <div class="attach-menu-item" id="menu-ncert-library">
+                                <div class="menu-item-icon">📚</div>
+                                <div class="menu-item-content">
+                                    <div class="menu-item-title">NCERT Book Library</div>
+                                    <div class="menu-item-subtitle">Attach Class 9 - 12 textbook chapter</div>
                                 </div>
-                                <div class="attach-menu-item" id="menu-board-formulas">
-                                    <div class="menu-item-icon">📐</div>
-                                    <div class="menu-item-content">
-                                        <div class="menu-item-title">Exam Formula Sheet</div>
-                                        <div class="menu-item-subtitle">Direct standard formulas & theorems</div>
-                                    </div>
+                            </div>
+                            <div class="attach-menu-item" id="menu-board-formulas">
+                                <div class="menu-item-icon">📐</div>
+                                <div class="menu-item-content">
+                                    <div class="menu-item-title">Exam Formula Sheet</div>
+                                    <div class="menu-item-subtitle">Direct standard formulas & theorems</div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Center: Slim Auto-Expanding Textarea -->
-                        <textarea id="user-input" placeholder="Ask any maths equation..." rows="1"></textarea>
+                    <!-- Center: Slim Auto-Expanding Textarea -->
+                    <textarea id="user-input" placeholder="Ask any maths equation..." rows="1"></textarea>
 
-                        <!-- Right: Action Controls Toolbar (Model Pill, Mic, Send) -->
-                        <div class="input-right-tools">
-                            <!-- ⚡ Model Selector Pill -->
-                            <div class="model-picker">
-                                <button type="button" id="model-pill-btn" class="model-pill-btn" title="Choose AI Model">
-                                    ⚡ <span id="selected-model-text">Groq</span> ▾
-                                </button>
-                                <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
-                                    <div class="menu-item active" data-model="openai/gpt-oss-120b" data-text="Groq · GPT-OSS (120B)">⚡ Groq · GPT-OSS (120B Versatile)</div>
-                                    <div class="menu-item" data-model="openai/gpt-oss-20b" data-text="Groq · GPT-OSS (20B)">🚀 Groq · GPT-OSS (20B Fast)</div>
-                                    <div class="menu-item" data-model="qwen/qwen3.8-27b" data-text="Groq · Qwen 3.8 (27B)">🧠 Groq · Qwen 3.8 (27B Math)</div>
-                                    <div class="menu-item" data-model="allam-2-7b" data-text="Groq · Allam (7B)">🌍 Groq · Allam (7B)</div>
-                                </div>
+                    <!-- Right: Action Controls Toolbar (Model Pill, Mic, Send) -->
+                    <div class="input-right-tools">
+                        <!-- ⚡ Model Selector Pill -->
+                        <div class="model-picker">
+                            <button type="button" id="model-pill-btn" class="model-pill-btn" title="Choose AI Model">
+                                ⚡ <span id="selected-model-text">Groq</span> ▾
+                            </button>
+                            <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
+                                <div class="menu-item active" data-model="openai/gpt-oss-120b" data-text="Groq · GPT-OSS (120B)">⚡ Groq · GPT-OSS (120B Versatile)</div>
+                                <div class="menu-item" data-model="openai/gpt-oss-20b" data-text="Groq · GPT-OSS (20B)">🚀 Groq · GPT-OSS (20B Fast)</div>
+                                <div class="menu-item" data-model="qwen/qwen3.8-27b" data-text="Groq · Qwen 3.8 (27B)">🧠 Groq · Qwen 3.8 (27B Math)</div>
+                                <div class="menu-item" data-model="allam-2-7b" data-text="Groq · Allam (7B)">🌍 Groq · Allam (7B)</div>
                             </div>
-
-                            <!-- 🎙️ Voice Mic Button -->
-                            <button type="button" id="mic-btn" class="tool-circle-btn mic-btn" title="Speak to Tutor">
-                                🎙️
-                            </button>
-
-                            <!-- ➤ Send Button -->
-                            <button type="submit" id="send-btn" class="send-circle-btn" title="Send question">
-                                ➤
-                            </button>
                         </div>
+
+                        <!-- 🎙️ Voice Mic Button -->
+                        <button type="button" id="mic-btn" class="tool-circle-btn mic-btn" title="Speak to Tutor">
+                            🎙️
+                        </button>
+
+                        <!-- ➤ Send Button -->
+                        <button type="submit" id="send-btn" class="send-circle-btn" title="Send question">
+                            ➤
+                        </button>
                     </div>
                 </form>
             </div>
@@ -357,6 +474,10 @@
                     <button type="button" class="settings-tab-btn active" data-tab="tab-general">
                         <span class="tab-icon">⚙️</span>
                         <span class="tab-label">General</span>
+                    </button>
+                    <button type="button" class="settings-tab-btn" data-tab="tab-voice">
+                        <span class="tab-icon">🎙️</span>
+                        <span class="tab-label">Voice</span>
                     </button>
                     <button type="button" class="settings-tab-btn" data-tab="tab-education">
                         <span class="tab-icon">🎓</span>
@@ -418,11 +539,11 @@
                             </div>
                             <div class="setting-control">
                                 <select id="setting-language-select" class="settings-select">
-                                    <option value="hinglish">Hinglish (Recommended)</option>
-                                    <option value="en">English (US)</option>
-                                    <option value="hi">हिंदी (Hindi)</option>
-                                    <option value="ur">اردو (Urdu)</option>
-                                    <option value="ar">العربية (Arabic)</option>
+                                    <option value="hinglish">🇮🇳 Hinglish (Recommended)</option>
+                                    <option value="english">🇺🇸 English</option>
+                                    <option value="hindi">🇮🇳 हिन्दी (Hindi)</option>
+                                    <option value="urdu">🇵🇰 اردو (Urdu)</option>
+                                    <option value="arabic">🇸🇦 العربية (Arabic)</option>
                                 </select>
                             </div>
                         </div>
@@ -437,6 +558,92 @@
                                 <span id="font-size-display" class="font-size-label">Normal</span>
                                 <button type="button" id="font-increase-btn" class="settings-pill-btn" title="Increase font size">+</button>
                                 <button type="button" id="font-reset-btn" class="settings-text-btn">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Voice (ChatGPT Style Voice Settings) -->
+                    <div id="tab-voice" class="settings-tab-pane">
+                        <h4 class="pane-title">Voice</h4>
+                        
+                        <!-- ChatGPT Style Voice Persona Showcase -->
+                        <div class="chatgpt-voice-showcase">
+                            <div class="voice-orb-carousel-row">
+                                <button type="button" class="voice-carousel-arrow" id="voice-prev-arrow" title="Previous voice">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+
+                                <div class="voice-orb-container" id="voice-orb-trigger" title="Click to test sample voice">
+                                    <div class="voice-orb-celestial" id="voice-orb-celestial">
+                                        <div class="voice-orb-reflection"></div>
+                                    </div>
+                                    <div class="voice-orb-rings"></div>
+                                </div>
+
+                                <button type="button" class="voice-carousel-arrow" id="voice-next-arrow" title="Next voice">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="voice-persona-meta">
+                                <h3 class="voice-persona-name" id="voice-persona-name">Arjun</h3>
+                                <p class="voice-persona-vibe" id="voice-persona-vibe">Savvy and relaxed</p>
+                            </div>
+
+                            <!-- Carousel Dots -->
+                            <div class="voice-carousel-dots" id="voice-carousel-dots"></div>
+
+                            <button type="button" id="voice-sample-btn" class="voice-sample-action-btn">
+                                <span class="voice-sample-icon" id="voice-sample-icon">▶</span>
+                                <span id="voice-sample-text">Sample voice</span>
+                            </button>
+                        </div>
+
+                        <!-- Speech Settings Controls -->
+                        <div class="voice-controls-section">
+                            <div class="settings-row">
+                                <div class="setting-info">
+                                    <span class="setting-name">Pacing & Speed</span>
+                                    <span class="setting-desc">Vocal pace for mathematical explanations</span>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="setting-voice-speed-select" class="settings-select">
+                                        <option value="0.76">0.75x (Relaxed & Patient)</option>
+                                        <option value="0.85" selected>1x (Normal Teacher - Recommended)</option>
+                                        <option value="1.0">1.25x (Fast Revision)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-row">
+                                <div class="setting-info">
+                                    <span class="setting-name">Language Accent</span>
+                                    <span class="setting-desc">Primary accent and linguistic phonetics</span>
+                                </div>
+                                <div class="setting-control">
+                                    <select id="setting-voice-lang-select" class="settings-select">
+                                        <option value="auto" selected>Auto-detect (Hinglish & English)</option>
+                                        <option value="en-IN">Indian English (Clear Math)</option>
+                                        <option value="hi-IN">Hindi (Devanagari)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-row">
+                                <div class="setting-info">
+                                    <span class="setting-name">Auto-Read Solutions</span>
+                                    <span class="setting-desc">Read out AI math responses automatically</span>
+                                </div>
+                                <div class="setting-control">
+                                    <label class="switch-toggle" style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                                        <input type="checkbox" id="setting-auto-read-toggle" style="opacity: 0; width: 0; height: 0;">
+                                        <span class="slider-toggle" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 24px;"></span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -487,9 +694,12 @@
                             <div class="setting-control">
                                 <select id="setting-default-style-select" class="settings-select">
                                     <option value="simple">💡 Concept-First (Intuition)</option>
+                                    <option value="step_by_step">🔢 Step-by-Step Working</option>
+                                    <option value="quick">⚡ Quick Answer Mode</option>
+                                    <option value="exam">🎯 Exam-Oriented (Board Marks)</option>
+                                    <option value="sports">🏏 Sports Analogy (Cricket)</option>
                                     <option value="analogy">🌍 Real-Life Analogy</option>
-                                    <option value="exam">🎯 Exam-Oriented Step-by-Step</option>
-                                    <option value="sports">🏏 Sports Analogy</option>
+                                    <option value="socratic">🤔 Socratic Mode (Hints First)</option>
                                     <option value="story">📖 Story Mode</option>
                                 </select>
                             </div>
@@ -574,9 +784,9 @@
                             </p>
                             <div class="about-specs-grid">
                                 <div class="spec-item"><strong>Backend:</strong> Monolithic FastAPI</div>
-                                <div class="spec-item"><strong>Database:</strong> SQLite / MySQL</div>
+                                <div class="spec-item"><strong>Database:</strong> MySQL</div>
                                 <div class="spec-item"><strong>Vector RAG:</strong> ChromaDB</div>
-                                <div class="spec-item"><strong>Inference:</strong> LLaMA 3.1 / Groq</div>
+                                <div class="spec-item"><strong>Inference:</strong> LLaMA 3.3 / Groq & Ollama</div>
                             </div>
                         </div>
                     </div>
@@ -705,19 +915,30 @@
 
                     <!-- Dev Tab 5: Admin Password & Security -->
                     <div id="dev-tab-security" class="dev-tab-pane" style="display: none;">
-                        <h4 style="margin: 0 0 6px 0; color: #f8fafc; font-size: 15px;">🔐 Change Developer Admin Password</h4>
-                        <p style="font-size: 12px; color: #94a3b8; margin: 0 0 14px 0;">Update your developer login password anytime. The new password will work on both laptop and mobile login screens.</p>
+                        <h4 style="margin: 0 0 6px 0; color: #f8fafc; font-size: 15px;">🔐 Developer Admin Security & Credentials</h4>
+                        <p style="font-size: 12px; color: #94a3b8; margin: 0 0 14px 0;">Apna developer login Gmail ya password update karein. Bina purane password ke koi bhi changes allowed nahi honge.</p>
                         
                         <form id="dev-password-form" style="display: flex; flex-direction: column; gap: 12px;">
                             <div>
-                                <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; display: block; margin-bottom: 4px;">Developer Email (Fixed)</label>
-                                <input type="text" value="dev@mathstutor.com" disabled style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; font-size: 13px; cursor: not-allowed;">
+                                <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; display: block; margin-bottom: 4px;">Developer Gmail / Email (Changeable)</label>
+                                <input type="email" id="dev-email-input" value="dev@mathstutor.com" placeholder="Enter developer Gmail..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; outline: none;">
                             </div>
                             <div>
-                                <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; display: block; margin-bottom: 4px;">New Password</label>
-                                <input type="password" id="dev-new-password" placeholder="Enter new developer password..." required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; outline: none;">
+                                <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; display: block; margin-bottom: 4px;">Current / Old Password <span style="color: #ef4444;">* (Required for any changes)</span></label>
+                                <input type="password" id="dev-current-password" placeholder="Enter current/old password..." required style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; outline: none;">
                             </div>
-                            <button type="submit" id="dev-password-submit-btn" style="background: #6366f1; color: white; border: none; border-radius: 8px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer;">🔐 Update Developer Password</button>
+                            <div>
+                                <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; display: block; margin-bottom: 4px;">New Password (1/2 - Optional, if changing password)</label>
+                                <input type="password" id="dev-new-password" placeholder="Enter new password (min 4 characters)..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; outline: none;">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; display: block; margin-bottom: 4px;">Confirm New Password (2/2 - Re-enter new password)</label>
+                                <input type="password" id="dev-confirm-password" placeholder="Re-enter new password to confirm..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 13px; outline: none;">
+                            </div>
+                            <div style="font-size: 11px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); padding: 8px 12px; border-radius: 6px;">
+                                🛡️ <strong>Security Rule:</strong> Purane password ke bina na Gmail change hogi aur na hi naya password badla ja sakega.
+                            </div>
+                            <button type="submit" id="dev-password-submit-btn" style="background: #6366f1; color: white; border: none; border-radius: 8px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer;">💾 Update Developer Credentials</button>
                         </form>
                     </div>
                 </div>
@@ -725,6 +946,45 @@
         </div>
     </div>
 
-    <script src="script.js?v=101"></script>
+        <!-- 📸 Live Camera Scanner Modal -->
+    <div id="camera-modal-backdrop" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center;">
+        <div style="background: #111827; border: 1px solid #374151; border-radius: 16px; width: 92%; max-width: 500px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); display: flex; flex-direction: column;">
+            <!-- Modal Header -->
+            <div style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1f2937; background: #0f172a;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">📸</span>
+                    <span style="font-weight: 600; color: #f9fafb; font-size: 14px;">Math Question Camera</span>
+                </div>
+                <button type="button" id="camera-modal-close-btn" style="background: none; border: none; color: #9ca3af; font-size: 20px; cursor: pointer; padding: 2px 8px; border-radius: 6px;">✕</button>
+            </div>
+
+            <!-- Viewfinder -->
+            <div style="position: relative; background: #000; width: 100%; aspect-ratio: 4/3; max-height: 360px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <video id="camera-video-stream" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                
+                <!-- Align Box -->
+                <div style="position: absolute; inset: 20px; border: 2px dashed rgba(99, 102, 241, 0.8); border-radius: 12px; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 8px;">
+                    <span style="background: rgba(15, 23, 42, 0.85); color: #c7d2fe; font-size: 11px; padding: 3px 10px; border-radius: 4px; align-self: center; font-weight: 500;">📐 Align maths equation inside box</span>
+                    <span style="background: rgba(15, 23, 42, 0.85); color: #94a3b8; font-size: 10px; padding: 2px 8px; border-radius: 4px; align-self: center;">Hold steady for clear scan</span>
+                </div>
+
+                <canvas id="camera-capture-canvas" style="display: none;"></canvas>
+            </div>
+
+            <!-- Camera Controls Bar -->
+            <div style="padding: 14px 18px; display: flex; align-items: center; justify-content: space-around; background: #0f172a; border-top: 1px solid #1f2937;">
+                <!-- Flip Camera (Front/Rear) -->
+                <button type="button" id="camera-flip-btn" title="Switch Camera" style="background: #1e293b; border: 1px solid #334155; color: #cbd5e1; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px;">🔄</button>
+                
+                <!-- Shutter Snap Button -->
+                <button type="button" id="camera-snap-btn" title="Capture Photo" style="background: linear-gradient(135deg, #6366f1, #a855f7); border: 4px solid #ffffff44; color: white; border-radius: 50%; width: 62px; height: 62px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.6);">📸</button>
+                
+                <!-- Native Camera App Trigger -->
+                <button type="button" id="camera-native-btn" title="Use Phone Native Camera App" style="background: #1e293b; border: 1px solid #334155; color: #cbd5e1; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px;">📱</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=158"></script>
 </body>
 </html>

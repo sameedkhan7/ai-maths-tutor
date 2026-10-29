@@ -1,7 +1,5 @@
-from typing import Literal
-
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
-
 
 # =========================
 # CHAT MESSAGE
@@ -10,7 +8,6 @@ from pydantic import BaseModel, Field
 class ChatMessage(BaseModel):
     role: Literal["user", "assistant"]
     content: str
-
 
 # =========================
 # RAG CHUNK
@@ -22,7 +19,6 @@ class RAGChunk(BaseModel):
     page: int
     score: float = Field(ge=0, le=1)
 
-
 # =========================
 # TUTOR REQUEST
 # =========================
@@ -30,10 +26,11 @@ class TutorRequest(BaseModel):
     question: str
     chat_history: list[ChatMessage] = Field(default_factory=list)
     explanation_style: str = "simple"
-    language: Literal["english", "hindi", "hinglish", "urdu"] = "english"
+    language: Literal["english", "hindi", "hinglish", "urdu", "arabic"] = "english"
     student_level: Literal["beginner", "intermediate", "advanced"] = "beginner"
+    student_grade: str = "Class 10"
     rag_chunks: list[RAGChunk] = Field(default_factory=list)
-    model: str = "llama-3.3-70b-versatile"
+    model: str = "openai/gpt-oss-120b"
 
 # =========================
 # TUTOR RESPONSE
@@ -47,4 +44,7 @@ class TutorResponse(BaseModel):
     sources: list[str]
     prompt_version: str
     model: str
-    error: str | None = None
+    error: Optional[str] = None
+    image_url: Optional[str] = None
+    image_prompt: Optional[str] = None
+    image_theme: Optional[str] = None

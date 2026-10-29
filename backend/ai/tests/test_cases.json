@@ -25,14 +25,14 @@
         "question": "What about this?",
         "student_level": "beginner",
         "explanation_style": "simple",
-        "expected_type": "follow-up"
+        "expected_type": "follow_up"
     },
     {
         "name": "Student mistake",
         "question": "My answer is 8 but the book says 10. Where did I go wrong?",
         "student_level": "beginner",
         "explanation_style": "simple",
-        "expected_type": "student mistake"
+        "expected_type": "student_mistake"
     },
     {
         "name": "Explain again",

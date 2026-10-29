@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Login — AI Maths Tutor</title>
     <link rel="stylesheet" href="style.css">
+    <!-- 🌐 Official Google Identity Services SDK (OAuth 2.0 / One Tap) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         /* Auth Screen Centering */
         .auth-wrapper {
@@ -362,86 +364,35 @@
                 <hr style="flex:1; border:none; border-top:1px solid #e2e8f0;">
             </div>
 
-            <!-- Continue with Google Button -->
-            <button type="button" class="google-login-btn" id="google-login-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.33 24 12 24z"/>
-                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/>
-                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
-                <span>Continue with Google</span>
-            </button>
+            <!-- Official Google Sign-In Container -->
+            <div id="g_id_onload"
+                 data-client_id="165303629004-0thk2v4o8vn0m6eh6ug0kq4hgbn05nhh.apps.googleusercontent.com"
+                 data-callback="handleGoogleCredentialResponse"
+                 data-auto_prompt="false"
+                 data-cancel_on_tap_outside="true">
+            </div>
 
-            <!-- Quick Demo Button (Instant Login without typing) -->
-            <button type="button" class="demo-btn" id="demo-login-btn">
-                ⚡ Instant Demo Login (Alex)
-            </button>
+            <!-- Styled Continue with Google Button -->
+            <div id="google-btn-container" style="display: flex; justify-content: center; margin-bottom: 12px; width: 100%;">
+                <button type="button" class="google-login-btn" id="google-login-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.33 24 12 24z"/>
+                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                    </svg>
+                    <span>Continue with Google</span>
+                </button>
+            </div>
 
             <div class="auth-footer">
                 Don't have an account? <a href="register.html">Sign Up</a>
             </div>
-        </div>
-    </div>
 
-    <!-- ============================================== -->
-    <!-- 🌐 Authentic Google Account Chooser Modal     -->
-    <!-- ============================================== -->
-    <div id="google-modal-backdrop" class="google-modal-backdrop">
-        <div class="google-modal-card">
-            <button type="button" class="google-modal-close" id="google-modal-close" title="Close">✕</button>
-            
-            <div id="google-modal-main">
-                <!-- Google SVG Logo -->
-                <svg width="28" height="28" viewBox="0 0 24 24" style="margin-bottom: 4px;">
-                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.33 24 12 24z"/>
-                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/>
-                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
-                
-                <h3 class="google-modal-title">Choose an account</h3>
-                <p class="google-modal-subtitle">to continue to <strong>AI Maths Tutor</strong></p>
-
-                <!-- Accounts List -->
-                <div class="google-account-list">
-                    <!-- Account 1: Sameed Khan -->
-                    <div class="google-account-item" onclick="selectGoogleAccount('Sameed Khan', 'sameedkhan7@gmail.com')">
-                        <div class="google-account-avatar" style="background-color: #4f46e5;">SK</div>
-                        <div class="google-account-info">
-                            <div class="google-account-name">Sameed Khan</div>
-                            <div class="google-account-email">sameedkhan7@gmail.com</div>
-                        </div>
-                    </div>
-
-                    <!-- Account 2: Alex Sharma -->
-                    <div class="google-account-item" onclick="selectGoogleAccount('Alex Sharma', 'alex.student@ncert.ac.in')">
-                        <div class="google-account-avatar" style="background-color: #059669;">AS</div>
-                        <div class="google-account-info">
-                            <div class="google-account-name">Alex Sharma</div>
-                            <div class="google-account-email">alex.student@ncert.ac.in</div>
-                        </div>
-                    </div>
-
-                    <!-- Account 3: Use Another Account -->
-                    <div class="google-account-item" onclick="promptGoogleAccount()">
-                        <div class="google-account-avatar" style="background-color: #64748b;">👤</div>
-                        <div class="google-account-info">
-                            <div class="google-account-name">Use another account</div>
-                            <div class="google-account-email">Sign in with a different Google ID</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="google-modal-footer">
-                    To continue, Google will share your name, email address, and language preference with <strong>AI Maths Tutor</strong>. See our Privacy Policy.
-                </div>
-            </div>
-
-            <!-- Loading Spinner State -->
-            <div id="google-loading-state" class="google-loading-state">
-                <div class="google-spinner"></div>
-                <h4 style="margin: 0; font-size: 15px; color: #1e293b;" id="google-loading-text">Signing in...</h4>
+            <div style="margin-top: 18px; font-size: 11px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                By continuing, you agree to our 
+                <a href="terms.html" style="color: #64748b; text-decoration: underline;">Terms</a> & 
+                <a href="privacy.html" style="color: #64748b; text-decoration: underline;">Privacy Policy</a>.
             </div>
         </div>
     </div>
@@ -449,9 +400,6 @@
     <!-- Login Handler Script -->
     <script>
         const loginForm = document.getElementById('login-form');
-        const demoBtn = document.getElementById('demo-login-btn');
-        const googleModalBackdrop = document.getElementById('google-modal-backdrop');
-        const googleModalClose = document.getElementById('google-modal-close');
         const googleBtn = document.getElementById('google-login-btn');
 
         // Dynamic API Base URL helper for login
@@ -495,6 +443,9 @@
                     localStorage.setItem('studentEmail', data.email || inputVal);
                     localStorage.setItem('userRole', data.role || 'student');
                     localStorage.setItem('userId', String(data.user_id));
+                    if (data.token) localStorage.setItem('authToken', data.token);
+                    if (data.grade) localStorage.setItem('studentGrade', data.grade);
+                    localStorage.removeItem('activeChatId');
                     window.location.href = 'maths.html';
                     return;
                 } else if (res.status === 401) {
@@ -545,70 +496,99 @@
                 localStorage.setItem('userId', String(hash + 10));
             }
 
+            localStorage.removeItem('activeChatId');
             window.location.href = 'maths.html';
         });
 
-        // Instant Demo Login
-        demoBtn.addEventListener('click', () => {
-            localStorage.setItem('studentName', 'Alex (Student)');
-            localStorage.setItem('studentEmail', 'alex.student@ncert.ac.in');
-            localStorage.setItem('userRole', 'student');
-            localStorage.setItem('userId', '2');
-            window.location.href = 'maths.html';
-        });
+        // ==========================================
+        // 🌐 Official Google Identity Services Handler
+        // ==========================================
+        const GOOGLE_CLIENT_ID = localStorage.getItem('googleClientId') || '165303629004-0thk2v4o8vn0m6eh6ug0kq4hgbn05nhh.apps.googleusercontent.com';
 
-        // Open Google Account Chooser Modal
-        if (googleBtn && googleModalBackdrop) {
-            googleBtn.addEventListener('click', () => {
-                googleModalBackdrop.classList.add('active');
-            });
+        function initGoogleClient() {
+            if (window.google && window.google.accounts) {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleGoogleCredentialResponse,
+                    auto_select: false,
+                    cancel_on_tap_outside: true
+                });
+
+                // If a real client ID is configured, render official Google button and prompt One Tap
+                if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID') {
+                    const btnContainer = document.getElementById('google-btn-container');
+                    if (btnContainer) {
+                        btnContainer.innerHTML = '';
+                        google.accounts.id.renderButton(btnContainer, {
+                            theme: 'outline',
+                            size: 'large',
+                            width: 336,
+                            text: 'continue_with',
+                            shape: 'rectangular',
+                            logo_alignment: 'left'
+                        });
+                    }
+                    // Prompt native Google accounts bottom sheet on page load
+                    google.accounts.id.prompt();
+                }
+            }
         }
 
-        // Close Google Modal
-        if (googleModalClose && googleModalBackdrop) {
-            googleModalClose.addEventListener('click', () => {
-                googleModalBackdrop.classList.remove('active');
-            });
+        window.addEventListener('load', () => {
+            setTimeout(initGoogleClient, 400);
+        });
 
-            googleModalBackdrop.addEventListener('click', (e) => {
-                if (e.target === googleModalBackdrop) {
-                    googleModalBackdrop.classList.remove('active');
+        // Click on "Continue with Google" Button
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        if (googleLoginBtn) {
+            googleLoginBtn.addEventListener('click', () => {
+                if (window.google && window.google.accounts) {
+                    if (GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+                        // Helpful guidance alert for developer setup
+                        const manualId = prompt(
+                            "🔑 Google Client ID Setup\n\nAapke paas Google Cloud Console se Client ID aa gayi ho toh yahan paste karein (e.g. xxxxx.apps.googleusercontent.com):", 
+                            localStorage.getItem('googleClientId') || ""
+                        );
+                        if (manualId && manualId.trim()) {
+                            localStorage.setItem('googleClientId', manualId.trim());
+                            alert("✅ Google Client ID saved! Reloading...");
+                            window.location.reload();
+                            return;
+                        }
+                    }
+                    google.accounts.id.prompt();
+                } else {
+                    alert("⚠️ Google Identity Services loading... Please check your internet connection.");
                 }
             });
         }
 
-        // Account Selection Handler
-        function selectGoogleAccount(name, email) {
-            const mainView = document.getElementById('google-modal-main');
-            const loadingView = document.getElementById('google-loading-state');
-            const loadingText = document.getElementById('google-loading-text');
-
-            if (mainView && loadingView) {
-                mainView.style.display = 'none';
-                loadingView.style.display = 'flex';
-                loadingText.innerText = `Signing in as ${name}...`;
-            }
-
-            localStorage.setItem('studentName', name);
-            localStorage.setItem('studentEmail', email);
-            localStorage.setItem('authProvider', 'google');
-            localStorage.setItem('userRole', email.toLowerCase() === 'dev@mathstutor.com' ? 'developer' : 'student');
-
-            setTimeout(() => {
-                window.location.href = 'maths.html';
-            }, 750);
-        }
-
-        // Prompt custom Google email
-        function promptGoogleAccount() {
-            const email = prompt('Enter your Google email address:', 'student@gmail.com');
-            if (email && email.trim()) {
-                const name = email.split('@')[0].replace(/[._0-9]/g, ' ').trim() || 'Google Student';
-                const formattedName = name.split(' ')
-                    .filter(w => w.length > 0)
-                    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-                    .join(' ');
-                selectGoogleAccount(formattedName, email.trim());
+        // Receive verified token from Google
+        async function handleGoogleCredentialResponse(response) {
+            if (!response || !response.credential) return;
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    localStorage.setItem('studentName', data.name);
+                    localStorage.setItem('studentEmail', data.email);
+                    localStorage.setItem('userRole', data.role || 'student');
+                    localStorage.setItem('userId', String(data.user_id));
+                    if (data.token) localStorage.setItem('authToken', data.token);
+                    if (data.grade) localStorage.setItem('studentGrade', data.grade);
+                    localStorage.setItem('authProvider', 'google');
+                    localStorage.removeItem('activeChatId');
+                    window.location.href = 'maths.html';
+                } else {
+                    alert('⚠️ Google Authentication failed: ' + (data.detail || 'Could not verify token'));
+                }
+            } catch (err) {
+                console.error('Network error during Google auth:', err);
+                alert('⚠️ Server connection error during Google sign-in.');
             }
         }
     </script>

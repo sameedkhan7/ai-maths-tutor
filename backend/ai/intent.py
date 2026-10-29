@@ -12,6 +12,42 @@ def detect_question_type(question: str) -> str:
     q = question.lower().strip()
 
     # -------------------------
+    # Syllabus & Chapter Info
+    # -------------------------
+    syllabus_keywords = [
+        "first chapter", "1st chapter", "chapter 1", "chapter one", "pehla chapter",
+        "second chapter", "2nd chapter", "chapter 2", "chapter two", "dusra chapter", "doosra chapter",
+        "third chapter", "3rd chapter", "chapter 3", "chapter three", "teesra chapter",
+        "fourth chapter", "4th chapter", "chapter 4", "chautha chapter",
+        "fifth chapter", "5th chapter", "chapter 5", "panchwa chapter",
+        "sixth chapter", "6th chapter", "chapter 6",
+        "seventh chapter", "7th chapter", "chapter 7",
+        "eighth chapter", "8th chapter", "chapter 8",
+        "ninth chapter", "9th chapter", "chapter 9",
+        "tenth chapter", "10th chapter", "chapter 10",
+        "syllabus", "how many chapters", "list of chapters",
+        "all chapters", "table of contents", "which chapter",
+        "what is the chapter", "what does the chapter",
+        "what is the first chapter", "what does the first chapter",
+        "what is chapter", "chapters in class",
+        "curriculum", "course structure"
+    ]
+
+    if any(keyword in q for keyword in syllabus_keywords):
+        return "syllabus_info"
+
+    # -------------------------
+    # Voice / Pure Greeting Check
+    # -------------------------
+    greeting_voice_keywords = [
+        "can you listen", "can you hear", "are you listening",
+        "can you type", "voice check", "mic test", "testing mic",
+        "hello tutor", "hello sir", "namaste", "hey tutor"
+    ]
+    if any(k in q for k in greeting_voice_keywords) and len(q.split()) <= 8:
+        return "greeting"
+
+    # -------------------------
     # Explain Again
     # -------------------------
 

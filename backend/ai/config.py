@@ -20,7 +20,7 @@ GROQ_MODEL = os.getenv("GROQ_MODEL")
 # =========================
 
 TEMPERATURE = 0.4
-MAX_TOKENS = 1200
+MAX_TOKENS = 2500
 
 
 # =========================

@@ -1,0 +1,221 @@
+<svg viewBox="0 0 960 580" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgPoster" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070c18"/>
+      <stop offset="50%" stop-color="#0b1329"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="pitchGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#854d0e"/>
+      <stop offset="50%" stop-color="#a16207"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+    <linearGradient id="grassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <!-- Card Gradients -->
+    <linearGradient id="sinCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(244, 63, 94, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(15, 23, 42, 0.95)"/>
+    </linearGradient>
+    <linearGradient id="cosCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(16, 185, 129, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(15, 23, 42, 0.95)"/>
+    </linearGradient>
+    <linearGradient id="tanCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(245, 158, 11, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(15, 23, 42, 0.95)"/>
+    </linearGradient>
+    <linearGradient id="sohCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(56, 189, 248, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(15, 23, 42, 0.95)"/>
+    </linearGradient>
+    <!-- Filter Glow -->
+    <filter id="cyanGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Poster Frame -->
+  <rect width="960" height="580" fill="url(#bgPoster)" rx="16" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- Top Title Banner -->
+  <rect x="0" y="0" width="960" height="60" fill="#0b1329" rx="16"/>
+  <rect x="0" y="44" width="960" height="16" fill="#0b1329"/>
+  <line x1="0" y1="60" x2="960" y2="60" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Title & Badges -->
+  <text x="28" y="38" fill="url(#headerGrad)" font-size="22" font-weight="900" font-family="'Segoe UI', system-ui, sans-serif" letter-spacing="0.5">🏏 TRIGONOMETRY IN CRICKET : SIN, COS &amp; TAN</text>
+  <rect x="735" y="16" width="195" height="28" rx="14" fill="rgba(56, 189, 248, 0.12)" stroke="#38bdf8" stroke-width="1.2"/>
+  <text x="832" y="34" fill="#38bdf8" font-size="12" font-weight="bold" font-family="system-ui" text-anchor="middle">NCERT Class 10 / 11 · Visual</text>
+
+  <!-- ======================================================== -->
+  <!-- MAIN VISUAL: CRICKET GROUND RIGHT-ANGLED TRIANGLE (Left) -->
+  <!-- ======================================================== -->
+  <rect x="25" y="75" width="560" height="270" rx="12" fill="#050a14" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Stadium Grass & Pitch -->
+  <rect x="25" y="270" width="560" height="75" fill="url(#grassGrad)" rx="0"/>
+  <line x1="25" y1="270" x2="585" y2="270" stroke="#10b981" stroke-width="2"/>
+  <rect x="35" y="270" width="130" height="24" fill="url(#pitchGrad)" rx="3" opacity="0.9"/>
+  <line x1="100" y1="270" x2="100" y2="294" stroke="#ffffff" stroke-width="2"/>
+
+  <!-- Batsman Figure at Pitch (x=80, y=270) -->
+  <!-- Legs -->
+  <path d="M 75 240 L 70 270 M 82 240 L 92 270" stroke="#f8fafc" stroke-width="6.5" stroke-linecap="round"/>
+  <!-- Torso (Team Blue) -->
+  <path d="M 72 215 L 85 218 L 82 242 L 70 240 Z" fill="#2563eb"/>
+  <!-- Head & Helmet -->
+  <circle cx="78" cy="205" r="9.5" fill="#1e3a8a"/>
+  <path d="M 81 206 L 90 208 L 86 213 Z" fill="#94a3b8"/>
+  <!-- Arms & Bat Swing -->
+  <path d="M 74 218 L 86 222 L 96 214" stroke="#fde047" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <line x1="92" y1="218" x2="100" y2="210" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+  <polygon points="100,210 104,206 130,172 124,168" fill="url(#pitchGrad)" stroke="#78350f" stroke-width="1.2"/>
+  <!-- Batsman Tag -->
+  <rect x="42" y="178" width="82" height="18" rx="4" fill="rgba(15, 23, 42, 0.9)" stroke="#38bdf8" stroke-width="1"/>
+  <text x="83" y="191" fill="#38bdf8" font-size="10" font-weight="bold" text-anchor="middle">🏏 Batsman (A)</text>
+
+  <!-- ======================================================== -->
+  <!-- GLOWING RIGHT-ANGLED TRIANGLE ON CRICKET FIELD -->
+  <!-- A = Batsman (80, 270) -->
+  <!-- B = Base Ground beneath ball (480, 270) -->
+  <!-- C = Peak Ball Height (480, 110) -->
+  <!-- ======================================================== -->
+  <!-- Shaded Area of Triangle -->
+  <polygon points="80,270 480,270 480,110" fill="rgba(56, 189, 248, 0.06)"/>
+
+  <!-- Base (Ground Distance d = 86.6 m) in Emerald Green -->
+  <line x1="80" y1="270" x2="480" y2="270" stroke="#10b981" stroke-width="3.5" filter="url(#cyanGlow)"/>
+  <!-- Perpendicular (Height h = 50 m) in Coral Red -->
+  <line x1="480" y1="270" x2="480" y2="110" stroke="#f43f5e" stroke-width="3.5" stroke-dasharray="6,4"/>
+  <!-- Hypotenuse (Line of Sight r = 100 m) in Neon Cyan -->
+  <line x1="80" y1="270" x2="480" y2="110" stroke="#38bdf8" stroke-width="4"/>
+
+  <!-- Right Angle Box at B(480, 270) -->
+  <path d="M 458,270 L 458,248 L 480,248" fill="none" stroke="#f43f5e" stroke-width="2"/>
+  <text x="445" y="264" fill="#f43f5e" font-size="10" font-weight="bold">90°</text>
+
+  <!-- Angle theta arc at A(80, 270) -->
+  <path d="M 125,270 A 45,45 0 0,0 120,242" fill="none" stroke="#fbbf24" stroke-width="3"/>
+  <text x="135" y="258" fill="#fbbf24" font-size="15" font-weight="900">θ = 30°</text>
+
+  <!-- Cricket Ball at Peak C(480, 110) -->
+  <circle cx="480" cy="110" r="10" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+  <path d="M 474 106 Q 480 110 486 114" stroke="#ffffff" stroke-width="1.5" fill="none"/>
+  <!-- Ball Pulse Ring -->
+  <circle cx="480" cy="110" r="17" fill="none" stroke="#f43f5e" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Ball Peak Height Tag -->
+  <rect x="420" y="80" width="120" height="22" rx="5" fill="#0f172a" stroke="#f43f5e" stroke-width="1.2"/>
+  <text x="480" y="95" fill="#f87171" font-size="10.5" font-weight="bold" text-anchor="middle">⚾ Peak Height (C)</text>
+
+  <!-- Triangle Side Labels with Exact Values -->
+  <!-- Hypotenuse Label -->
+  <rect x="180" y="160" width="175" height="24" rx="4" fill="#070d19" stroke="#38bdf8" stroke-width="1"/>
+  <text x="267" y="176" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">Hypotenuse = 100 m (Ball Path)</text>
+
+  <!-- Perpendicular Label -->
+  <rect x="495" y="180" width="80" height="38" rx="4" fill="#070d19" stroke="#f43f5e" stroke-width="1"/>
+  <text x="535" y="196" fill="#f43f5e" font-size="10.5" font-weight="bold" text-anchor="middle">Height (p)</text>
+  <text x="535" y="211" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle">h = 50 m</text>
+
+  <!-- Base Label -->
+  <rect x="220" y="280" width="160" height="24" rx="4" fill="#070d19" stroke="#10b981" stroke-width="1"/>
+  <text x="300" y="296" fill="#10b981" font-size="11" font-weight="bold" text-anchor="middle">Base (d) = 86.6 m (Distance)</text>
+
+  <!-- Boundary Marker on Right -->
+  <rect x="500" y="258" width="75" height="22" rx="4" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="537" y="273" fill="#f59e0b" font-size="10.5" font-weight="bold" text-anchor="middle">6️⃣ Boundary</text>
+
+  <!-- ======================================================== -->
+  <!-- RIGHT SIDE: QUICK SUMMARY & ANGLE CALCULATIONS -->
+  <!-- ======================================================== -->
+  <rect x="600" y="75" width="335" height="270" rx="12" fill="#070e1c" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Card Header -->
+  <rect x="600" y="75" width="335" height="38" fill="#0d1829" rx="12"/>
+  <rect x="600" y="100" width="335" height="13" fill="#0d1829"/>
+  <text x="618" y="99" fill="#f8fafc" font-size="13" font-weight="bold">🎯 Cricket Lofted Shot Math (θ = 30°)</text>
+
+  <!-- Row 1: Sine Calculation -->
+  <rect x="615" y="122" width="305" height="46" rx="6" fill="rgba(244, 63, 94, 0.08)" stroke="#f43f5e" stroke-width="1"/>
+  <text x="628" y="141" fill="#f43f5e" font-size="11.5" font-weight="900">sin(30°) = Height / Ball Path</text>
+  <text x="628" y="157" fill="#94a3b8" font-size="10.5">= 50 / 100 = <tspan fill="#f8fafc" font-weight="bold">0.500</tspan> (50% travel is vertical height)</text>
+
+  <!-- Row 2: Cosine Calculation -->
+  <rect x="615" y="176" width="305" height="46" rx="6" fill="rgba(16, 185, 129, 0.08)" stroke="#10b981" stroke-width="1"/>
+  <text x="628" y="195" fill="#10b981" font-size="11.5" font-weight="900">cos(30°) = Ground Distance / Ball Path</text>
+  <text x="628" y="211" fill="#94a3b8" font-size="10.5">= 86.6 / 100 = <tspan fill="#f8fafc" font-weight="bold">0.866</tspan> (86.6% travel is ground gain)</text>
+
+  <!-- Row 3: Tangent Calculation -->
+  <rect x="615" y="230" width="305" height="46" rx="6" fill="rgba(245, 158, 11, 0.08)" stroke="#f59e0b" stroke-width="1"/>
+  <text x="628" y="249" fill="#f59e0b" font-size="11.5" font-weight="900">tan(30°) = Height / Ground Distance</text>
+  <text x="628" y="265" fill="#94a3b8" font-size="10.5">= 50 / 86.6 = <tspan fill="#f8fafc" font-weight="bold">0.577</tspan> (Elevation slope ratio)</text>
+
+  <!-- Pythagoras Verification -->
+  <rect x="615" y="284" width="305" height="48" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+  <text x="628" y="302" fill="#38bdf8" font-size="11" font-weight="bold">Pythagoras Verification:</text>
+  <text x="628" y="320" fill="#f8fafc" font-size="11" font-family="'Consolas', monospace">100² = 50² + 86.6²  (10,000 ≈ 2500 + 7500) ✓</text>
+
+  <!-- ======================================================== -->
+  <!-- BOTTOM GRID: 4 FORMULA & EDUCATIONAL CARDS -->
+  <!-- ======================================================== -->
+  <!-- Card 1: SINE (sin) -->
+  <rect x="25" y="360" width="218" height="155" rx="10" fill="url(#sinCardGrad)" stroke="#f43f5e" stroke-width="1.2"/>
+  <rect x="37" y="372" width="105" height="22" rx="4" fill="#f43f5e"/>
+  <text x="89" y="387" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle">1. SINE (sin θ)</text>
+  <text x="37" y="415" fill="#f87171" font-size="13" font-weight="900">sin θ = Opp / Hyp</text>
+  <text x="37" y="434" fill="#f8fafc" font-size="11" font-weight="bold">= Height ÷ Ball Path</text>
+  <line x1="37" y1="445" x2="230" y2="445" stroke="#334155" stroke-width="1"/>
+  <text x="37" y="465" fill="#94a3b8" font-size="10.5">🏏 <tspan fill="#f8fafc" font-weight="bold">Cricket Meaning:</tspan></text>
+  <text x="37" y="482" fill="#cbd5e1" font-size="10">Bat se nikli ball kitni</text>
+  <text x="37" y="497" fill="#f43f5e" font-size="10.5" font-weight="bold">unchai (height)</text> <text x="115" y="497" fill="#cbd5e1" font-size="10">tak uthegi.</text>
+
+  <!-- Card 2: COSINE (cos) -->
+  <rect x="260" y="360" width="218" height="155" rx="10" fill="url(#cosCardGrad)" stroke="#10b981" stroke-width="1.2"/>
+  <rect x="272" y="372" width="115" height="22" rx="4" fill="#10b981"/>
+  <text x="329" y="387" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle">2. COSINE (cos θ)</text>
+  <text x="272" y="415" fill="#34d399" font-size="13" font-weight="900">cos θ = Adj / Hyp</text>
+  <text x="272" y="434" fill="#f8fafc" font-size="11" font-weight="bold">= Ground ÷ Ball Path</text>
+  <line x1="272" y1="445" x2="465" y2="445" stroke="#334155" stroke-width="1"/>
+  <text x="272" y="465" fill="#94a3b8" font-size="10.5">🏏 <tspan fill="#f8fafc" font-weight="bold">Cricket Meaning:</tspan></text>
+  <text x="272" y="482" fill="#cbd5e1" font-size="10">Ball pitch se boundary tak</text>
+  <text x="272" y="497" fill="#10b981" font-size="10.5" font-weight="bold">kitni horizontal doori</text> <text x="390" y="497" fill="#cbd5e1" font-size="10">tay karegi.</text>
+
+  <!-- Card 3: TANGENT (tan) -->
+  <rect x="495" y="360" width="218" height="155" rx="10" fill="url(#tanCardGrad)" stroke="#f59e0b" stroke-width="1.2"/>
+  <rect x="507" y="372" width="115" height="22" rx="4" fill="#f59e0b"/>
+  <text x="564" y="387" fill="#0f172a" font-size="11" font-weight="900" text-anchor="middle">3. TANGENT (tan θ)</text>
+  <text x="507" y="415" fill="#fbbf24" font-size="13" font-weight="900">tan θ = Opp / Adj</text>
+  <text x="507" y="434" fill="#f8fafc" font-size="11" font-weight="bold">= Height ÷ Ground</text>
+  <line x1="507" y1="445" x2="700" y2="445" stroke="#334155" stroke-width="1"/>
+  <text x="507" y="465" fill="#94a3b8" font-size="10.5">🏏 <tspan fill="#f8fafc" font-weight="bold">Cricket Meaning:</tspan></text>
+  <text x="507" y="482" fill="#cbd5e1" font-size="10">Floodlight tower unchai ya</text>
+  <text x="507" y="497" fill="#f59e0b" font-size="10.5" font-weight="bold">lofted shot ka slope</text> <text x="618" y="497" fill="#cbd5e1" font-size="10">ratio.</text>
+
+  <!-- Card 4: SOH - CAH - TOA Cheat Card -->
+  <rect x="730" y="360" width="205" height="155" rx="10" fill="url(#sohCardGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+  <rect x="742" y="372" width="180" height="22" rx="4" fill="#0284c7"/>
+  <text x="832" y="387" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle">⚡ SOH - CAH - TOA Rule</text>
+  <text x="742" y="416" fill="#f43f5e" font-size="11.5" font-weight="bold">SOH : <tspan fill="#f8fafc">Sin = Opp / Hyp</tspan></text>
+  <text x="742" y="438" fill="#10b981" font-size="11.5" font-weight="bold">CAH : <tspan fill="#f8fafc">Cos = Adj / Hyp</tspan></text>
+  <text x="742" y="460" fill="#f59e0b" font-size="11.5" font-weight="bold">TOA : <tspan fill="#f8fafc">Tan = Opp / Adj</tspan></text>
+  <line x1="742" y1="472" x2="920" y2="472" stroke="#334155" stroke-width="1"/>
+  <text x="742" y="492" fill="#38bdf8" font-size="10" font-weight="bold">Opp = Height | Adj = Base</text>
+  <text x="742" y="506" fill="#94a3b8" font-size="9.5">Hyp = Ball Path (Longest)</text>
+
+  <!-- ======================================================== -->
+  <!-- BOTTOM STRIP: REAL-WORLD CRICKET TECH CALLOUT -->
+  <!-- ======================================================== -->
+  <rect x="25" y="528" width="910" height="36" rx="8" fill="#0b1329" stroke="#1e293b" stroke-width="1"/>
+  <text x="40" y="551" fill="#94a3b8" font-size="11">💡 <tspan fill="#38bdf8" font-weight="bold">Real-World Cricket Technology:</tspan> Hawk-Eye aur DRS ball tracking system isi Trigonometric Right-Angled Triangle formula se 3D trajectory aur LBW wickets predict karta hai!</text>
+</svg>

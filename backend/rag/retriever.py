@@ -9,34 +9,54 @@ from backend.rag.config import (
 from backend.rag.embeddings import get_embeddings
 from backend.rag.ingest import load_documents, split_text_into_chunks
 
+try:
+    from backend.rag.curriculum import classify_question_curriculum, normalize_class_name
+except ImportError:
+    from rag.curriculum import classify_question_curriculum, normalize_class_name
+
 _cached_chunks = None
 
 def get_all_chunks():
     global _cached_chunks
     if _cached_chunks is None:
-        docs = load_documents()
+        docs = load_documents(include_pdfs=False)
         _cached_chunks = split_text_into_chunks(docs)
     return _cached_chunks
 
 
-def retrieve_math_context(query: str, top_k: int = TOP_K_RESULTS) -> dict:
+def retrieve_math_context(query: str, student_class: str = "Class 10", top_k: int = TOP_K_RESULTS) -> dict:
     """
-    Retrieves the most relevant NCERT math textbook chunks for a student query.
-    Returns:
-        {
-            "has_context": bool,
-            "chunks": list[dict],
-            "formatted_context": str
-        }
+    Retrieves NCERT math curriculum context for a student query with:
+    1. Priority Search on student's selected class (e.g. Class 12 first).
+    2. Fallback to other classes if topic belongs to Class 9/10/11.
+    3. Cross-class detection and automatic citation badge generation.
     """
     if not query or not query.strip():
-        return {"has_context": False, "chunks": [], "formatted_context": ""}
+        return {
+            "has_context": False,
+            "chunks": [],
+            "formatted_context": "",
+            "reference_badge": "📚 NCERT Mathematics",
+            "matched_class": student_class,
+            "target_class": student_class,
+            "is_cross_class": False,
+            "note_text": None
+        }
+
+    # 1. ⚡ Fast NCERT Curriculum Search (Class-Priority First)
+    curriculum_meta = classify_question_curriculum(query, student_class=student_class)
+    matched_class = curriculum_meta.get("matched_class", student_class)
+    target_class = curriculum_meta.get("target_class", student_class)
+    is_cross_class = curriculum_meta.get("is_cross_class", False)
+    chapter_title = curriculum_meta.get("chapter_title", "")
+    chapter_summary = curriculum_meta.get("chapter_summary", "")
+    reference_badge = curriculum_meta.get("reference_badge", f"📚 NCERT Reference: {target_class}")
+    note_text = curriculum_meta.get("note_text")
 
     chunks = get_all_chunks()
-    if not chunks:
-        return {"has_context": False, "chunks": [], "formatted_context": ""}
+    scored_chunks = []
 
-    # 1. Try LangChain Chroma Retriever if available
+    # 2. Try LangChain Chroma Retriever if available
     embeddings = get_embeddings()
     if embeddings and CHROMA_PERSIST_DIR.exists():
         try:
@@ -46,62 +66,65 @@ def retrieve_math_context(query: str, top_k: int = TOP_K_RESULTS) -> dict:
                 embedding_function=embeddings
             )
             results = db.similarity_search_with_relevance_scores(query, k=top_k)
-            retrieved = []
             for doc, score in results:
-                retrieved.append({
+                scored_chunks.append({
                     "text": doc.page_content,
-                    "source": doc.metadata.get("source", "NCERT Textbook"),
+                    "source": doc.metadata.get("source", f"NCERT {matched_class}"),
                     "page": doc.metadata.get("page", 1),
                     "score": float(score)
                 })
-
-            if retrieved:
-                formatted = "\n\n---\n\n".join([
-                    f"[NCERT Source: {c['source']} (Page {c['page']})]\n{c['text']}"
-                    for c in retrieved
-                ])
-                return {
-                    "has_context": True,
-                    "chunks": retrieved,
-                    "formatted_context": formatted
-                }
-        except Exception as e:
-            # Fallback to local matching
+        except Exception:
             pass
 
-    # 2. Fast Keyword + Relevance Scoring Fallback
-    query_words = set(re.findall(r'\w+', query.lower()))
-    scored_chunks = []
+    # 3. Fast Keyword Matching with Priority Boost on Matched Class
+    if not scored_chunks and chunks:
+        query_words = set(re.findall(r'\w+', query.lower()))
+        matched_class_norm = matched_class.lower().replace(" ", "")
 
-    for chunk in chunks:
-        text_lower = chunk["text"].lower()
-        # Count matched keywords
-        matches = sum(1 for w in query_words if w in text_lower and len(w) > 2)
-        if matches > 0:
-            score = min(0.95, 0.4 + (matches * 0.15))
-            scored_chunks.append({
-                "text": chunk["text"],
-                "source": chunk["metadata"].get("source", "NCERT Mathematics"),
-                "page": chunk["metadata"].get("page", 1),
-                "score": score
-            })
+        for chunk in chunks:
+            text_lower = chunk["text"].lower()
+            source_lower = str(chunk["metadata"].get("source", "")).lower()
 
-    # Sort by score descending
-    scored_chunks.sort(key=lambda x: x["score"], reverse=True)
-    top_chunks = scored_chunks[:top_k]
+            matches = sum(1 for w in query_words if w in text_lower and len(w) > 2)
+            if matches > 0:
+                base_score = 0.4 + (matches * 0.15)
+                # Class Priority Boost: if document matches the identified class, boost relevance
+                if matched_class_norm in source_lower or matched_class_norm in text_lower:
+                    base_score += 0.3
+                scored_chunks.append({
+                    "text": chunk["text"],
+                    "source": chunk["metadata"].get("source", f"NCERT {matched_class}"),
+                    "page": chunk["metadata"].get("page", 1),
+                    "score": min(0.98, base_score)
+                })
 
-    if top_chunks:
-        formatted = "\n\n---\n\n".join([
-            f"[NCERT Source: {c['source']} (Page {c['page']})]\n{c['text']}"
-            for c in top_chunks
+        scored_chunks.sort(key=lambda x: x["score"], reverse=True)
+        scored_chunks = scored_chunks[:top_k]
+
+    # 4. Assemble Final Context with Curriculum Grounding
+    curriculum_header = f"[Official NCERT Grounding: {reference_badge}]\nChapter Scope: {chapter_title} — {chapter_summary}"
+    
+    if scored_chunks:
+        chunks_text = "\n\n---\n\n".join([
+            f"[Source: {c['source']} (Page {c['page']})]\n{c['text']}"
+            for c in scored_chunks
         ])
-        return {
-            "has_context": True,
-            "chunks": top_chunks,
-            "formatted_context": formatted
-        }
+        formatted_context = f"{curriculum_header}\n\nExcerpts:\n{chunks_text}"
+    else:
+        formatted_context = curriculum_header
 
-    return {"has_context": False, "chunks": [], "formatted_context": ""}
+    return {
+        "has_context": True,
+        "chunks": scored_chunks,
+        "formatted_context": formatted_context,
+        "reference_badge": reference_badge,
+        "matched_class": matched_class,
+        "target_class": target_class,
+        "is_cross_class": is_cross_class,
+        "chapter_no": curriculum_meta.get("chapter_no"),
+        "chapter_title": chapter_title,
+        "note_text": note_text
+    }
 
 
 def get_langchain_retriever(k: int = TOP_K_RESULTS):
@@ -117,11 +140,3 @@ def get_langchain_retriever(k: int = TOP_K_RESULTS):
         )
         return db.as_retriever(search_kwargs={"k": k})
     return None
-
-
-if __name__ == "__main__":
-    res = retrieve_math_context("What is the derivative of x^n?")
-    print("Has context:", res["has_context"])
-    print("Chunks count:", len(res["chunks"]))
-    if res["chunks"]:
-        print("Sample context:\n", res["formatted_context"][:200])

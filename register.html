@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Registration — AI Maths Tutor</title>
     <link rel="stylesheet" href="style.css">
+    <!-- 🌐 Official Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         .auth-wrapper {
             display: flex;
@@ -357,16 +359,26 @@
                 <hr style="flex:1; border:none; border-top:1px solid #e2e8f0;">
             </div>
 
-            <!-- Continue with Google Button -->
-            <button type="button" class="google-login-btn" id="google-login-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.33 24 12 24z"/>
-                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/>
-                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
-                <span>Continue with Google</span>
-            </button>
+            <!-- Official Google Sign-In Container -->
+            <div id="g_id_onload"
+                 data-client_id="165303629004-0thk2v4o8vn0m6eh6ug0kq4hgbn05nhh.apps.googleusercontent.com"
+                 data-callback="handleGoogleCredentialResponse"
+                 data-auto_prompt="false"
+                 data-cancel_on_tap_outside="true">
+            </div>
+
+            <!-- Styled Continue with Google Button -->
+            <div id="google-btn-container" style="display: flex; justify-content: center; margin-bottom: 12px; width: 100%;">
+                <button type="button" class="google-login-btn" id="google-login-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.33 24 12 24z"/>
+                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                    </svg>
+                    <span>Continue with Google</span>
+                </button>
+            </div>
 
             <div class="auth-footer">
                 Already have an account? <a href="login.html">Sign In</a>
@@ -432,74 +444,151 @@
     </div>
 
     <script>
+        function getApiBaseUrl() {
+            const saved = localStorage.getItem('customApiBaseUrl');
+            if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
+            if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+                return 'http://127.0.0.1:8000';
+            }
+            if (window.location.protocol === 'http:' && /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname)) {
+                return `http://${window.location.hostname}:8000`;
+            }
+            return (window.location.protocol === 'https:') ? '' : 'http://127.0.0.1:8000';
+        }
+        const API_BASE_URL = getApiBaseUrl();
+
         const registerForm = document.getElementById('register-form');
         const googleModalBackdrop = document.getElementById('google-modal-backdrop');
         const googleModalClose = document.getElementById('google-modal-close');
         const googleBtn = document.getElementById('google-login-btn');
 
-        registerForm.addEventListener('submit', (e) => {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('reg-name').value.trim();
             const email = document.getElementById('reg-email').value.trim();
             const grade = document.getElementById('reg-class').value;
+            const password = document.getElementById('reg-password').value.trim();
+            const submitBtn = registerForm.querySelector('button[type="submit"]');
 
-            localStorage.setItem('studentName', name || 'Sameed Khan');
-            localStorage.setItem('registeredName', name);
-            localStorage.setItem('registeredEmail', email);
-            localStorage.setItem('studentGrade', `Class ${grade}`);
+            if (!name || !email || !password) return;
+            if (password.length < 4) {
+                alert("⚠️ Password must be at least 4 characters long.");
+                return;
+            }
 
-            window.location.href = 'maths.html';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Creating account...";
+            }
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password,
+                        grade: `Class ${grade}`
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    localStorage.setItem('studentName', data.name || name);
+                    localStorage.setItem('studentEmail', email);
+                    localStorage.setItem('userRole', 'student');
+                    localStorage.setItem('userId', String(data.user_id));
+                    if (data.token) localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('studentGrade', `Class ${grade}`);
+                    localStorage.removeItem('activeChatId');
+                    window.location.href = 'maths.html';
+                    return;
+                } else {
+                    alert('⚠️ ' + (data.detail || 'Registration failed. Email might already exist.'));
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Create Student Account";
+                    }
+                    return;
+                }
+            } catch (err) {
+                console.warn('Backend server offline during registration, using local fallback:', err);
+                localStorage.setItem('studentName', name);
+                localStorage.setItem('registeredName', name);
+                localStorage.setItem('registeredEmail', email);
+                localStorage.setItem('studentGrade', `Class ${grade}`);
+                localStorage.removeItem('activeChatId');
+                window.location.href = 'maths.html';
+            }
         });
 
-        // Open Google Modal
-        if (googleBtn && googleModalBackdrop) {
-            googleBtn.addEventListener('click', () => {
-                googleModalBackdrop.classList.add('active');
-            });
+        // ==========================================
+        // 🌐 Official Google Identity Services Handler
+        // ==========================================
+        const GOOGLE_CLIENT_ID = '165303629004-0thk2v4o8vn0m6eh6ug0kq4hgbn05nhh.apps.googleusercontent.com';
+
+        function initGoogleClient() {
+            if (window.google && window.google.accounts) {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleGoogleCredentialResponse,
+                    auto_select: false,
+                    cancel_on_tap_outside: true
+                });
+
+                const btnContainer = document.getElementById('google-btn-container');
+                if (btnContainer) {
+                    btnContainer.innerHTML = '';
+                    google.accounts.id.renderButton(btnContainer, {
+                        theme: 'outline',
+                        size: 'large',
+                        width: 356,
+                        text: 'signup_with',
+                        shape: 'rectangular',
+                        logo_alignment: 'left'
+                    });
+                }
+            }
         }
 
-        // Close Google Modal
-        if (googleModalClose && googleModalBackdrop) {
-            googleModalClose.addEventListener('click', () => {
-                googleModalBackdrop.classList.remove('active');
-            });
+        window.addEventListener('load', () => {
+            setTimeout(initGoogleClient, 400);
+        });
 
-            googleModalBackdrop.addEventListener('click', (e) => {
-                if (e.target === googleModalBackdrop) {
-                    googleModalBackdrop.classList.remove('active');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        if (googleLoginBtn) {
+            googleLoginBtn.addEventListener('click', () => {
+                if (window.google && window.google.accounts) {
+                    google.accounts.id.prompt();
                 }
             });
         }
 
-        function selectGoogleAccount(name, email) {
-            const mainView = document.getElementById('google-modal-main');
-            const loadingView = document.getElementById('google-loading-state');
-            const loadingText = document.getElementById('google-loading-text');
-
-            if (mainView && loadingView) {
-                mainView.style.display = 'none';
-                loadingView.style.display = 'flex';
-                loadingText.innerText = `Connecting with ${name}...`;
-            }
-
-            localStorage.setItem('studentName', name);
-            localStorage.setItem('studentEmail', email);
-            localStorage.setItem('authProvider', 'google');
-
-            setTimeout(() => {
-                window.location.href = 'maths.html';
-            }, 750);
-        }
-
-        function promptGoogleAccount() {
-            const email = prompt('Enter your Google email address:', 'student@gmail.com');
-            if (email && email.trim()) {
-                const name = email.split('@')[0].replace(/[._0-9]/g, ' ').trim() || 'Google Student';
-                const formattedName = name.split(' ')
-                    .filter(w => w.length > 0)
-                    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-                    .join(' ');
-                selectGoogleAccount(formattedName, email.trim());
+        async function handleGoogleCredentialResponse(response) {
+            if (!response || !response.credential) return;
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    localStorage.setItem('studentName', data.name);
+                    localStorage.setItem('studentEmail', data.email);
+                    localStorage.setItem('userRole', data.role || 'student');
+                    localStorage.setItem('userId', String(data.user_id));
+                    if (data.token) localStorage.setItem('authToken', data.token);
+                    if (data.grade) localStorage.setItem('studentGrade', data.grade);
+                    localStorage.setItem('authProvider', 'google');
+                    localStorage.removeItem('activeChatId');
+                    window.location.href = 'maths.html';
+                } else {
+                    alert('⚠️ Google Registration failed: ' + (data.detail || 'Could not verify token'));
+                }
+            } catch (err) {
+                console.error('Network error during Google auth:', err);
+                alert('⚠️ Server connection error during Google sign-up.');
             }
         }
     </script>

@@ -155,23 +155,37 @@ def ingest_text_content(title: str, content: str):
     return {"filename": filename, "char_count": len(content)}
 
 def scrape_and_ingest_url(url: str):
-    """Scrapes text content from web URL and ingests into RAG vector database"""
+    """Scrapes text content from web URL with SSL bypass and ingests into RAG vector database"""
     SAMPLE_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    import ssl
+    
+    # SSL context bypass for self-signed or modern strict certificate sites
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
     req = urllib.request.Request(
         url, 
-        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5'
+        }
     )
-    with urllib.request.urlopen(req, timeout=12) as response:
+    with urllib.request.urlopen(req, context=ctx, timeout=15) as response:
         html = response.read().decode('utf-8', errors='ignore')
         
     soup = BeautifulSoup(html, 'html.parser')
-    for elem in soup(["script", "style", "nav", "footer", "header", "svg"]):
+    for elem in soup(["script", "style", "nav", "footer", "header", "svg", "noscript", "iframe"]):
         elem.extract()
         
     text = soup.get_text(separator=' ')
     clean_lines = [line.strip() for line in text.splitlines() if line.strip()]
     clean_text = "\n".join(clean_lines)
     
+    if len(clean_text) < 50:
+        raise ValueError("Webpage did not return readable text or requires login.")
+
     slug = re.sub(r'[^a-zA-Z0-9]', '_', url.replace('https://', '').replace('http://', ''))[:35]
     filename = f"scraped_{slug}.txt"
     file_path = SAMPLE_DOCS_DIR / filename
@@ -179,7 +193,28 @@ def scrape_and_ingest_url(url: str):
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(f"Source URL: {url}\n\n{clean_text}")
         
-    ingest_all()
+    # Ingest text without blocking on heavy PDF re-reads
+    try:
+        docs = load_documents(include_pdfs=False)
+        chunks = split_text_into_chunks(docs)
+        embeddings = get_embeddings()
+        if embeddings:
+            from langchain_chroma import Chroma
+            from langchain_core.documents import Document
+            langchain_docs = [
+                Document(page_content=c["text"], metadata=c["metadata"])
+                for c in chunks
+            ]
+            CHROMA_PERSIST_DIR.mkdir(parents=True, exist_ok=True)
+            Chroma.from_documents(
+                documents=langchain_docs,
+                embedding=embeddings,
+                persist_directory=str(CHROMA_PERSIST_DIR)
+            )
+    except Exception as e:
+        print(f"Incremental text ingest notice: {e}")
+        
+    get_rag_stats(force_refresh=True)
     return {"filename": filename, "source": url, "char_count": len(clean_text)}
 
 import json

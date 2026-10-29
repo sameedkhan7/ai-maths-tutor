@@ -1,0 +1,53 @@
+<svg viewBox="0 0 540 280" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgCar" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050811"/><stop offset="60%" stop-color="#0b1120"/><stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="carRed" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444"/><stop offset="50%" stop-color="#f87171"/><stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+    <linearGradient id="dialG" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bgCar)" rx="14" stroke="#0284c7" stroke-width="1.5"/>
+  <rect x="0" y="0" width="100%" height="34" fill="#0f172a" rx="14"/>
+  <rect x="0" y="24" width="100%" height="10" fill="#0f172a"/>
+  <text x="20" y="22" fill="#38bdf8" font-size="12" font-weight="bold" font-family="'Segoe UI', sans-serif">🏎️ Kinematics & Instantaneous Velocity Visualization</text>
+  <rect x="420" y="7" width="105" height="20" rx="10" fill="rgba(34, 197, 94, 0.15)" stroke="#22c55e" stroke-width="1"/>
+  <text x="472" y="21" fill="#22c55e" font-size="10.5" font-weight="bold" text-anchor="middle">v(t) = ds / dt</text>
+  <!-- Road -->
+  <rect x="15" y="195" width="310" height="42" fill="#1e293b" rx="6"/>
+  <line x1="15" y1="216" x2="325" y2="216" stroke="#f8fafc" stroke-width="2.5" stroke-dasharray="14,10"/>
+  <line x1="15" y1="195" x2="325" y2="195" stroke="#ef4444" stroke-width="3"/>
+  <!-- Sports Car -->
+  <path d="M 50 195 L 70 178 L 115 178 L 138 185 L 175 188 L 182 195 Z" fill="url(#carRed)"/>
+  <path d="M 74 180 L 88 171 L 118 171 L 126 180 Z" fill="#38bdf8" opacity="0.85"/>
+  <circle cx="78" cy="195" r="9" fill="#090d16" stroke="#94a3b8" stroke-width="2.5"/>
+  <circle cx="78" cy="195" r="3.5" fill="#f8fafc"/>
+  <circle cx="152" cy="195" r="9" fill="#090d16" stroke="#94a3b8" stroke-width="2.5"/>
+  <circle cx="152" cy="195" r="3.5" fill="#f8fafc"/>
+  <polygon points="182,190 260,180 260,205 182,194" fill="rgba(253, 224, 71, 0.18)"/>
+  <!-- Distance Trajectory Curve -->
+  <path d="M 55 160 Q 140 135 270 85" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="5,3"/>
+  <text x="110" y="125" fill="#38bdf8" font-size="10.5" font-weight="bold">Distance Curve s(t)</text>
+  <!-- Tangent Arrow -->
+  <line x1="110" y1="145" x2="235" y2="105" stroke="#22c55e" stroke-width="3"/>
+  <polygon points="235,105 222,100 226,112" fill="#22c55e"/>
+  <circle cx="165" cy="127" r="5" fill="#fde047" stroke="#ffffff" stroke-width="1.5"/>
+  <rect x="75" y="60" width="195" height="36" rx="6" fill="rgba(15, 23, 42, 0.95)" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="85" y="76" fill="#22c55e" font-size="10.5" font-weight="bold">⚡ Tangent Slope = Velocity</text>
+  <text x="85" y="90" fill="#f8fafc" font-size="9.5">v(t) = s'(t) = Instantaneous Speed</text>
+  <!-- Speedometer Gauge -->
+  <rect x="345" y="48" width="180" height="190" rx="10" fill="url(#dialG)" stroke="#334155" stroke-width="1.2"/>
+  <path d="M 375 160 A 55 55 0 1 1 495 160" fill="none" stroke="#334155" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 375 160 A 55 55 0 0 1 475 110" fill="none" stroke="#22c55e" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="435" cy="155" r="7" fill="#ffffff" stroke="#090d16" stroke-width="2"/>
+  <line x1="435" y1="155" x2="470" y2="114" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+  <text x="435" y="185" fill="#ffffff" font-size="20" font-weight="bold" text-anchor="middle" font-family="'Consolas', monospace">140</text>
+  <text x="435" y="198" fill="#22c55e" font-size="10" font-weight="bold" text-anchor="middle">KM / H</text>
+  <text x="435" y="222" fill="#94a3b8" font-size="9.5" text-anchor="middle">Instantaneous Speedometer</text>
+  <!-- Bottom Strip -->
+  <rect x="15" y="246" width="510" height="26" rx="5" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+  <text x="25" y="263" fill="#94a3b8" font-size="9.5">💡 <tspan fill="#38bdf8" font-weight="bold">Concept Rule:</tspan> Car ka speedometer uss pal ki instantaneous derivative speed <tspan fill="#22c55e" font-weight="bold">v(t) = dx/dt</tspan> show karta hai.</text>
+</svg>

@@ -30,28 +30,42 @@ def call_groq(
 
     client = create_groq_client()
     default_model = GROQ_MODEL or "openai/gpt-oss-120b"
-    target_model = model or default_model
+    primary_model = model or default_model
+    
+    # Cascade candidate models if primary hits rate limit (TPD / TPM 429)
+    candidate_models = [primary_model]
+    for fallback in ["qwen/qwen3.8-27b", "openai/gpt-oss-20b", "openai/gpt-oss-120b"]:
+        if fallback not in candidate_models:
+            candidate_models.append(fallback)
 
     last_error = None
 
-    for attempt in range(retries):
-        try:
-            response = client.chat.completions.create(
-                model=target_model,
-                messages=messages,
-                temperature=TEMPERATURE,
-                max_tokens=MAX_TOKENS,
-            )
-
-            return response.choices[0].message.content
-
-        except Exception as error:
-            last_error = error
-            # If model is not found, fallback to the working default model
-            if "model_not_found" in str(error) and target_model != default_model:
-                target_model = default_model
-                continue
+    import time
+    for candidate in candidate_models:
+        for attempt in range(retries):
+            try:
+                response = client.chat.completions.create(
+                    model=candidate,
+                    messages=messages,
+                    temperature=TEMPERATURE,
+                    max_tokens=MAX_TOKENS,
+                )
+                return response.choices[0].message.content
+            except Exception as error:
+                last_error = error
+                err_str = str(error).lower()
+                # If daily quota limit exceeded (TPD), immediately switch to next fallback model
+                if "tokens per day" in err_str or "tpd" in err_str:
+                    break
+                # If short-term minute rate limit (TPM), pause briefly for sub-second reset
+                if "tokens per minute" in err_str or "tpm" in err_str:
+                    time.sleep(1.5)
+                    continue
+                if "rate_limit" in err_str or "429" in err_str:
+                    break  # switch to next candidate model
+                if "model_not_found" in err_str:
+                    break  # switch to next candidate model if model name is invalid
 
     raise RuntimeError(
-        f"Groq API failed after {retries} attempts: {last_error}"
+        f"Groq API failed after trying models {candidate_models}: {last_error}"
     )

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Maths Tutor — Official Project Documentation</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 16mm 14mm 16mm 14mm;
+      @bottom-right {
+        content: counter(page);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      line-height: 1.55;
+      font-size: 13px;
+      padding: 10px;
+    }
+
+    /* Header Banner */
+    .header-banner {
+      border-bottom: 2px solid #4f46e5;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .title-group h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .title-group p {
+      font-size: 13px;
+      color: #6366f1;
+      font-weight: 600;
+    }
+
+    .badge-pill {
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 5px;
+    }
+
+    h3 {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 12px;
+      margin-bottom: 6px;
+    }
+
+    p {
+      margin-bottom: 10px;
+      color: #334155;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 16px 0;
+      font-size: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+      text-align: left;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+    }
+
+    td {
+      padding: 7px 10px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+      color: #334155;
+    }
+
+    tr:nth-child(even) td {
+      background: #fbfcfe;
+    }
+
+    /* Callout & Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 10px 0 14px 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .feature-card {
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .feature-card h4 {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .feature-card p {
+      font-size: 11.5px;
+      color: #475569;
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* Code & Architecture Block */
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 10.5px;
+      line-height: 1.4;
+      overflow-x: auto;
+      margin: 10px 0 14px 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 10px;
+      color: #334155;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    .highlight-box {
+      background: #f0fdf4;
+      border-left: 4px solid #16a34a;
+      padding: 10px 14px;
+      border-radius: 4px;
+      margin: 12px 0;
+      font-size: 12px;
+      color: #14532d;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+    }
+
+    footer {
+      margin-top: 30px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      color: #64748b;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header-banner">
+    <div class="title-group">
+      <h1>AI Maths Tutor — Project Documentation</h1>
+      <p>Intelligent, Curriculum-Aligned Mathematics Platform · NCERT Classes 9–12</p>
+    </div>
+    <div class="badge-pill">CBSE / NCERT 2026</div>
+  </div>
+
+  <!-- SECTION 1: TEAM MEMBERS -->
+  <h2>👥 1. Team Members & Core Responsibilities</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 5%;">#</th>
+        <th style="width: 25%;">Name</th>
+        <th style="width: 28%;">Core Role</th>
+        <th style="width: 42%;">Key Deliverables</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1</strong></td>
+        <td><strong>Syed Alkab Hussain Rizvi</strong></td>
+        <td><span style="color:#4f46e5; font-weight:600;">LLM Specialist</span></td>
+        <td>Prompt engineering, system instruction design, Groq API integration, mathematical reasoning, and failover cascading.</td>
+      </tr>
+      <tr>
+        <td><strong>2</strong></td>
+        <td><strong>Sameed Khan</strong></td>
+        <td><span style="color:#0891b2; font-weight:600;">Testing & Feature Integration</span></td>
+        <td>End-to-end QA testing, cross-browser responsiveness, git feature branch merging, conflict resolution, and UI/UX validation.</td>
+      </tr>
+      <tr>
+        <td><strong>3</strong></td>
+        <td><strong>Rumman Siddiqui</strong></td>
+        <td><span style="color:#d97706; font-weight:600;">RAG & Knowledge Architecture</span></td>
+        <td>Vector embeddings pipeline, semantic retrieval, NCERT Class 9–12 textbook ingestion, and official PDF deep-link referencing.</td>
+      </tr>
+      <tr>
+        <td><strong>4</strong></td>
+        <td><strong>Arman Khan</strong></td>
+        <td><span style="color:#2563eb; font-weight:600;">Backend Engineering (Core & DB)</span></td>
+        <td>FastAPI core server architecture, MySQL relational database design, Google OAuth 2.0 integration, and Bcrypt + JWT security.</td>
+      </tr>
+      <tr>
+        <td><strong>5</strong></td>
+        <td><strong>Kazim Shaikh</strong></td>
+        <td><span style="color:#2563eb; font-weight:600;">Backend Engineering (APIs & Services)</span></td>
+        <td>RESTful endpoints for chat sessions and history pagination, multi-format file/OCR document parser, and connection pool optimization.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 2: EXECUTIVE SUMMARY -->
+  <h2>🚀 2. Project Overview & Problem Statement</h2>
+  <p>
+    Mathematics education often suffers from high student dropouts due to lack of personalized, step-by-step guidance. <strong>AI Maths Tutor</strong> addresses this by pairing state-of-the-art Large Language Models (LLMs) with strict <strong>Retrieval-Augmented Generation (RAG)</strong> over the official NCERT syllabus. The result is a hallucination-free, interactive learning partner accessible on any desktop or smartphone.
+  </p>
+
+  <!-- SECTION 3: KEY CAPABILITIES -->
+  <h2>✨ 3. Core System Capabilities</h2>
+
+  <div class="card-grid">
+    <div class="feature-card">
+      <h4>🧠 Multi-Model Engine with Failover</h4>
+      <p>Powered by Groq Cloud LPUs with models: <strong>GPT-OSS 120B</strong> (Deep Reasoning), <strong>Qwen 3.8 27B</strong> (Math Specialist), and <strong>GPT-OSS 20B</strong> (Speed). Automated cascading switches models if a rate limit is met.</p>
+    </div>
+    <div class="feature-card">
+      <h4>🎭 9 Pedagogical Teaching Styles</h4>
+      <p>Tailored modes: <em>Quick Answer</em>, <em>Concept First</em>, <em>Step-by-Step</em>, <em>Exam-Oriented</em>, <em>Sports Mode</em> (Cricket analogies), <em>Real-Life</em>, <em>Story</em>, <em>Social Buddy</em>, and <em>Socratic Mode</em>.</p>
+    </div>
+    <div class="feature-card">
+      <h4>📚 NCERT Textbook Grounding (RAG)</h4>
+      <p>Every explanation is cross-verified against official Class 9–12 textbooks, providing students with exact textbook chapter citations and clickable NCERT PDF links.</p>
+    </div>
+    <div class="feature-card">
+      <h4>🛡️ Guardrails & Typo Fuzzy Matching</h4>
+      <p>Strict defensive filters block non-math prompts, prompt injections, and database leaks, while fuzzy matching corrects student phonetic typos (e.g. <em>"tignomatry"</em>).</p>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="feature-card">
+      <h4>📐 KaTeX Formula & SVG Diagrams</h4>
+      <p>Instant rendering of LaTeX math ($$\int$$, $$\sum$$, radicals, fractions) plus real-time generation of interactive SVG coordinate graphs and geometric diagrams.</p>
+    </div>
+    <div class="feature-card">
+      <h4>🎙️ Speech Dictation & AI Voice (TTS)</h4>
+      <p>Voice question input (STT) combined with a specialized Text-to-Speech (TTS) converter that translates complex LaTeX syntax into clear spoken words.</p>
+    </div>
+    <div class="feature-card">
+      <h4>🔐 Dual Authentication & User Isolation</h4>
+      <p>Google OAuth 2.0 alongside standard email login with Bcrypt password hashing. Chat histories and pinned discussions are strictly isolated per <code>user_id</code>.</p>
+    </div>
+    <div class="feature-card">
+      <h4>🛠️ Developer RAG Control Center</h4>
+      <p>Admin panel enabling educators and developers to upload supplementary PDF textbooks, paste custom lecture notes, or scrape math web articles directly into vectors.</p>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 4: ARCHITECTURE DIAGRAM -->
+  <h2>🏗️ 4. Technical Architecture</h2>
+  <pre>
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            FRONTEND CLIENT LAYER                            │
+│  • HTML5 / CSS3 (Dark Slate Theme)    • KaTeX Equation Engine               │
+│  • Vanilla ES6+ JavaScript            • Web Speech API (Voice STT / TTS)    │
+│  • Responsive Design (Desktop/Mobile) • Interactive SVG Renderer            │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │ HTTPS / REST API
+┌──────────────────────────────────────▼──────────────────────────────────────┐
+│                        FASTAPI BACKEND SERVICES                             │
+│  • Route Orchestration (main.py)      • Security Guardrails & Typo Matcher  │
+│  • Bcrypt + JWT Authentication Engine • Multi-Model Groq Client & Cascade   │
+│  • RAG Retrieval & Ingestion Pipeline • File & Image OCR Parser             │
+└───────────────────┬─────────────────────────────────────┬───────────────────┘
+                    │                                     │
+┌───────────────────▼─────────────────┐ ┌─────────────────▼───────────────────┐
+│        DATABASE STORAGE LAYER       │ │         EXTERNAL AI CLOUD           │
+│  • MySQL (Users, Chats, History)    │ │  • Groq Cloud API LPU Accelerators  │
+│  • Relational Schema with Foreign   │ │  • Llama-3, Qwen, & OSS Architectures│
+│    Keys & Indexed user_id Lookups   │ │  • Continuous Token Window (TPM)    │
+└─────────────────────────────────────┘ └─────────────────────────────────────┘
+  </pre>
+
+  <!-- SECTION 5: TECHNOLOGY STACK TABLE -->
+  <h2>💻 5. Technology Stack Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Layer</th>
+        <th style="width: 35%;">Technology</th>
+        <th style="width: 40%;">Functionality</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Frontend</strong></td>
+        <td>HTML5, CSS3, JavaScript (ES6+)</td>
+        <td>Ultra-fast, zero-dependency client interface</td>
+      </tr>
+      <tr>
+        <td><strong>Math Typography</strong></td>
+        <td>KaTeX</td>
+        <td>Client-side high-performance LaTeX formula rendering</td>
+      </tr>
+      <tr>
+        <td><strong>Backend API</strong></td>
+        <td>FastAPI (Python 3.13), Uvicorn</td>
+        <td>Asynchronous, high-throughput microservices</td>
+      </tr>
+      <tr>
+        <td><strong>Database</strong></td>
+        <td>MySQL Relational Engine</td>
+        <td>Persistent storage of students, conversations, and pins</td>
+      </tr>
+      <tr>
+        <td><strong>Authentication</strong></td>
+        <td>Google OAuth 2.0, Bcrypt, PyJWT</td>
+        <td>Salted password hashing and secure session tokens</td>
+      </tr>
+      <tr>
+        <td><strong>AI Inference</strong></td>
+        <td>Groq Cloud LPU Accelerators</td>
+        <td>Sub-second token generation across multiple LLM weights</td>
+      </tr>
+      <tr>
+        <td><strong>RAG Pipeline</strong></td>
+        <td>LangChain, Vector Embeddings</td>
+        <td>Semantic document chunking, indexing, and retrieval</td>
+      </tr>
+      <tr>
+        <td><strong>Deployment Plan</strong></td>
+        <td>Vercel (Frontend) + Railway (Backend/DB)</td>
+        <td>Scalable, cost-effective serverless cloud architecture</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 6: SECURITY HIGHLIGHTS -->
+  <h2>🔒 6. Security & Privacy Guarantees</h2>
+  <div class="highlight-box">
+    <strong>Security Standards Enforced:</strong>
+    <ul style="margin-top: 6px; margin-bottom: 0;">
+      <li><strong>Zero Plaintext Passwords:</strong> Salted Bcrypt hashing ensures database dumps cannot expose credentials.</li>
+      <li><strong>Data Isolation:</strong> Queries are restricted by <code>WHERE user_id = :authenticated_user_id</code> to prevent cross-account leaks.</li>
+      <li><strong>SSRF Protection:</strong> RAG web scrapers reject private network targets (<code>127.0.0.1</code>, <code>localhost</code>).</li>
+      <li><strong>Air-Gapped Developer Mode:</strong> Developer admin routes can be restricted to local development environments, leaving zero administrative attack surface on the live internet.</li>
+    </ul>
+  </div>
+
+  <footer>
+    <span>AI Maths Tutor — Academic & Technical Report</span>
+    <span>Syed Alkab · Sameed Khan · Rumman Siddiqui · Arman Khan · Kazim Shaikh</span>
+  </footer>
+
+</body>
+</html>

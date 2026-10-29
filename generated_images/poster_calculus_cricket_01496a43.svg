@@ -1,0 +1,115 @@
+<svg viewBox="0 0 960 580" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgCarPost" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050811"/>
+      <stop offset="50%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="headerGradCar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <linearGradient id="carBodyRed" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="50%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+    <linearGradient id="dialGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#070d19"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="960" height="580" fill="url(#bgCarPost)" rx="16" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- Top Banner -->
+  <rect x="0" y="0" width="960" height="60" fill="#0b1329" rx="16"/>
+  <rect x="0" y="44" width="960" height="16" fill="#0b1329"/>
+  <line x1="0" y1="60" x2="960" y2="60" stroke="#1e293b" stroke-width="1.5"/>
+
+  <text x="28" y="38" fill="url(#headerGradCar)" font-size="22" font-weight="900" font-family="'Segoe UI', system-ui, sans-serif">🏎️ CALCULUS IN MOTION : INSTANTANEOUS SPEED &amp; DERIVATIVE</text>
+  <rect x="745" y="16" width="185" height="28" rx="14" fill="rgba(34, 197, 94, 0.12)" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="837" y="34" fill="#22c55e" font-size="12" font-weight="bold" font-family="system-ui" text-anchor="middle">NCERT Class 11 / 12 · Calculus</text>
+
+  <!-- Left: Car Motion & Tangent Line -->
+  <rect x="25" y="75" width="560" height="270" rx="12" fill="#050a14" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Highway Road -->
+  <rect x="25" y="240" width="560" height="105" fill="#1e293b"/>
+  <line x1="25" y1="240" x2="585" y2="240" stroke="#ef4444" stroke-width="3"/>
+  <line x1="25" y1="290" x2="585" y2="290" stroke="#f8fafc" stroke-width="3" stroke-dasharray="25,20"/>
+
+  <!-- Racing Car at (180, 240) -->
+  <path d="M 120 240 L 150 215 L 230 215 L 265 228 L 320 232 L 330 240 Z" fill="url(#carBodyRed)"/>
+  <path d="M 155 218 L 175 204 L 225 204 L 245 218 Z" fill="#38bdf8" opacity="0.85"/>
+  <circle cx="160" cy="240" r="14" fill="#090d16" stroke="#94a3b8" stroke-width="3.5"/>
+  <circle cx="160" cy="240" r="5" fill="#ffffff"/>
+  <circle cx="280" cy="240" r="14" fill="#090d16" stroke="#94a3b8" stroke-width="3.5"/>
+  <circle cx="280" cy="240" r="5" fill="#ffffff"/>
+
+  <!-- Distance Trajectory Curve s(t) -->
+  <path d="M 70 210 Q 220 160 460 90" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="7,4"/>
+  <text x="180" y="145" fill="#38bdf8" font-size="12" font-weight="bold">Position Curve s(t)</text>
+
+  <!-- Tangent Line representing Instantaneous Velocity -->
+  <line x1="160" y1="180" x2="410" y2="105" stroke="#22c55e" stroke-width="3.5"/>
+  <polygon points="410,105 394,98 398,114" fill="#22c55e"/>
+  <circle cx="270" cy="148" r="6.5" fill="#fde047" stroke="#ffffff" stroke-width="2"/>
+
+  <!-- Tangent Badge -->
+  <rect x="190" y="90" width="225" height="42" rx="6" fill="#0f172a" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="202" y="108" fill="#22c55e" font-size="11.5" font-weight="bold">⚡ Tangent Slope = Velocity v(t)</text>
+  <text x="202" y="124" fill="#f8fafc" font-size="10.5">v(t) = lim(Δt→0) [Δs / Δt] = ds / dt</text>
+
+  <!-- Right: Speedometer Gauge -->
+  <rect x="600" y="75" width="335" height="270" rx="12" fill="#070e1c" stroke="#1e293b" stroke-width="1.5"/>
+  <rect x="600" y="75" width="335" height="38" fill="#0d1829" rx="12"/>
+  <rect x="600" y="100" width="335" height="13" fill="#0d1829"/>
+  <text x="618" y="99" fill="#f8fafc" font-size="13" font-weight="bold">🏎️ Instantaneous Speedometer HUD</text>
+
+  <!-- Speedometer Dial -->
+  <circle cx="767" cy="195" r="70" fill="url(#dialGrad)" stroke="#334155" stroke-width="2"/>
+  <path d="M 717 215 A 55 55 0 1 1 817 215" fill="none" stroke="#334155" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 717 215 A 55 55 0 0 1 795 155" fill="none" stroke="#22c55e" stroke-width="10" stroke-linecap="round"/>
+  <line x1="767" y1="195" x2="805" y2="150" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="767" cy="195" r="7" fill="#ffffff"/>
+  <text x="767" y="215" fill="#ffffff" font-size="24" font-weight="900" font-family="'Consolas', monospace" text-anchor="middle">140</text>
+  <text x="767" y="230" fill="#22c55e" font-size="11" font-weight="bold" text-anchor="middle">KM / H</text>
+
+  <rect x="620" y="285" width="295" height="45" rx="6" fill="#0f172a" stroke="#22c55e" stroke-width="1"/>
+  <text x="632" y="303" fill="#22c55e" font-size="11" font-weight="bold">Derivative Connection:</text>
+  <text x="632" y="320" fill="#f8fafc" font-size="10.5">Speedometer har microsecond ka <tspan fill="#38bdf8" font-weight="bold">ds/dt</tspan> show karta hai!</text>
+
+  <!-- Bottom Grid: 3 Formula Cards -->
+  <rect x="25" y="360" width="295" height="155" rx="10" fill="#0b1329" stroke="#ef4444" stroke-width="1.2"/>
+  <rect x="37" y="372" width="130" height="22" rx="4" fill="#ef4444"/>
+  <text x="102" y="387" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle">1. Average vs Instant</text>
+  <text x="37" y="416" fill="#f87171" font-size="12" font-weight="bold">Average Speed = Δs / Δt</text>
+  <text x="37" y="435" fill="#f8fafc" font-size="11">Instantaneous = lim (Δs / Δt)</text>
+  <line x1="37" y1="446" x2="305" y2="446" stroke="#334155" stroke-width="1"/>
+  <text x="37" y="468" fill="#94a3b8" font-size="10.5">Jab time interval Δt zero ke karib</text>
+  <text x="37" y="485" fill="#f87171" font-size="10.5" font-weight="bold">pahunche, tab average instant ban jata hai.</text>
+
+  <rect x="335" y="360" width="295" height="155" rx="10" fill="#0b1329" stroke="#22c55e" stroke-width="1.2"/>
+  <rect x="347" y="372" width="130" height="22" rx="4" fill="#22c55e"/>
+  <text x="412" y="387" fill="#0f172a" font-size="11" font-weight="900" text-anchor="middle">2. The Derivative Rule</text>
+  <text x="347" y="416" fill="#4ade80" font-size="12" font-weight="bold">v(t) = s'(t) = ds / dt</text>
+  <text x="347" y="435" fill="#f8fafc" font-size="11">Acceleration a(t) = d²s / dt²</text>
+  <line x1="347" y1="446" x2="615" y2="446" stroke="#334155" stroke-width="1"/>
+  <text x="347" y="468" fill="#94a3b8" font-size="10.5">Position ka 1st derivative = Velocity</text>
+  <text x="347" y="485" fill="#22c55e" font-size="10.5" font-weight="bold">Position ka 2nd derivative = Acceleration</text>
+
+  <rect x="645" y="360" width="290" height="155" rx="10" fill="#0b1329" stroke="#38bdf8" stroke-width="1.2"/>
+  <rect x="657" y="372" width="130" height="22" rx="4" fill="#0284c7"/>
+  <text x="722" y="387" fill="#ffffff" font-size="11" font-weight="900" text-anchor="middle">3. Tangent Geometry</text>
+  <text x="657" y="416" fill="#38bdf8" font-size="12" font-weight="bold">Slope m = tan θ = dy / dx</text>
+  <text x="657" y="435" fill="#f8fafc" font-size="11">Geometry mein tangent ka dhaal</text>
+  <line x1="657" y1="446" x2="920" y2="446" stroke="#334155" stroke-width="1"/>
+  <text x="657" y="468" fill="#94a3b8" font-size="10.5">Curve ke kisi ek point par sparsh-rekha</text>
+  <text x="657" y="485" fill="#38bdf8" font-size="10.5" font-weight="bold">(tangent) ka angle hi derivative hai.</text>
+
+  <!-- Bottom Strip -->
+  <rect x="25" y="528" width="910" height="36" rx="8" fill="#0b1329" stroke="#1e293b" stroke-width="1"/>
+  <text x="40" y="551" fill="#94a3b8" font-size="11">💡 <tspan fill="#38bdf8" font-weight="bold">Core Takeaway:</tspan> Car ka speedometer kisi lambi yatra ki average speed nahi, balki theek uss second ka instantaneous derivative <tspan fill="#22c55e" font-weight="bold">v = ds/dt</tspan> batata hai!</text>
+</svg>

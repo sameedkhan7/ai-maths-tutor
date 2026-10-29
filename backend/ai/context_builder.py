@@ -116,10 +116,7 @@ def build_messages(
     rag_context, sources = build_rag_context(req)
 
     # Current question
-    user_content = (
-        "Use the previous conversation to understand references "
-        "such as 'it', 'this', 'that', 'again', or 'why'.\n\n"
-    )
+    user_content = ""
 
     if rag_context:
         user_content += (
@@ -131,6 +128,21 @@ def build_messages(
         "STUDENT QUESTION:\n"
         f"{req.question}"
     )
+
+    # NCERT & CBSE Live MCP Context Hook
+    try:
+        from backend.ncert_mcp_server import fetch_ncert_context_for_query
+        ncert_data = fetch_ncert_context_for_query(req.question, req.student_grade)
+        if ncert_data.get("found"):
+            user_content += (
+                f"\n\n[OFFICIAL NCERT CONTEXT VIA MCP]:\n"
+                f"- Book: {ncert_data['class']} Mathematics\n"
+                f"- Chapter {ncert_data['chapter_number']}: {ncert_data['chapter_title']}\n"
+                f"- Official NCERT PDF Link: {ncert_data['official_link']}\n"
+                f"- Rule: Mention this official NCERT chapter name and provide the official link at the end so student can click and view it!\n"
+            )
+    except Exception:
+        pass
 
     messages.append({
         "role": "user",

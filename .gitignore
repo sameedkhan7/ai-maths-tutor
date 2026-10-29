@@ -1,12 +1,40 @@
-.env
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-backend/__pycache__/
-backend/ai/__pycache__/
-*.db
-.vscode/
-AI-Maths-Tutor-frontend.zip
+*.py[cod]
+*$py.class
+*.so
 
+# Environments & Virtual Envs
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# Databases
+*.sqlite
+*.sqlite3
+*.db
+backend/tutor.db
+tutor.db
+
+# Executables & Tunnels
+*.exe
 cloudflared.exe
-*.pyc
-__pycache__/
+ngrok.exe
+
+# Local Windows launcher scripts (kept locally, excluded from production repo)
+*.bat
+
+# Large Media, Videos, Zips, Raw Books
+output/
+data/raw_pdfs/
+*.zip
+*.pdf
+scratch/
+
+# IDE / Editor configs
+.vscode/
+.idea/
+.pytest_cache/
+.system_generated/
