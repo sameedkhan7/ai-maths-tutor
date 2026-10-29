@@ -10,7 +10,7 @@ except ImportError:
     HAS_PYMYSQL = False
 
 # Database Settings from Environment or Defaults
-USE_MYSQL = os.getenv("USE_MYSQL", "true").lower() in ("true", "1", "yes")
+USE_MYSQL = bool(os.getenv("MYSQL_HOST")) and os.getenv("USE_MYSQL", "true").lower() in ("true", "1", "yes")
 MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
 MYSQL_USER = os.getenv("MYSQL_USER", "root")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "1234")

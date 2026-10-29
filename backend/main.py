@@ -866,4 +866,10 @@ def root_redirect():
 
 # 12. Mount Static Frontend (Serves login.html, maths.html, JS, CSS directly from FastAPI)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-app.mount("/", StaticFiles(directory=PROJECT_ROOT, html=True), name="static") 
+app.mount("/", StaticFiles(directory=PROJECT_ROOT, html=True), name="static")
+
+if __name__ == '__main__':
+    import uvicorn
+    port = int(os.environ.get('PORT', 10000))
+    print(f'[Server] Starting on port {port}...')
+    uvicorn.run('backend.main:app', host='0.0.0.0', port=port)
