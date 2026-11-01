@@ -105,9 +105,47 @@ def create_access_token(data: dict, expires_days: int = 7) -> str:
     return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
-# 2. Student Registration API (Secured with Bcrypt)
+def is_valid_real_email(email: str) -> tuple[bool, str]:
+    """Validates real syntax, legitimate domain MX/DNS reachability, and blocks disposable/fake emails"""
+    import socket
+    clean_email = email.strip().lower()
+
+    # 1. Regex Syntax Check
+    email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    if not re.match(email_regex, clean_email):
+        return False, "Invalid email format. Please enter a valid email address (e.g. name@gmail.com)."
+
+    username, domain = clean_email.split('@', 1)
+
+    # 2. Block Disposable / Trash Temporary Email Providers
+    DISPOSABLE_DOMAINS = {
+        'tempmail.com', '10minutemail.com', 'guerrillamail.com', 'sharklasers.com',
+        'throwawaymail.com', 'yopmail.com', 'mailinator.com', 'getnada.com',
+        'dispostable.com', 'trashmail.com', 'fakeinbox.com', 'burnermail.io'
+    }
+    if domain in DISPOSABLE_DOMAINS:
+        return False, "Disposable or temporary emails are not allowed. Please use your genuine Google/Yahoo/Outlook email."
+
+    # 3. Check Real Domain Existence via DNS
+    try:
+        socket.gethostbyname(domain)
+    except Exception:
+        return False, f"Domain '@{domain}' does not exist on the internet. Please provide a real email domain."
+
+    return True, "OK"
+
+
+# 2. Student Registration API (Secured with Bcrypt & Real Email Validation)
 @app.post("/api/register")
 def register(req: RegisterRequest):
+    if len(req.name.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Please enter your real full name.")
+
+    # Strict Real Email Verification
+    is_valid, reason = is_valid_real_email(req.email)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=reason)
+
     if len(req.password.strip()) < 4:
         raise HTTPException(status_code=400, detail="Password must be at least 4 characters long")
 
@@ -129,7 +167,7 @@ def register(req: RegisterRequest):
             "grade": req.grade
         }
     except Exception as e:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Email already registered. Please log in.")
     finally:
         conn.close()
 
