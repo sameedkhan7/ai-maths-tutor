@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Maths Tutor — Developer Admin & Analytics Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Chart.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-card: rgba(15, 23, 42, 0.75);
+            --bg-surface: #1e293b;
+            --border-glow: rgba(99, 102, 241, 0.2);
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-cyan: #38bdf8;
+            --accent-purple: #c084fc;
+            --accent-green: #10b981;
+            --accent-pink: #ec4899;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* Top Navbar */
+        .admin-nav {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #38bdf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .nav-title h1 {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #fff;
+        }
+
+        .nav-title span {
+            font-size: 11px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: rgba(30, 41, 59, 0.7);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-outline:hover {
+            background: rgba(51, 65, 85, 0.9);
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        /* Container */
+        .dashboard-container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 28px 24px 60px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .kpi-blue::before { background: linear-gradient(90deg, #38bdf8, #0284c7); }
+        .kpi-purple::before { background: linear-gradient(90deg, #c084fc, #9333ea); }
+        .kpi-pink::before { background: linear-gradient(90deg, #f472b6, #db2777); }
+        .kpi-green::before { background: linear-gradient(90deg, #34d399, #059669); }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .kpi-icon {
+            font-size: 20px;
+            padding: 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #fff;
+        }
+
+        .kpi-badge {
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Charts Row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .charts-row { grid-template-columns: 1fr; }
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-box {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        /* Data Tables & Feed Row */
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1.9fr 1.1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 990px) {
+            .bottom-row { grid-template-columns: 1fr; }
+        }
+
+        .table-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .table-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 7px 14px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box:focus {
+            border-color: #6366f1;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 380px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        th {
+            padding: 10px 14px;
+            background: #1e293b;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--accent-cyan);
+        }
+
+        /* Feed List */
+        .feed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .feed-item {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .feed-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .feed-student {
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        .feed-question {
+            font-size: 13px;
+            color: #f1f5f9;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* Security Gate Modal if not logged in */
+        #auth-lock-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 13, 22, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lock-card {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 32px 28px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+
+        .lock-icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .lock-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #fff;
+            font-size: 14px;
+            margin: 16px 0;
+            outline: none;
+        }
+
+        .lock-input:focus {
+            border-color: #6366f1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🔒 Security Gate Modal (Protects dashboard if not authenticated) -->
+    <div id="auth-lock-overlay" style="display: none;">
+        <div class="lock-card">
+            <div class="lock-icon">🔐</div>
+            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 6px;">Developer Admin Authentication</h2>
+            <p style="font-size: 13px; color: var(--text-muted);">Please enter your Developer Admin password to access the live Analytics Dashboard.</p>
+            <form id="lock-form">
+                <input type="password" id="lock-password-input" class="lock-input" placeholder="Enter Developer Admin Password..." required autofocus />
+                <div id="lock-error-msg" style="color: #ef4444; font-size: 12px; margin-bottom: 12px; display: none;"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Unlock Dashboard 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Top Navbar -->
+    <nav class="admin-nav">
+        <div class="nav-brand">
+            <div class="nav-logo">📊</div>
+            <div class="nav-title">
+                <h1>AI Maths Tutor <span style="font-size: 13px; font-weight: 800; color: #a855f7;">• DEV ANALYTICS</span></h1>
+                <span>Cloud MySQL Aiven • Live Overview</span>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <a href="/maths.html" class="btn btn-outline">← Back to Tutor</a>
+            <button id="btn-export-csv" class="btn btn-outline">📥 Export CSV</button>
+            <button id="btn-refresh" class="btn btn-primary">🔄 Refresh</button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="dashboard-container">
+
+        <!-- 4 KPI Metrics -->
+        <section class="kpi-grid">
+            <div class="kpi-card kpi-blue">
+                <div class="kpi-header">
+                    <span class="kpi-label">TOTAL REGISTERED STUDENTS</span>
+                    <span class="kpi-icon">👥</span>
+                </div>
+                <div class="kpi-value" id="kpi-students">0</div>
+                <div class="kpi-badge" style="color: #38bdf8;">Verified Active Accounts</div>
+            </div>
+
+            <div class="kpi-card kpi-purple">
+                <div class="kpi-header">
+                    <span class="kpi-label">TOTAL QUESTIONS SOLVED</span>
+                    <span class="kpi-icon">💬</span>
+                </div>
+                <div class="kpi-value" id="kpi-questions">0</div>
+                <div class="kpi-badge" style="color: #c084fc;">Powered by Groq AI</div>
+            </div>
+
+            <div class="kpi-card kpi-pink">
+                <div class="kpi-header">
+                    <span class="kpi-label">AI VISUALS GENERATED</span>
+                    <span class="kpi-icon">🎨</span>
+                </div>
+                <div class="kpi-value" id="kpi-visuals">0</div>
+                <div class="kpi-badge" style="color: #f472b6;">Posters & SVG Diagrams</div>
+            </div>
+
+            <div class="kpi-card kpi-green">
+                <div class="kpi-header">
+                    <span class="kpi-label">DATABASE & UPTIME</span>
+                    <span class="kpi-icon">⚡</span>
+                </div>
+                <div class="kpi-value" style="font-size: 22px; color: #34d399; margin-top: 8px;">100% ONLINE</div>
+                <div class="kpi-badge" style="color: #34d399;">Aiven Cloud MySQL + UptimeRobot</div>
+            </div>
+        </section>
+
+        <!-- Charts Row -->
+        <section class="charts-row">
+            <div class="chart-card">
+                <div class="card-header">
+                    <h3 class="card-title">🎓 Student Class Distribution</h3>
+                    <span style="font-size: 11px; color: var(--text-muted);">Real-time breakdown</span>
+                </div>
+                <div class="chart-box">
+                    <canvas id="gradeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="card-header">
+                    <h3 class="card-title">🌐 Language & Teaching Styles</h3>
+                    <span style="font-size: 11px; color: var(--text-muted);">Student Preferences</span>
+                </div>
+                <div class="chart-box">
+                    <canvas id="langChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Table & Live Feed Row -->
+        <section class="bottom-row">
+            <div class="table-card">
+                <div class="card-header">
+                    <h3 class="card-title">👥 Student Directory</h3>
+                    <div class="table-controls">
+                        <input type="text" id="student-search-input" class="search-box" placeholder="🔍 Search student name, email, or grade..." />
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Class</th>
+                                <th>Questions</th>
+                                <th>Date Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-tbody">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading student records...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="card-header">
+                    <h3 class="card-title">💬 Live Question Activity Feed</h3>
+                    <span style="font-size: 11px; color: var(--text-muted);">Latest incoming queries</span>
+                </div>
+                <div class="feed-list" id="questions-feed">
+                    <div style="text-align: center; color: var(--text-muted); padding: 20px;">Loading questions...</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Dashboard Script -->
+    <script>
+        const API_BASE = window.location.origin;
+        let gradeChartInstance = null;
+        let langChartInstance = null;
+        let allStudents = [];
+
+        // 1. Auth Guard (Requires role == developer or verification)
+        function checkAuth() {
+            const role = localStorage.getItem('userRole');
+            if (role !== 'developer') {
+                document.getElementById('auth-lock-overlay').style.display = 'flex';
+            } else {
+                document.getElementById('auth-lock-overlay').style.display = 'none';
+                loadDashboardData();
+            }
+        }
+
+        // Lock form submit
+        document.getElementById('lock-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pwd = document.getElementById('lock-password-input').value.trim();
+            const errMsg = document.getElementById('lock-error-msg');
+            errMsg.style.display = 'none';
+
+            try {
+                // Verify against backend login
+                const res = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'dev@mathstutor.com', password: pwd })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    localStorage.setItem('userRole', 'developer');
+                    localStorage.setItem('studentName', 'Developer Admin');
+                    localStorage.setItem('studentEmail', 'dev@mathstutor.com');
+                    document.getElementById('auth-lock-overlay').style.display = 'none';
+                    loadDashboardData();
+                } else {
+                    errMsg.innerText = data.detail || 'Invalid Developer Password!';
+                    errMsg.style.display = 'block';
+                }
+            } catch (err) {
+                errMsg.innerText = 'Connection error: ' + err.message;
+                errMsg.style.display = 'block';
+            }
+        });
+
+        // 2. Load Real-Time Dashboard Data
+        async function loadDashboardData() {
+            const btnRefresh = document.getElementById('btn-refresh');
+            if (btnRefresh) btnRefresh.innerText = '⏳ Loading...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/analytics`);
+                const data = await res.json();
+
+                if (data && data.success) {
+                    // Update KPI numbers
+                    document.getElementById('kpi-students').innerText = data.total_students || 0;
+                    document.getElementById('kpi-questions').innerText = data.total_questions || 0;
+                    document.getElementById('kpi-visuals').innerText = data.total_visuals || 0;
+
+                    // Update Charts
+                    renderGradeChart(data.grade_distribution || []);
+                    renderLangChart(data.language_distribution || []);
+
+                    // Update Student Table
+                    allStudents = data.students || [];
+                    renderStudents(allStudents);
+
+                    // Update Live Feed
+                    renderQuestionsFeed(data.recent_questions || []);
+                }
+            } catch (err) {
+                console.error('Failed to load analytics:', err);
+            } finally {
+                if (btnRefresh) btnRefresh.innerText = '🔄 Refresh';
+            }
+        }
+
+        // 3. Render Grade Donut Chart
+        function renderGradeChart(dist) {
+            const ctx = document.getElementById('gradeChart').getContext('2d');
+            const labels = dist.map(d => d.grade);
+            const counts = dist.map(d => d.count);
+
+            if (labels.length === 0) {
+                labels.push('Class 10 (Default)');
+                counts.push(1);
+            }
+
+            if (gradeChartInstance) gradeChartInstance.destroy();
+
+            gradeChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: ['#6366f1', '#38bdf8', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 11 } } }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+
+        // 4. Render Language Bar Chart
+        function renderLangChart(dist) {
+            const ctx = document.getElementById('langChart').getContext('2d');
+            const labels = dist.map(d => d.language);
+            const counts = dist.map(d => d.count);
+
+            if (labels.length === 0) {
+                labels.push('Hinglish', 'English', 'Hindi');
+                counts.push(1, 0, 0);
+            }
+
+            if (langChartInstance) langChartInstance.destroy();
+
+            langChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Queries',
+                        data: counts,
+                        backgroundColor: '#38bdf8',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // 5. Render Students Table
+        function renderStudents(students) {
+            const tbody = document.getElementById('student-tbody');
+            if (!students || students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No students registered yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = students.map(s => `
+                <tr>
+                    <td style="font-weight: 600; color: #fff;">${s.name}</td>
+                    <td style="color: var(--text-muted);">${s.email}</td>
+                    <td><span class="badge-pill">${s.grade}</span></td>
+                    <td style="font-weight: 700; color: #38bdf8;">${s.questions_count}</td>
+                    <td style="font-size: 11px; color: var(--text-muted);">${s.created_at ? s.created_at.split(' ')[0] : 'Today'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Search Filter
+        document.getElementById('student-search-input').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase().trim();
+            if (!q) {
+                renderStudents(allStudents);
+            } else {
+                const filtered = allStudents.filter(s => 
+                    (s.name && s.name.toLowerCase().includes(q)) ||
+                    (s.email && s.email.toLowerCase().includes(q)) ||
+                    (s.grade && s.grade.toLowerCase().includes(q))
+                );
+                renderStudents(filtered);
+            }
+        });
+
+        // 6. Render Questions Feed
+        function renderQuestionsFeed(questions) {
+            const feed = document.getElementById('questions-feed');
+            if (!questions || questions.length === 0) {
+                feed.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px;">No questions asked yet.</div>`;
+                return;
+            }
+            feed.innerHTML = questions.map(q => `
+                <div class="feed-item">
+                    <div class="feed-header">
+                        <span class="feed-student">${q.student_name} (${q.grade})</span>
+                        <span>${q.timestamp ? q.timestamp.split('T')[0] : 'Recent'}</span>
+                    </div>
+                    <div class="feed-question">${q.question}</div>
+                </div>
+            `).join('');
+        }
+
+        // 7. CSV Export
+        document.getElementById('btn-export-csv').addEventListener('click', () => {
+            if (!allStudents || allStudents.length === 0) {
+                alert('No students data to export.');
+                return;
+            }
+            let csv = 'data:text/csv;charset=utf-8,ID,Name,Email,Grade,Questions Asked,Joined Date\n';
+            allStudents.forEach(s => {
+                csv += `"${s.id}","${s.name}","${s.email}","${s.grade}","${s.questions_count}","${s.created_at}"\n`;
+            });
+            const link = document.createElement('a');
+            link.setAttribute('href', encodeURI(csv));
+            link.setAttribute('download', `maths_students_export_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Refresh Button
+        document.getElementById('btn-refresh').addEventListener('click', loadDashboardData);
+
+        // Initial Auth Check
+        window.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+</body>
+</html>

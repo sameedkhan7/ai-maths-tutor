@@ -6985,6 +6985,10 @@ devTabBtns.forEach(btn => {
 
             fetchRagStats();
 
+        } else if (targetTab === 'dev-tab-analytics') {
+
+            fetchStudentAnalytics();
+
         }
 
     });
@@ -7676,3 +7680,158 @@ function closeImageModal() {
 }
 window.openImageModal = openImageModal;
 window.closeImageModal = closeImageModal;
+
+// ========================================================
+// 📈 Student Analytics & Dashboard Loader
+// ========================================================
+let cachedStudentData = [];
+
+async function fetchStudentAnalytics() {
+    const refreshBtn = document.getElementById('analytics-refresh-btn');
+    if (refreshBtn) refreshBtn.innerText = '⏳ Loading...';
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/admin/analytics`);
+        const data = await res.json();
+        if (data && data.success) {
+            // 1. KPI Stats
+            const elStudents = document.getElementById('analytics-stat-students');
+            const elQuestions = document.getElementById('analytics-stat-questions');
+            const elVisuals = document.getElementById('analytics-stat-visuals');
+            if (elStudents) elStudents.innerText = data.total_students || 0;
+            if (elQuestions) elQuestions.innerText = data.total_questions || 0;
+            if (elVisuals) elVisuals.innerText = data.total_visuals || 0;
+
+            // 2. Grade Distribution Bars
+            const gradeContainer = document.getElementById('analytics-grade-bars');
+            if (gradeContainer) {
+                if (data.grade_distribution && data.grade_distribution.length > 0) {
+                    const maxCount = Math.max(...data.grade_distribution.map(g => g.count), 1);
+                    gradeContainer.innerHTML = data.grade_distribution.map(g => {
+                        const pct = Math.round((g.count / maxCount) * 100);
+                        return `
+                            <div>
+                                <div style="display:flex; justify-content:space-between; font-size:11px; color:#cbd5e1; margin-bottom:2px;">
+                                    <span>${g.grade}</span>
+                                    <span style="font-weight:700; color:#38bdf8;">${g.count} students</span>
+                                </div>
+                                <div style="background:#1e293b; border-radius:4px; height:6px; overflow:hidden;">
+                                    <div style="background:linear-gradient(90deg, #6366f1, #38bdf8); width:${pct}%; height:100%; border-radius:4px;"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    gradeContainer.innerHTML = `<div style="font-size:11px; color:#64748b;">No class data yet.</div>`;
+                }
+            }
+
+            // 3. Language Tags
+            const langContainer = document.getElementById('analytics-lang-tags');
+            if (langContainer) {
+                if (data.language_distribution && data.language_distribution.length > 0) {
+                    langContainer.innerHTML = data.language_distribution.map(l => `
+                        <span style="background:#1e293b; border:1px solid #334155; color:#a5b4fc; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:600;">
+                            ${l.language}: <strong style="color:white;">${l.count}</strong>
+                        </span>
+                    `).join('');
+                } else {
+                    langContainer.innerHTML = `<div style="font-size:11px; color:#64748b;">Hinglish (Default)</div>`;
+                }
+            }
+
+            // 4. Students Directory Table
+            cachedStudentData = data.students || [];
+            renderStudentTable(cachedStudentData);
+
+            // 5. Recent Questions Feed
+            const qContainer = document.getElementById('analytics-recent-questions-list');
+            if (qContainer) {
+                if (data.recent_questions && data.recent_questions.length > 0) {
+                    qContainer.innerHTML = data.recent_questions.map(q => `
+                        <div style="background:#1e293b; padding:8px 10px; border-radius:6px; border:1px solid #334155; font-size:11px;">
+                            <div style="display:flex; justify-content:space-between; color:#94a3b8; font-size:10px; margin-bottom:2px;">
+                                <span style="font-weight:600; color:#38bdf8;">${q.student_name} (${q.grade})</span>
+                                <span>${q.timestamp ? q.timestamp.split('T')[0] : 'Today'}</span>
+                            </div>
+                            <div style="color:#e2e8f0; font-weight:500;">${q.question}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    qContainer.innerHTML = `<div style="font-size:11px; color:#64748b;">No questions logged yet.</div>`;
+                }
+            }
+        }
+    } catch (err) {
+        console.warn('Could not load student analytics:', err);
+    } finally {
+        if (refreshBtn) refreshBtn.innerText = '🔄 Refresh';
+    }
+}
+
+function renderStudentTable(students) {
+    const tbody = document.getElementById('analytics-student-tbody');
+    if (!tbody) return;
+    if (!students || students.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:10px; text-align:center; color:#64748b;">No students found</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = students.map(s => `
+        <tr style="border-bottom:1px solid #1e293b; color:#cbd5e1;">
+            <td style="padding:6px; font-weight:600; color:#f8fafc;">${s.name}</td>
+            <td style="padding:6px; color:#94a3b8;">${s.email}</td>
+            <td style="padding:6px;"><span style="background:#1e293b; padding:2px 6px; border-radius:4px; font-size:10px;">${s.grade}</span></td>
+            <td style="padding:6px; font-weight:700; color:#38bdf8;">${s.questions_count}</td>
+            <td style="padding:6px; font-size:10px; color:#64748b;">${s.created_at ? s.created_at.split(' ')[0] : 'N/A'}</td>
+        </tr>
+    `).join('');
+}
+
+// Student Search Filter
+const searchInput = document.getElementById('analytics-student-search');
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        if (!query) {
+            renderStudentTable(cachedStudentData);
+        } else {
+            const filtered = cachedStudentData.filter(s => 
+                (s.name && s.name.toLowerCase().includes(query)) ||
+                (s.email && s.email.toLowerCase().includes(query)) ||
+                (s.grade && s.grade.toLowerCase().includes(query))
+            );
+            renderStudentTable(filtered);
+        }
+    });
+}
+
+// Refresh Button Listener
+const analyticsRefreshBtn = document.getElementById('analytics-refresh-btn');
+if (analyticsRefreshBtn) {
+    analyticsRefreshBtn.addEventListener('click', fetchStudentAnalytics);
+}
+
+// Export CSV
+const exportCsvBtn = document.getElementById('analytics-export-csv-btn');
+if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', () => {
+        if (!cachedStudentData || cachedStudentData.length === 0) {
+            alert('No student data available to export.');
+            return;
+        }
+        let csvContent = 'data:text/csv;charset=utf-8,ID,Name,Email,Grade,Questions Asked,Registered Date\n';
+        cachedStudentData.forEach(s => {
+            csvContent += `"${s.id}","${s.name}","${s.email}","${s.grade}","${s.questions_count}","${s.created_at}"\n`;
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', `maths_tutor_students_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+}
+
+window.fetchStudentAnalytics = fetchStudentAnalytics;
+

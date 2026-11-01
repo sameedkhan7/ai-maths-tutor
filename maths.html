@@ -799,21 +799,21 @@
     <!-- ⚡ DEVELOPER RAG CONTROL CENTER MODAL       -->
     <!-- ========================================== -->
     <div id="dev-modal-backdrop" class="modal-backdrop settings-backdrop" style="display: none;">
-        <div class="settings-card dev-settings-card" style="max-width: 680px; width: 92%;">
+        <div class="settings-card dev-settings-card" style="max-width: 860px; width: 95%; max-height: 90vh;">
             <div class="settings-header" style="border-bottom: 1px solid #334155;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 22px;">⚡</span>
                     <div>
                         <h3 style="margin: 0; font-size: 16px; color: #c084fc;">Developer RAG Knowledge Base Center</h3>
-                        <span style="font-size: 11px; color: #94a3b8;">Upload PDFs, text notes & web scrape into RAG Vector DB</span>
+                        <span style="font-size: 11px; color: #94a3b8;">Upload PDFs, text notes, analytics & RAG management</span>
                     </div>
                 </div>
                 <button type="button" id="dev-modal-close" class="settings-close-btn">&times;</button>
             </div>
 
-            <div class="settings-body" style="display: flex; gap: 0; min-height: 420px; padding: 0;">
+            <div class="settings-body" style="display: flex; gap: 0; min-height: 480px; padding: 0;">
                 <!-- Dev Left Sidebar -->
-                <div class="settings-sidebar" style="width: 180px; border-right: 1px solid #334155; padding: 12px 8px; background: #0f172a;">
+                <div class="settings-sidebar" style="width: 195px; border-right: 1px solid #334155; padding: 12px 8px; background: #0f172a;">
                     <div class="settings-tab-btn dev-tab-btn active" data-dev-tab="dev-tab-pdf" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
                         <span>📄</span> PDF Upload
                     </div>
@@ -825,6 +825,9 @@
                     </div>
                     <div class="settings-tab-btn dev-tab-btn" data-dev-tab="dev-tab-stats" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
                         <span>📊</span> RAG Stats
+                    </div>
+                    <div class="settings-tab-btn dev-tab-btn" data-dev-tab="dev-tab-analytics" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #38bdf8; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.25);">
+                        <span>📈</span> Student Analytics
                     </div>
                     <div class="settings-tab-btn dev-tab-btn" data-dev-tab="dev-tab-security" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
                         <span>🔐</span> Admin Security
@@ -940,6 +943,91 @@
                             </div>
                             <button type="submit" id="dev-password-submit-btn" style="background: #6366f1; color: white; border: none; border-radius: 8px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer;">💾 Update Developer Credentials</button>
                         </form>
+                    </div>
+
+                    <!-- Dev Tab 6: Student Analytics & Dashboard -->
+                    <div id="dev-tab-analytics" class="dev-tab-pane" style="display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <h4 style="margin: 0; color: #f8fafc; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                    <span>📈</span> Student Analytics & Insights
+                                </h4>
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Real-time stats from Cloud MySQL database</div>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <a href="/admin.html" target="_blank" style="background: #334155; color: #38bdf8; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1px solid #475569; display: flex; align-items: center; gap: 4px;">↗️ Full Screen</a>
+                                <button type="button" id="analytics-export-csv-btn" style="background: #0284c7; color: white; border: none; border-radius: 6px; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer;">📥 Export CSV</button>
+                                <button type="button" id="analytics-refresh-btn" style="background: #6366f1; color: white; border: none; border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 600; cursor: pointer;">🔄 Refresh</button>
+                            </div>
+                        </div>
+
+                        <!-- 4 Glowing KPI Metric Cards -->
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+                            <div style="background: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #334155; text-align: center;">
+                                <div style="font-size: 22px; font-weight: 800; color: #38bdf8;" id="analytics-stat-students">0</div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">👥 Students</div>
+                            </div>
+                            <div style="background: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #334155; text-align: center;">
+                                <div style="font-size: 22px; font-weight: 800; color: #a855f7;" id="analytics-stat-questions">0</div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">💬 Questions</div>
+                            </div>
+                            <div style="background: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #334155; text-align: center;">
+                                <div style="font-size: 22px; font-weight: 800; color: #ec4899;" id="analytics-stat-visuals">0</div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">🎨 AI Visuals</div>
+                            </div>
+                            <div style="background: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid #334155; text-align: center;">
+                                <div style="font-size: 13px; font-weight: 700; color: #10b981; margin-top: 4px;">Connected</div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">☁️ MySQL Aiven</div>
+                            </div>
+                        </div>
+
+                        <!-- Class Distribution & Languages Breakdown -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                            <div style="background: #0f172a; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155;">
+                                <div style="font-size: 12px; font-weight: 700; color: #e2e8f0; margin-bottom: 8px;">🎓 Class / Grade Distribution</div>
+                                <div id="analytics-grade-bars" style="display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="font-size: 11px; color: #64748b;">Loading grades...</div>
+                                </div>
+                            </div>
+                            <div style="background: #0f172a; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155;">
+                                <div style="font-size: 12px; font-weight: 700; color: #e2e8f0; margin-bottom: 8px;">🗣️ Language Preferences</div>
+                                <div id="analytics-lang-tags" style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                    <div style="font-size: 11px; color: #64748b;">Loading languages...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Student Directory Table -->
+                        <div style="background: #0f172a; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                                <div style="font-size: 12px; font-weight: 700; color: #e2e8f0;">👥 Student Directory</div>
+                                <input type="text" id="analytics-student-search" placeholder="🔍 Search by name or email..." style="background: #1e293b; border: 1px solid #475569; color: white; padding: 5px 10px; border-radius: 6px; font-size: 11px; width: 200px; outline: none;">
+                            </div>
+                            <div style="max-height: 180px; overflow-y: auto;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
+                                            <th style="padding: 6px;">Name</th>
+                                            <th style="padding: 6px;">Email</th>
+                                            <th style="padding: 6px;">Grade</th>
+                                            <th style="padding: 6px;">Questions</th>
+                                            <th style="padding: 6px;">Registered</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="analytics-student-tbody">
+                                        <tr><td colspan="5" style="padding: 10px; text-align: center; color: #64748b;">Loading student directory...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Recent Questions Log -->
+                        <div style="background: #0f172a; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155;">
+                            <div style="font-size: 12px; font-weight: 700; color: #e2e8f0; margin-bottom: 8px;">💬 Recent Student Questions</div>
+                            <div id="analytics-recent-questions-list" style="max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+                                <div style="font-size: 11px; color: #64748b;">Loading questions...</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

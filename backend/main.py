@@ -494,6 +494,136 @@ def dev_change_password(req: PasswordChangeRequest):
         raise HTTPException(status_code=500, detail=f"Failed to update password: {str(e)}")
 
 
+@app.get("/api/admin/analytics")
+def get_admin_analytics():
+    """Returns aggregated stats, student directory, class breakdowns, and recent student questions for the Admin Dashboard"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # 1. Total Registered Students
+        cursor.execute("SELECT COUNT(*) as cnt FROM users WHERE role != 'developer' AND role != 'admin'")
+        row = cursor.fetchone()
+        total_students = (row["cnt"] if isinstance(row, dict) else row[0]) if row else 0
+
+        # 2. Total Questions Asked by students
+        cursor.execute("SELECT COUNT(*) as cnt FROM messages WHERE sender NOT IN ('ai', 'tutor', 'assistant')")
+        row = cursor.fetchone()
+        total_questions = (row["cnt"] if isinstance(row, dict) else row[0]) if row else 0
+
+        # 3. Total Visuals / Diagrams Generated
+        cursor.execute("SELECT COUNT(*) as cnt FROM messages WHERE image_url IS NOT NULL AND image_url != ''")
+        row = cursor.fetchone()
+        total_visuals = (row["cnt"] if isinstance(row, dict) else row[0]) if row else 0
+
+        # 4. Grade / Class Distribution
+        cursor.execute("SELECT grade, COUNT(*) as cnt FROM users WHERE role != 'developer' AND role != 'admin' GROUP BY grade")
+        grade_rows = cursor.fetchall() or []
+        grade_dist = []
+        for r in grade_rows:
+            g = r["grade"] if isinstance(r, dict) else r[0]
+            c = r["cnt"] if isinstance(r, dict) else r[1]
+            if g:
+                grade_dist.append({"grade": str(g), "count": int(c)})
+
+        # 5. Language Distribution
+        cursor.execute("SELECT language, COUNT(*) as cnt FROM messages WHERE language IS NOT NULL AND language != '' GROUP BY language")
+        lang_rows = cursor.fetchall() or []
+        lang_dist = []
+        for r in lang_rows:
+            l = r["language"] if isinstance(r, dict) else r[0]
+            c = r["cnt"] if isinstance(r, dict) else r[1]
+            if l:
+                lang_dist.append({"language": str(l).capitalize(), "count": int(c)})
+
+        # 6. Student Directory (All registered students with question counts)
+        cursor.execute("""
+            SELECT u.id, u.name, u.email, u.grade, u.created_at,
+                   (SELECT COUNT(*) FROM messages m JOIN chats c ON m.chat_id = c.id WHERE c.user_id = u.id AND m.sender NOT IN ('ai', 'tutor', 'assistant')) as questions_count
+            FROM users u
+            WHERE u.role != 'developer' AND u.role != 'admin'
+            ORDER BY u.id DESC LIMIT 100
+        """)
+        user_rows = cursor.fetchall() or []
+        students = []
+        for u in user_rows:
+            if isinstance(u, dict):
+                students.append({
+                    "id": u.get("id"),
+                    "name": u.get("name") or "Student",
+                    "email": u.get("email") or "N/A",
+                    "grade": u.get("grade") or "Class 10",
+                    "created_at": str(u.get("created_at") or ""),
+                    "questions_count": int(u.get("questions_count") or 0)
+                })
+            else:
+                students.append({
+                    "id": u[0],
+                    "name": u[1] or "Student",
+                    "email": u[2] or "N/A",
+                    "grade": u[3] or "Class 10",
+                    "created_at": str(u[4] or ""),
+                    "questions_count": int(u[5] or 0)
+                })
+
+        # 7. Recent Student Questions (Latest 25)
+        cursor.execute("""
+            SELECT m.id, m.content, m.timestamp, m.question_type, u.name as student_name, u.grade
+            FROM messages m
+            LEFT JOIN chats c ON m.chat_id = c.id
+            LEFT JOIN users u ON c.user_id = u.id
+            WHERE m.sender NOT IN ('ai', 'tutor', 'assistant')
+            ORDER BY m.id DESC LIMIT 25
+        """)
+        q_rows = cursor.fetchall() or []
+        recent_questions = []
+        for q in q_rows:
+            if isinstance(q, dict):
+                recent_questions.append({
+                    "id": q.get("id"),
+                    "question": q.get("content") or "",
+                    "timestamp": str(q.get("timestamp") or ""),
+                    "type": q.get("question_type") or "General",
+                    "student_name": q.get("student_name") or "Student",
+                    "grade": q.get("grade") or "Class 10"
+                })
+            else:
+                recent_questions.append({
+                    "id": q[0],
+                    "question": q[1] or "",
+                    "timestamp": str(q[2] or ""),
+                    "type": q[3] or "General",
+                    "student_name": q[4] or "Student",
+                    "grade": q[5] or "Class 10"
+                })
+
+        return {
+            "success": True,
+            "total_students": total_students,
+            "total_questions": total_questions,
+            "total_visuals": total_visuals,
+            "grade_distribution": grade_dist,
+            "language_distribution": lang_dist,
+            "students": students,
+            "recent_questions": recent_questions
+        }
+    except Exception as e:
+        print(f"[Admin Analytics Error] {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "total_students": 0,
+            "total_questions": 0,
+            "total_visuals": 0,
+            "grade_distribution": [],
+            "language_distribution": [],
+            "students": [],
+            "recent_questions": []
+        }
+    finally:
+        conn.close()
+
+
+
 # 4. Student Chat File Parser API (Supports PDF, TXT, ZIP, Images)
 @app.post("/api/chat/parse-file")
 async def chat_parse_file(file: UploadFile = File(...)):
