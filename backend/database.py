@@ -72,15 +72,27 @@ def get_connection():
     """
     if USE_MYSQL and HAS_PYMYSQL:
         try:
-            raw_conn = pymysql.connect(
-                host=MYSQL_HOST,
-                user=MYSQL_USER,
-                password=MYSQL_PASSWORD,
-                database=MYSQL_DB,
-                port=MYSQL_PORT,
-                charset='utf8mb4',
-                connect_timeout=3
-            )
+            connect_kwargs = {
+                "host": MYSQL_HOST,
+                "user": MYSQL_USER,
+                "password": MYSQL_PASSWORD,
+                "database": MYSQL_DB,
+                "port": MYSQL_PORT,
+                "charset": "utf8mb4",
+                "connect_timeout": 5
+            }
+            # Enable SSL for cloud MySQL providers (e.g. Aiven)
+            if MYSQL_HOST not in ("localhost", "127.0.0.1") or os.getenv("MYSQL_SSL", "").lower() in ("true", "1", "yes"):
+                try:
+                    import ssl
+                    ctx = ssl.create_default_context()
+                    ctx.check_hostname = False
+                    ctx.verify_mode = ssl.CERT_NONE
+                    connect_kwargs["ssl"] = ctx
+                except Exception:
+                    connect_kwargs["ssl"] = {"check_hostname": False}
+
+            raw_conn = pymysql.connect(**connect_kwargs)
             return MySQLConnectionWrapper(raw_conn)
         except Exception as e:
             print(f"[MySQL Notice] Could not connect to MySQL ({e}). Falling back to SQLite.")
