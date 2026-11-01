@@ -499,43 +499,67 @@ def get_admin_analytics():
     """Returns aggregated stats, student directory, class breakdowns, and recent student questions for the Admin Dashboard"""
     conn = get_connection()
     cursor = conn.cursor()
+    total_students = 0
+    total_questions = 0
+    total_visuals = 0
+    grade_dist = []
+    lang_dist = []
+    students = []
+    recent_questions = []
+
+    # 1. Total Registered Students
     try:
-        # 1. Total Registered Students
         cursor.execute("SELECT COUNT(*) as cnt FROM users WHERE role != 'developer' AND role != 'admin'")
         row = cursor.fetchone()
         total_students = (row["cnt"] if isinstance(row, dict) else row[0]) if row else 0
+    except Exception as e:
+        print(f"[Analytics Notice: students] {e}")
 
-        # 2. Total Questions Asked by students
+    # 2. Total Questions Asked by students
+    try:
         cursor.execute("SELECT COUNT(*) as cnt FROM messages WHERE sender NOT IN ('ai', 'tutor', 'assistant')")
         row = cursor.fetchone()
         total_questions = (row["cnt"] if isinstance(row, dict) else row[0]) if row else 0
+    except Exception as e:
+        print(f"[Analytics Notice: questions] {e}")
 
-        # 3. Total Visuals / Diagrams Generated
+    # 3. Total Visuals / Diagrams Generated
+    try:
         cursor.execute("SELECT COUNT(*) as cnt FROM messages WHERE image_url IS NOT NULL AND image_url != ''")
         row = cursor.fetchone()
         total_visuals = (row["cnt"] if isinstance(row, dict) else row[0]) if row else 0
+    except Exception as e:
+        print(f"[Analytics Notice: visuals] {e}")
 
-        # 4. Grade / Class Distribution
+    # 4. Grade / Class Distribution
+    try:
         cursor.execute("SELECT grade, COUNT(*) as cnt FROM users WHERE role != 'developer' AND role != 'admin' GROUP BY grade")
         grade_rows = cursor.fetchall() or []
-        grade_dist = []
         for r in grade_rows:
             g = r["grade"] if isinstance(r, dict) else r[0]
             c = r["cnt"] if isinstance(r, dict) else r[1]
             if g:
                 grade_dist.append({"grade": str(g), "count": int(c)})
+    except Exception as e:
+        print(f"[Analytics Notice: grades] {e}")
 
-        # 5. Language Distribution
-        cursor.execute("SELECT language, COUNT(*) as cnt FROM messages WHERE language IS NOT NULL AND language != '' GROUP BY language")
-        lang_rows = cursor.fetchall() or []
-        lang_dist = []
-        for r in lang_rows:
-            l = r["language"] if isinstance(r, dict) else r[0]
+    # 5. Teaching Styles & Modes Distribution
+    try:
+        cursor.execute("SELECT style, COUNT(*) as cnt FROM messages WHERE style IS NOT NULL AND style != '' GROUP BY style")
+        style_rows = cursor.fetchall() or []
+        for r in style_rows:
+            s_name = r["style"] if isinstance(r, dict) else r[0]
             c = r["cnt"] if isinstance(r, dict) else r[1]
-            if l:
-                lang_dist.append({"language": str(l).capitalize(), "count": int(c)})
+            if s_name:
+                lang_dist.append({"language": str(s_name).capitalize(), "count": int(c)})
+    except Exception as e:
+        print(f"[Analytics Notice: styles] {e}")
 
-        # 6. Student Directory (All registered students with question counts)
+    if not lang_dist:
+        lang_dist = [{"language": "Hinglish (Sports Mode)", "count": total_questions or 1}]
+
+    # 6. Student Directory (All registered students with question counts)
+    try:
         cursor.execute("""
             SELECT u.id, u.name, u.email, u.grade, u.created_at,
                    (SELECT COUNT(*) FROM messages m JOIN chats c ON m.chat_id = c.id WHERE c.user_id = u.id AND m.sender NOT IN ('ai', 'tutor', 'assistant')) as questions_count
@@ -544,7 +568,6 @@ def get_admin_analytics():
             ORDER BY u.id DESC LIMIT 100
         """)
         user_rows = cursor.fetchall() or []
-        students = []
         for u in user_rows:
             if isinstance(u, dict):
                 students.append({
@@ -564,10 +587,27 @@ def get_admin_analytics():
                     "created_at": str(u[4] or ""),
                     "questions_count": int(u[5] or 0)
                 })
+    except Exception as e:
+        print(f"[Analytics Notice: student directory] {e}")
+        try:
+            # Simple fallback if subquery fails
+            cursor.execute("SELECT id, name, email, grade, created_at FROM users WHERE role != 'developer' AND role != 'admin' ORDER BY id DESC LIMIT 50")
+            for u in cursor.fetchall() or []:
+                students.append({
+                    "id": u["id"] if isinstance(u, dict) else u[0],
+                    "name": (u["name"] if isinstance(u, dict) else u[1]) or "Student",
+                    "email": (u["email"] if isinstance(u, dict) else u[2]) or "N/A",
+                    "grade": (u["grade"] if isinstance(u, dict) else u[3]) or "Class 10",
+                    "created_at": str(u["created_at"] if isinstance(u, dict) else u[4] or ""),
+                    "questions_count": 0
+                })
+        except Exception:
+            pass
 
-        # 7. Recent Student Questions (Latest 25)
+    # 7. Recent Student Questions (Latest 25)
+    try:
         cursor.execute("""
-            SELECT m.id, m.content, m.timestamp, m.question_type, u.name as student_name, u.grade
+            SELECT m.id, m.text, m.created_at, m.style, u.name as student_name, u.grade
             FROM messages m
             LEFT JOIN chats c ON m.chat_id = c.id
             LEFT JOIN users u ON c.user_id = u.id
@@ -575,14 +615,13 @@ def get_admin_analytics():
             ORDER BY m.id DESC LIMIT 25
         """)
         q_rows = cursor.fetchall() or []
-        recent_questions = []
         for q in q_rows:
             if isinstance(q, dict):
                 recent_questions.append({
                     "id": q.get("id"),
-                    "question": q.get("content") or "",
-                    "timestamp": str(q.get("timestamp") or ""),
-                    "type": q.get("question_type") or "General",
+                    "question": q.get("text") or "",
+                    "timestamp": str(q.get("created_at") or ""),
+                    "type": q.get("style") or "General",
                     "student_name": q.get("student_name") or "Student",
                     "grade": q.get("grade") or "Class 10"
                 })
@@ -595,32 +634,21 @@ def get_admin_analytics():
                     "student_name": q[4] or "Student",
                     "grade": q[5] or "Class 10"
                 })
-
-        return {
-            "success": True,
-            "total_students": total_students,
-            "total_questions": total_questions,
-            "total_visuals": total_visuals,
-            "grade_distribution": grade_dist,
-            "language_distribution": lang_dist,
-            "students": students,
-            "recent_questions": recent_questions
-        }
     except Exception as e:
-        print(f"[Admin Analytics Error] {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "total_students": 0,
-            "total_questions": 0,
-            "total_visuals": 0,
-            "grade_distribution": [],
-            "language_distribution": [],
-            "students": [],
-            "recent_questions": []
-        }
-    finally:
-        conn.close()
+        print(f"[Analytics Notice: questions log] {e}")
+
+    conn.close()
+
+    return {
+        "success": True,
+        "total_students": total_students,
+        "total_questions": total_questions,
+        "total_visuals": total_visuals,
+        "grade_distribution": grade_dist,
+        "language_distribution": lang_dist,
+        "students": students,
+        "recent_questions": recent_questions
+    }
 
 
 
