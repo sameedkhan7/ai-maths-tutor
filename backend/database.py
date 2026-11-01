@@ -181,10 +181,22 @@ def init_db():
             sender TEXT NOT NULL,
             text TEXT NOT NULL,
             style TEXT DEFAULT 'simple',
+            image_url TEXT,
+            image_prompt TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (chat_id) REFERENCES chats (id)
         )
         """)
+
+        # Auto-migrate SQLite if old table exists without image_url/image_prompt
+        try:
+            cursor.execute("ALTER TABLE messages ADD COLUMN image_url TEXT")
+        except Exception:
+            pass
+        try:
+            cursor.execute("ALTER TABLE messages ADD COLUMN image_prompt TEXT")
+        except Exception:
+            pass
 
         default_seed_users = [
             ('Developer Admin', 'dev@mathstutor.com', 'admin', 'Developer', 'developer'),
