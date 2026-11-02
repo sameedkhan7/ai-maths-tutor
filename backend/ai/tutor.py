@@ -75,53 +75,49 @@ FALLBACK_SVG_RIGHT_TRIANGLE = """```svg
 
 
 FALLBACK_SVG_SPORTS_PARABOLA = """```svg
-
-<svg viewBox="0 0 380 220" width="100%" xmlns="http://www.w3.org/2000/svg" class="math-svg-diagram">
-
+<svg viewBox="0 0 420 230" width="100%" xmlns="http://www.w3.org/2000/svg" class="math-svg-diagram">
   <rect width="100%" height="100%" fill="#090d16" rx="12"/>
+  <!-- Ground Pitch -->
+  <rect x="0" y="175" width="420" height="55" fill="#064e3b"/>
+  <line x1="15" y1="175" x2="405" y2="175" stroke="#10b981" stroke-width="2"/>
 
-  <rect x="0" y="170" width="380" height="50" fill="#064e3b"/>
+  <!-- Launch point (Batsman / Kick) at (50, 175) -->
+  <circle cx="50" cy="175" r="5" fill="#38bdf8"/>
+  <text x="50" y="200" fill="#94a3b8" font-size="11" font-weight="bold" text-anchor="middle">Launch (0, 0)</text>
 
-  <line x1="10" y1="170" x2="370" y2="170" stroke="#10b981" stroke-width="2"/>
+  <!-- Parabolic Trajectory Curve: (50, 175) -> Apex (210, 45) -> Landing (370, 175) -->
+  <!-- Quadratic bezier control point: y_c = 2*45 - 175 = -85 -->
+  <path d="M 50,175 Q 210,-85 370,175" fill="none" stroke="#38bdf8" stroke-width="2.8"/>
 
-  <rect x="30" y="170" width="70" height="12" fill="#78350f" opacity="0.6"/>
+  <!-- Tangent Initial Velocity Vector u at launch -->
+  <line x1="50" y1="175" x2="115" y2="110" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Arrowhead for vector u -->
+  <polygon points="115,110 102,114 111,123" fill="#fbbf24"/>
+  <text x="120" y="105" fill="#fbbf24" font-size="12" font-weight="bold">Initial Velocity (u)</text>
 
-  <circle cx="50" cy="170" r="5" fill="#f43f5e"/>
+  <!-- Launch Angle θ Arc -->
+  <path d="M 85,175 A 35 35 0 0 0 75,150" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <text x="92" y="166" fill="#fbbf24" font-size="12" font-weight="bold">θ</text>
 
-  <text x="50" y="196" fill="#f8fafc" font-size="11.5" font-weight="bold" text-anchor="middle">🏏 Batsman (A)</text>
+  <!-- Apex (Peak Height H_max) at (210, 45) -->
+  <line x1="210" y1="175" x2="210" y2="45" stroke="#f43f5e" stroke-width="2" stroke-dasharray="4,4"/>
+  <circle cx="210" cy="45" r="6" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="210" y="32" fill="#f87171" font-size="11.5" font-weight="bold" text-anchor="middle">Peak / Apex</text>
 
-  <line x1="50" y1="170" x2="260" y2="170" stroke="#38bdf8" stroke-width="2.5"/>
+  <!-- Maximum Height Label -->
+  <rect x="218" y="95" width="92" height="22" rx="4" fill="#1e293b" stroke="#f43f5e" stroke-width="1"/>
+  <text x="264" y="110" fill="#f43f5e" font-size="11" font-weight="bold" text-anchor="middle">H_max = u²sin²θ/2g</text>
 
-  <line x1="260" y1="170" x2="260" y2="45" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="5,4"/>
+  <!-- Landing Point at (370, 175) -->
+  <circle cx="370" cy="175" r="5" fill="#10b981"/>
+  <text x="370" y="200" fill="#10b981" font-size="11" font-weight="bold" text-anchor="middle">Landing (R, 0)</text>
 
-  <line x1="50" y1="170" x2="260" y2="45" stroke="#fbbf24" stroke-width="3"/>
-
-  <path d="M 50,170 Q 155,10 260,45" fill="none" stroke="rgba(251, 191, 36, 0.4)" stroke-width="2" stroke-dasharray="4,4"/>
-
-  <circle cx="260" cy="45" r="7" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>
-
-  <text x="260" y="32" fill="#f87171" font-size="11.5" font-weight="bold" text-anchor="middle">⚾ Ball at Height (C)</text>
-
-  <path d="M 245,170 L 245,155 L 260,155" fill="none" stroke="#f43f5e" stroke-width="2"/>
-
-  <path d="M 78,170 A 28 28 0 0 0 74,152" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
-
-  <text x="86" y="162" fill="#38bdf8" font-size="12" font-weight="bold">θ</text>
-
-  <circle cx="260" cy="170" r="4" fill="#10b981"/>
-
-  <rect x="285" y="152" width="85" height="26" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-
-  <text x="327" y="169" fill="#10b981" font-size="11" font-weight="bold" text-anchor="middle">6️⃣ Boundary (B)</text>
-
-  <text x="140" y="95" fill="#fbbf24" font-size="11.5" font-weight="bold" transform="rotate(-31, 140, 95)">Flight Path (h)</text>
-
-  <text x="272" y="105" fill="#f43f5e" font-size="11.5" font-weight="bold">Height (p)</text>
-
-  <text x="155" y="188" fill="#38bdf8" font-size="11.5" font-weight="bold" text-anchor="middle">Ground Distance (b)</text>
-
+  <!-- Total Horizontal Range R dimension line -->
+  <line x1="50" y1="215" x2="370" y2="215" stroke="#64748b" stroke-width="1.5"/>
+  <line x1="50" y1="210" x2="50" y2="220" stroke="#64748b" stroke-width="1.5"/>
+  <line x1="370" y1="210" x2="370" y2="220" stroke="#64748b" stroke-width="1.5"/>
+  <text x="210" y="212" fill="#e2e8f0" font-size="11" font-weight="bold" text-anchor="middle">Horizontal Range R = u²sin(2θ)/g</text>
 </svg>
-
 ```"""
 
 
@@ -218,7 +214,7 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
 
                 rag_res = retrieve_math_context(req.question, student_class=student_cls, top_k=2)
 
-                
+
 
                 # Check if question is a simple calculation where NCERT badge is not relevant
 
@@ -539,83 +535,50 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
 
 
 STRICT CONTEXT THEME DIRECTIVE — FOOTBALL (HIGHEST PRIORITY):
-
 The student asked for FOOTBALL!
-
 1. EXPLAIN THE CONCEPT 100% USING FOOTBALL (STRICT PROHIBITION: DO NOT mention cricket, pitch, batsman, wickets, or ladders!):
-
-   - For Calculus/Derivatives: Explain using a Footballer / Striker taking a curved free-kick or penalty kick. The ball flight curve is s(t). The derivative is the instantaneous kick speed v(t) = s'(t) = lim_{h->0} [s(t+h) - s(t)] / h (the tangent line slope to the ball trajectory as it curls into the top-corner of the goal net).
-
-   - For Trigonometry: Striker shooting towards the top corner of the goal net at elevation angle theta θ. Crossbar height is Perpendicular p, distance from penalty spot to goal line is Base b, direct flight trajectory is Hypotenuse h.
-
+   - For Calculus/Derivatives: Explain using a Footballer / Striker taking a curved free-kick. The ball position vector is s(t). The derivative is the instantaneous velocity v(t) = s'(t) = lim_{h->0} [s(t+h) - s(t)] / h (the tangent vector slope to the trajectory curve as it curls towards the goal).
+   - For Class 10 Trigonometry (Heights and Distances): Straight line-of-sight from penalty spot to the top crossbar of the goal net at angle of elevation theta θ. Crossbar vertical height is Perpendicular (p), ground distance is Base (b), and straight sightline distance is Hypotenuse (h) [tan θ = p/b, sin θ = p/h].
+   - For Class 11 Projectile Motion: The ball follows a true parabolic path under gravity: y(x) = x tan θ - (g x²) / (2 u² cos² θ). Range R = u² sin(2θ) / g, Max Height H_max = u² sin²θ / (2g). DO NOT confuse the curved trajectory with a straight hypotenuse!
 2. Include a clean SVG diagram showing the Football Pitch, Striker kicking, goalpost, and ball trajectory!
-
 """
 
             elif active_theme == "badminton":
-
                 sports_directive = """
-
-
-
 STRICT CONTEXT THEME DIRECTIVE — BADMINTON (HIGHEST PRIORITY):
-
 The student asked for BADMINTON!
-
 1. EXPLAIN 100% USING BADMINTON: Player executing a jump smash over the net. Shuttlecock trajectory dipping steeply into opponent court. Instantaneous smash speed is derivative v(t) = s'(t).
-
 2. Include Badminton Court SVG diagram with player, net, and shuttlecock path!
-
 """
 
             elif active_theme == "car":
-
                 sports_directive = """
-
-
-
 STRICT CONTEXT THEME DIRECTIVE — CAR RACING & SPEEDOMETER (HIGHEST PRIORITY):
-
 The student asked for CAR DRIVING / RACING!
-
 1. EXPLAIN 100% USING A RACING CAR: Car accelerating along highway track. Speedometer needle shows instantaneous speed v(t) = ds/dt at that exact second. Distance vs time curve s(t).
-
 2. Include Car / Speedometer SVG diagram!
-
 """
 
             elif active_theme == "coding":
-
                 sports_directive = """
-
-
-
 STRICT CONTEXT THEME DIRECTIVE — CODING & GAME PHYSICS (HIGHEST PRIORITY):
-
 The student asked for CODING / GAMING!
-
 1. EXPLAIN USING GAME DEVELOPMENT: Frame delta time (dt), player velocity update (position += velocity * dt), and physics engine collision calculations.
-
 """
 
             else:
-
                 sports_directive = """
-
-
-
 STRICT CONTEXT THEME DIRECTIVE — CRICKET (HIGHEST PRIORITY):
-
 The student asked for CRICKET!
-
-1. EXPLAIN 100% USING CRICKET: Batsman hitting a lofted shot / sixer over the boundary rope.
-
-   - For Calculus: Ball flight trajectory s(t) and instantaneous velocity tangent line v(t) = s'(t).
-
-   - For Trigonometry: Launch angle θ at bat, flight path h, ball height p, ground distance to boundary b.
-
+1. EXPLAIN 100% USING CRICKET:
+   - For Calculus: Ball trajectory s(t) and instantaneous velocity tangent vector v(t) = s'(t).
+   - For Class 10 Trigonometry (Heights & Distances): Straight sightline from a fielder/batsman to the top of a floodlight tower or stadium roof at elevation angle θ. Vertical height is Perpendicular (p), ground distance is Base (b), straight line-of-sight is Hypotenuse (h) [tan θ = p/b, sin θ = p/h].
+   - For Class 11 Projectile Motion: Batsman hitting a lofted sixer. The ball follows a parabolic path under gravity: y(x) = x tan θ - (g x²) / (2 u² cos² θ).
+     * Range: R = u² sin(2θ) / g
+     * Maximum Height: H_max = u² sin²θ / (2g)
+     * Time of Flight: T = 2u sin θ / g
+     * STRICT PROHIBITION: NEVER describe a curved projectile flight path as a straight-line hypotenuse!
 2. Include the Cricket Stadium SVG diagram showing pitch, batsman in action, and boundary!
-
 """
 
 
@@ -924,31 +887,31 @@ The student asked for CRICKET!
 
 
     except Exception as error:
-
-        print(f"[Tutor Error Exception]: {error}")
-
+        err_msg = str(error)
+        print(f"[Tutor Error Exception]: {type(error).__name__} - {err_msg}")
         import traceback
-
         traceback.print_exc()
 
-
+        # Friendly recovery message adapted to language without revealing raw internal traces
+        is_hinglish = any(w in req.question.lower() for w in ["kya", "kaise", "batao", "samjhao", "hai", "hota", "karo"])
+        if is_hinglish:
+            friendly_answer = (
+                "Maaf kijiye, abhi AI server response me temporary delay ya issue aa gaya hai. "
+                "Aap kripya **Retry** button par click karein ya apna sawal dobara bhejein, main turant solve karne ki koshish karunga! 🔄📐"
+            )
+        else:
+            friendly_answer = (
+                "I apologize, but there was a temporary delay connecting to the AI inference service. "
+                "Please click **Retry** or ask your question again, and I will be happy to solve it for you! 🔄📐"
+            )
 
         return TutorResponse(
-
-            answer="Sorry, I could not generate the answer right now.",
-
+            answer=friendly_answer,
             question_type=detect_question_type(req.question),
-
             explanation_style=detect_style(req.question, req.explanation_style),
-
             used_rag=False,
-
             sources=[],
-
             prompt_version=PROMPT_VERSION,
-
-            model=req.model or GROQ_MODEL or "llama-3.3-70b-versatile",
-
-            error=str(error),
-
+            model=req.model or GROQ_MODEL or "openai/gpt-oss-120b",
+            error=f"{type(error).__name__}: {err_msg}",
         )
