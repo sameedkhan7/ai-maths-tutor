@@ -36,12 +36,39 @@ init_db()
 
 app = FastAPI(title="AI Maths Tutor API", version="1.0")
 
-# CORS setup
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development").strip().lower()
+IS_PRODUCTION = ENVIRONMENT in ("production", "prod") or bool(os.getenv("RENDER"))
+
+# CORS setup with explicit allowed origins (Never use wildcard with credentials)
+DEFAULT_PROD_ORIGINS = [
+    "https://ai-maths-tutor.onrender.com",
+]
+DEV_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5000",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5000",
+    "http://127.0.0.1:5500",
+    "http://127.0.0.1:8000",
+]
+
+env_origins = os.getenv("ALLOWED_ORIGINS", "")
+if env_origins.strip():
+    allowed_origins = [o.strip() for o in env_origins.split(",") if o.strip()]
+else:
+    allowed_origins = list(DEFAULT_PROD_ORIGINS)
+
+if not IS_PRODUCTION:
+    for dev_o in DEV_ORIGINS:
+        if dev_o not in allowed_origins:
+            allowed_origins.append(dev_o)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -77,10 +104,26 @@ def home():
 # -------------------------------------------------------------
 import bcrypt
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from fastapi import Header, Depends
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "maths-tutor-jwt-secret-key-bca-2026-prod")
 JWT_ALGORITHM = "HS256"
+_RAW_JWT_KEY = os.getenv("JWT_SECRET_KEY")
+
+INSECURE_SECRETS = {
+    None, "", "maths-tutor-jwt-secret-key-bca-2026-prod", "secret", "change-me", "default"
+}
+
+if IS_PRODUCTION:
+    if not _RAW_JWT_KEY or _RAW_JWT_KEY.strip() in INSECURE_SECRETS or len(_RAW_JWT_KEY.strip()) < 32:
+        raise RuntimeError(
+            "FATAL SECURITY ERROR: In production environment, 'JWT_SECRET_KEY' must be set to a cryptographically "
+            "secure secret (minimum 32 characters) via environment variables. Do NOT use default or fallback keys."
+        )
+    JWT_SECRET_KEY = _RAW_JWT_KEY.strip()
+else:
+    # Safe fallback strictly for local development testing
+    JWT_SECRET_KEY = _RAW_JWT_KEY.strip() if _RAW_JWT_KEY else "maths-tutor-dev-only-secret-do-not-use-in-production-12345"
 
 def hash_password(plain_pwd: str) -> str:
     """Hashes plain password using bcrypt with salt rounds=12"""
@@ -100,9 +143,55 @@ def verify_password(plain_pwd: str, stored_hash: str) -> bool:
 def create_access_token(data: dict, expires_days: int = 7) -> str:
     """Generates signed cryptographic JWT token with expiry"""
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(days=expires_days)
-    to_encode.update({"exp": expire, "iat": datetime.utcnow()})
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(days=expires_days)
+    to_encode.update({"exp": expire, "iat": now})
     return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+def get_current_user_payload(authorization: Optional[str] = Header(None)) -> dict:
+    """
+    Validates JWT token from Authorization header (Bearer <token>).
+    Rejects missing, expired, or invalid tokens with HTTP 401 Unauthorized.
+    """
+    if not authorization:
+        raise HTTPException(
+            status_code=401,
+            detail="Missing Authorization header. Please log in.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Authorization header format. Expected 'Bearer <token>'.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    token = parts[1]
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=401,
+            detail="Token has expired. Please log in again.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    except jwt.PyJWTError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or malformed token.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+@app.get("/api/auth/me")
+def get_me(current_user: dict = Depends(get_current_user_payload)):
+    """Protected endpoint: Returns verified identity for authenticated user"""
+    return {
+        "success": True,
+        "user_id": current_user.get("user_id"),
+        "email": current_user.get("email"),
+        "role": current_user.get("role", "student")
+    }
 
 
 def is_valid_real_email(email: str) -> tuple[bool, str]:

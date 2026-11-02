@@ -18,6 +18,14 @@ ENV/
 backend/tutor.db
 tutor.db
 
+# Certificates & Secrets
+*.pem
+*.crt
+*.key
+*.cert
+ca.pem
+aiven-ca.pem
+
 # Executables & Tunnels
 *.exe
 cloudflared.exe

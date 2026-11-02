@@ -65,6 +65,55 @@ class MySQLConnectionWrapper:
         return self._conn.close()
 
 
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development").strip().lower()
+IS_PRODUCTION = ENVIRONMENT in ("production", "prod") or bool(os.getenv("RENDER"))
+
+def build_mysql_ssl_context(is_production: bool = False):
+    """
+    Constructs a verified TLS SSLContext for cloud MySQL (e.g. Aiven).
+    Strictly verifies both certificate validity and hostname matching.
+    Never disables certificate verification (CERT_NONE) in production.
+    """
+    import ssl
+    ca_cert_path = (
+        os.getenv("MYSQL_SSL_CA") or
+        os.getenv("MYSQL_CA_CERT") or
+        os.getenv("AIVEN_CA_CERT")
+    )
+
+    if is_production:
+        if not ca_cert_path or not ca_cert_path.strip():
+            raise RuntimeError(
+                "FATAL DATABASE SECURITY ERROR: Production MySQL connection requires a valid CA certificate path. "
+                "Set 'MYSQL_SSL_CA' or 'MYSQL_CA_CERT' to the Aiven CA certificate file."
+            )
+        clean_path = ca_cert_path.strip()
+        if not os.path.exists(clean_path):
+            raise FileNotFoundError(
+                f"FATAL DATABASE SECURITY ERROR: The configured CA certificate file does not exist: {clean_path}"
+            )
+        ctx = ssl.create_default_context(cafile=clean_path)
+        ctx.check_hostname = True
+        ctx.verify_mode = ssl.CERT_REQUIRED
+        return ctx
+
+    # Development mode: if CA cert path is explicitly provided, enforce verification
+    if ca_cert_path and ca_cert_path.strip():
+        clean_path = ca_cert_path.strip()
+        if not os.path.exists(clean_path):
+            raise FileNotFoundError(f"Configured development CA certificate file not found: {clean_path}")
+        ctx = ssl.create_default_context(cafile=clean_path)
+        ctx.check_hostname = True
+        ctx.verify_mode = ssl.CERT_REQUIRED
+        return ctx
+
+    # Default development TLS context with system trust store
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = True
+    ctx.verify_mode = ssl.CERT_REQUIRED
+    return ctx
+
+
 def get_connection():
     """
     Connects to MySQL database (Primary).
@@ -81,21 +130,18 @@ def get_connection():
                 "charset": "utf8mb4",
                 "connect_timeout": 5
             }
-            # Enable SSL for cloud MySQL providers (e.g. Aiven)
+            # Enable verified TLS SSL for cloud MySQL providers (e.g. Aiven)
             if MYSQL_HOST not in ("localhost", "127.0.0.1") or os.getenv("MYSQL_SSL", "").lower() in ("true", "1", "yes"):
-                try:
-                    import ssl
-                    ctx = ssl.create_default_context()
-                    ctx.check_hostname = False
-                    ctx.verify_mode = ssl.CERT_NONE
-                    connect_kwargs["ssl"] = ctx
-                except Exception:
-                    connect_kwargs["ssl"] = {"check_hostname": False}
+                connect_kwargs["ssl"] = build_mysql_ssl_context(is_production=IS_PRODUCTION)
 
             raw_conn = pymysql.connect(**connect_kwargs)
             return MySQLConnectionWrapper(raw_conn)
         except Exception as e:
-            print(f"[MySQL Notice] Could not connect to MySQL ({e}). Falling back to SQLite.")
+            if IS_PRODUCTION:
+                # In production, do not silently swallow security/connection errors
+                print(f"[MySQL Fatal Notice] Production MySQL connection failed: {type(e).__name__}")
+                raise
+            print(f"[MySQL Notice] Could not connect to MySQL ({type(e).__name__}: {e}). Falling back to SQLite.")
 
     # Fallback / Default: SQLite
     conn = sqlite3.connect(SQLITE_DB, timeout=30.0, check_same_thread=False)
