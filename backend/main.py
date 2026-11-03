@@ -93,13 +93,19 @@ class RegisterRequest(BaseModel):
 class RegisterInitiateRequest(BaseModel):
     name: str
     email: str
-    password: str
+    password: Optional[str] = None
     confirm_password: Optional[str] = None
     grade: Optional[str] = "Class 10"
 
 class VerifyOtpRequest(BaseModel):
     email: str
     otp: str
+
+class CompleteRegistrationRequest(BaseModel):
+    email: str
+    verification_token: str
+    password: str
+    confirm_password: Optional[str] = None
 
 class ResendOtpRequest(BaseModel):
     email: str
@@ -243,6 +249,41 @@ def is_valid_real_email(email: str) -> tuple[bool, str]:
     except Exception:
         return False, f"Domain '@{domain}' does not exist on the internet. Please provide a real email domain."
 
+def is_valid_gmail(email: str) -> tuple[bool, str]:
+    """
+    Validates that an email is a strict, well-formed Gmail address ending in @gmail.com.
+    Blocks non-Gmail domains, random non-existent patterns, and invalid Gmail usernames.
+    """
+    clean_email = email.strip().lower()
+
+    # 1. Regex Syntax Check
+    email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    if not re.match(email_regex, clean_email):
+        return False, "Invalid email format. Manual signup accepts only valid Gmail addresses ending in @gmail.com."
+
+    parts = clean_email.split('@', 1)
+    if len(parts) != 2:
+        return False, "Invalid email format. Manual signup accepts only valid Gmail addresses ending in @gmail.com."
+
+    username, domain = parts[0], parts[1]
+
+    # 2. Strict Domain Check
+    if domain != "gmail.com":
+        return False, "Manual signup accepts only valid Gmail addresses ending in @gmail.com."
+
+    # 3. Gmail Username Restrictions
+    if len(username) < 3 or len(username) > 30:
+        return False, "Gmail username must be between 3 and 30 characters long."
+
+    if username.startswith(".") or username.endswith("."):
+        return False, "Gmail username cannot start or end with a dot."
+
+    if ".." in username:
+        return False, "Gmail username cannot contain consecutive dots."
+
+    if not re.match(r"^[a-z0-9.]+$", username):
+        return False, "Gmail username can only contain letters (a-z), numbers (0-9), and dots (.)."
+
     return True, "OK"
 
 
@@ -270,27 +311,27 @@ def row_val(row, key, default=None):
         return default
 
 
-# 2. Student Registration Flow (Phase 1 & Phase 2: Dual-Step OTP Verification)
+# 2. Student Registration Flow (Strict Gmail Ownership Verification via 6-digit OTP)
 @app.post("/api/register/initiate")
 def register_initiate(req: RegisterInitiateRequest):
     """
     Step 1 of Registration:
-    Validates form data, checks uniqueness, generates 6-digit OTP,
-    hashes OTP securely, and dispatches verification email.
+    Validates form data, enforces strict @gmail.com address, checks uniqueness,
+    generates 6-digit OTP, hashes OTP securely, and dispatches verification email.
     """
     if len(req.name.strip()) < 2:
         raise HTTPException(status_code=400, detail="Please enter your real full name.")
 
     clean_email = req.email.strip().lower()
-    is_valid, reason = is_valid_real_email(clean_email)
+    is_valid, reason = is_valid_gmail(clean_email)
     if not is_valid:
         raise HTTPException(status_code=400, detail=reason)
 
-    if len(req.password.strip()) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
-
-    if req.confirm_password is not None and req.password.strip() != req.confirm_password.strip():
-        raise HTTPException(status_code=400, detail="Password and Confirm Password do not match.")
+    if req.password is not None and req.password.strip():
+        if len(req.password.strip()) < 8:
+            raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+        if req.confirm_password is not None and req.password.strip() != req.confirm_password.strip():
+            raise HTTPException(status_code=400, detail="Password and Confirm Password do not match.")
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -299,7 +340,7 @@ def register_initiate(req: RegisterInitiateRequest):
         cursor.execute("SELECT id, is_verified FROM users WHERE LOWER(email) = LOWER(?)", (clean_email,))
         existing_user = cursor.fetchone()
         if existing_user and row_val(existing_user, "is_verified", 1) == 1:
-            raise HTTPException(status_code=400, detail="This email is already registered and verified. Please log in.")
+            raise HTTPException(status_code=400, detail="This Gmail address is already registered and verified. Please log in.")
 
         now = datetime.now(timezone.utc)
 
@@ -318,13 +359,14 @@ def register_initiate(req: RegisterInitiateRequest):
         salt = secrets.token_hex(16)
         otp_hash = hash_otp(otp, salt)
 
-        # Hash student password securely with bcrypt before storing in pending state
-        hashed_pwd = hash_password(req.password.strip())
+        # Hash student password if provided (for backward test compatibility)
+        hashed_pwd = hash_password(req.password.strip()) if (req.password and req.password.strip()) else None
         user_payload = json.dumps({
             "name": req.name.strip(),
             "email": clean_email,
             "password": hashed_pwd,
-            "grade": req.grade or "Class 10"
+            "grade": req.grade or "Class 10",
+            "verified": False
         })
 
         now_str = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -352,7 +394,7 @@ def register_initiate(req: RegisterInitiateRequest):
 
         return {
             "success": True,
-            "message": "A 6-digit verification code has been sent to your email. Please check your inbox.",
+            "message": "A 6-digit verification code has been sent to your Gmail inbox. Please check your inbox.",
             "email": clean_email,
             "cooldown_seconds": 60,
             "expires_in_minutes": 5
@@ -366,7 +408,8 @@ def register_verify_otp(req: VerifyOtpRequest):
     """
     Step 2 of Registration:
     Validates entered OTP against stored hash, checks 5-minute expiry and attempt limit.
-    Upon success, creates verified user record and returns JWT token.
+    If password was provided in Step 1 (backward compatibility), creates verified user record and returns JWT token.
+    If password is not yet set, verifies Gmail ownership and issues a verification_token for Step 3 password creation.
     """
     clean_email = req.email.strip().lower()
     clean_otp = req.otp.strip()
@@ -418,18 +461,131 @@ def register_verify_otp(req: VerifyOtpRequest):
                 raise HTTPException(status_code=400, detail="Incorrect verification code. Maximum attempts reached. Please register again.")
             raise HTTPException(status_code=400, detail=f"Incorrect verification code. {remaining} attempt(s) remaining.")
 
-        # 4. Success: Activate account in users table
+        # 4. Success: Gmail ownership verified
         user_data = json.loads(record["user_data"])
         name = user_data["name"]
-        hashed_pwd = user_data["password"]
+        hashed_pwd = user_data.get("password")
         grade = user_data.get("grade", "Class 10")
 
-        # Clean any unverified duplicate user row if previously present
+        # Case A: Password already present (legacy 2-step flow)
+        if hashed_pwd:
+            cursor.execute("DELETE FROM users WHERE LOWER(email) = LOWER(?) AND is_verified = 0", (clean_email,))
+
+            cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(?)", (clean_email,))
+            existing = cursor.fetchone()
+            if existing:
+                cursor.execute(
+                    "UPDATE users SET name = ?, password = ?, grade = ?, is_verified = 1 WHERE id = ?",
+                    (name, hashed_pwd, grade, existing["id"])
+                )
+                user_id = existing["id"]
+            else:
+                cursor.execute(
+                    "INSERT INTO users (name, email, password, grade, role, is_verified) VALUES (?, ?, ?, ?, 'student', 1)",
+                    (name, clean_email, hashed_pwd, grade)
+                )
+                user_id = cursor.lastrowid
+
+            cursor.execute("DELETE FROM email_verifications WHERE id = ?", (record["id"],))
+            conn.commit()
+
+            token = create_access_token({"user_id": user_id, "email": clean_email, "role": "student"})
+            return {
+                "success": True,
+                "message": "Account verified and registered successfully!",
+                "token": token,
+                "user_id": user_id,
+                "name": name,
+                "email": clean_email,
+                "grade": grade
+            }
+
+        # Case B: Password to be created in Step 3 (strict Gmail ownership verification)
+        verification_token = secrets.token_urlsafe(32)
+        user_data["verified"] = True
+        user_data["verification_token"] = verification_token
+        exp_str = (now + timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
+
+        cursor.execute(
+            "UPDATE email_verifications SET user_data = ?, expires_at = ?, attempts = 0 WHERE id = ?",
+            (json.dumps(user_data), exp_str, record["id"])
+        )
+        conn.commit()
+
+        return {
+            "success": True,
+            "verified": True,
+            "requires_password": True,
+            "verification_token": verification_token,
+            "email": clean_email,
+            "name": name,
+            "grade": grade,
+            "message": "Gmail ownership verified successfully! Please set your AI Maths Tutor password."
+        }
+    finally:
+        conn.close()
+
+
+@app.post("/api/register/complete")
+def register_complete(req: CompleteRegistrationRequest):
+    """
+    Step 3 of Registration:
+    Sets student's AI Maths Tutor password after verified Gmail ownership.
+    Inserts verified student into users table and issues JWT session token.
+    """
+    clean_email = req.email.strip().lower()
+    is_valid, reason = is_valid_gmail(clean_email)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=reason)
+
+    if not req.verification_token or not req.verification_token.strip():
+        raise HTTPException(status_code=400, detail="Missing verification token.")
+
+    clean_pwd = req.password.strip()
+    if len(clean_pwd) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+
+    if req.confirm_password is not None and clean_pwd != req.confirm_password.strip():
+        raise HTTPException(status_code=400, detail="Password and Confirm Password do not match.")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Check active verification session
+        cursor.execute("""
+            SELECT id, user_data, expires_at
+            FROM email_verifications
+            WHERE LOWER(email) = LOWER(?)
+            ORDER BY id DESC LIMIT 1
+        """, (clean_email,))
+        record = cursor.fetchone()
+
+        if not record:
+            raise HTTPException(status_code=400, detail="No active verification session found. Please verify your Gmail first.")
+
+        now = datetime.now(timezone.utc)
+        expires_dt = parse_dt_safe(record["expires_at"])
+        if now > expires_dt:
+            cursor.execute("DELETE FROM email_verifications WHERE id = ?", (record["id"],))
+            conn.commit()
+            raise HTTPException(status_code=400, detail="Verification session has expired. Please verify your Gmail again.")
+
+        user_data = json.loads(record["user_data"])
+        if not user_data.get("verified") or user_data.get("verification_token") != req.verification_token.strip():
+            raise HTTPException(status_code=400, detail="Invalid verification token. Please verify your Gmail again.")
+
+        # Duplicate check against verified accounts
+        cursor.execute("SELECT id, is_verified FROM users WHERE LOWER(email) = LOWER(?)", (clean_email,))
+        existing = cursor.fetchone()
+        if existing and row_val(existing, "is_verified", 1) == 1:
+            raise HTTPException(status_code=400, detail="This Gmail address is already registered and verified. Please log in.")
+
+        name = user_data.get("name", "Student")
+        grade = user_data.get("grade", "Class 10")
+        hashed_pwd = hash_password(clean_pwd)
+
         cursor.execute("DELETE FROM users WHERE LOWER(email) = LOWER(?) AND is_verified = 0", (clean_email,))
 
-        # Check if already present (e.g. updating unverified)
-        cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(?)", (clean_email,))
-        existing = cursor.fetchone()
         if existing:
             cursor.execute(
                 "UPDATE users SET name = ?, password = ?, grade = ?, is_verified = 1 WHERE id = ?",
@@ -443,14 +599,14 @@ def register_verify_otp(req: VerifyOtpRequest):
             )
             user_id = cursor.lastrowid
 
-        # Clean up completed verification record
+        # Clean verification session
         cursor.execute("DELETE FROM email_verifications WHERE id = ?", (record["id"],))
         conn.commit()
 
         token = create_access_token({"user_id": user_id, "email": clean_email, "role": "student"})
         return {
             "success": True,
-            "message": "Account verified and registered successfully!",
+            "message": "AI Maths Tutor account created successfully!",
             "token": token,
             "user_id": user_id,
             "name": name,
@@ -524,40 +680,13 @@ def register_resend_otp(req: ResendOtpRequest):
         conn.close()
 
 
-# Fallback / Direct Programmatic Registration (Preserved for backward test compatibility)
+# Fallback / Direct Programmatic Registration (Blocked to prevent OTP bypass)
 @app.post("/api/register")
 def register(req: RegisterRequest):
-    if len(req.name.strip()) < 2:
-        raise HTTPException(status_code=400, detail="Please enter your real full name.")
-
-    is_valid, reason = is_valid_real_email(req.email)
-    if not is_valid:
-        raise HTTPException(status_code=400, detail=reason)
-
-    if len(req.password.strip()) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
-
-    conn = get_connection()
-    cursor = conn.cursor()
-    try:
-        hashed_pwd = hash_password(req.password)
-        cursor.execute("INSERT INTO users (name, email, password, grade, role, is_verified) VALUES (?, ?, ?, ?, 'student', 1)",
-                       (req.name.strip(), req.email.strip().lower(), hashed_pwd, req.grade))
-        conn.commit()
-        user_id = cursor.lastrowid
-        token = create_access_token({"user_id": user_id, "email": req.email.strip().lower(), "role": "student"})
-        return {
-            "success": True, 
-            "message": "Registered successfully", 
-            "token": token,
-            "user_id": user_id, 
-            "name": req.name.strip(),
-            "grade": req.grade
-        }
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Email already registered. Please log in.")
-    finally:
-        conn.close()
+    raise HTTPException(
+        status_code=400,
+        detail="Direct registration is disabled. You must verify ownership of your Gmail address via 6-digit OTP."
+    )
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip()
 _GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs"

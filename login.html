@@ -512,49 +512,23 @@
                         submitBtn.innerText = "Sign In to Tutor";
                     }
                     return;
-                }
-            } catch (err) {
-                console.warn('Backend server offline during login, using secure local validation:', err);
-            }
-
-            // 2. Client-side Offline Fallback (Only active if backend API is unreachable)
-            const devPass = localStorage.getItem('devAdminPassword') || 'admin';
-            const isDevAccount = (inputVal.toLowerCase() === 'dev@mathstutor.com' || inputVal.toLowerCase() === 'developer' || inputVal.toLowerCase() === 'dev');
-
-            if (isDevAccount) {
-                if (passVal !== devPass && passVal !== 'admin') {
-                    alert('⚠️ Invalid password for Developer Admin account!');
+                } else {
+                    alert('⚠️ ' + (data.detail || 'Authentication failed. Please try again.'));
                     if (submitBtn) {
                         submitBtn.disabled = false;
                         submitBtn.innerText = "Sign In to Tutor";
                     }
                     return;
                 }
-                localStorage.setItem('studentName', 'Developer Admin');
-                localStorage.setItem('studentEmail', 'dev@mathstutor.com');
-                localStorage.setItem('userRole', 'developer');
-                localStorage.setItem('userId', '1');
-            } else {
-                let finalDisplayName = inputVal;
-                if (inputVal.includes('@')) {
-                    let raw = inputVal.split('@')[0].replace(/[._0-9]/g, ' ').trim();
-                    finalDisplayName = raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : inputVal.split('@')[0];
-                } else {
-                    finalDisplayName = inputVal.charAt(0).toUpperCase() + inputVal.slice(1);
+            } catch (err) {
+                console.error('Server or network error during login:', err);
+                alert('⚠️ Unable to connect to authentication server. Please check your network connection.');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Sign In to Tutor";
                 }
-
-                localStorage.setItem('studentName', finalDisplayName || 'Student');
-                localStorage.setItem('studentEmail', inputVal.includes('@') ? inputVal : `${finalDisplayName.toLowerCase().replace(/\s+/g, '')}@gmail.com`);
-                localStorage.setItem('userRole', 'student');
-                
-                let str = (inputVal || 'student').toLowerCase();
-                let hash = 0;
-                for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) % 100000;
-                localStorage.setItem('userId', String(hash + 10));
+                return;
             }
-
-            localStorage.removeItem('activeChatId');
-            window.location.href = 'maths.html';
         });
 
         // ==========================================
