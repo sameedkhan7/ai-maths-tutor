@@ -90,6 +90,20 @@ class RegisterRequest(BaseModel):
     password: str
     grade: str = "Class 10"
 
+class RegisterInitiateRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    confirm_password: Optional[str] = None
+    grade: Optional[str] = "Class 10"
+
+class VerifyOtpRequest(BaseModel):
+    email: str
+    otp: str
+
+class ResendOtpRequest(BaseModel):
+    email: str
+
 class LoginRequest(BaseModel):
     email: str
     password: str
@@ -104,8 +118,14 @@ def home():
 # -------------------------------------------------------------
 import bcrypt
 import jwt
+import json
+import secrets
 from datetime import datetime, timedelta, timezone
 from fastapi import Header, Depends
+from backend.email_service import (
+    generate_secure_otp, hash_otp, verify_otp_hash, send_otp_email,
+    validate_production_smtp_config
+)
 
 JWT_ALGORITHM = "HS256"
 _RAW_JWT_KEY = os.getenv("JWT_SECRET_KEY")
@@ -121,6 +141,8 @@ if IS_PRODUCTION:
             "secure secret (minimum 32 characters) via environment variables. Do NOT use default or fallback keys."
         )
     JWT_SECRET_KEY = _RAW_JWT_KEY.strip()
+    # Enforce real SMTP configuration in production (fail startup early)
+    validate_production_smtp_config()
 else:
     # Safe fallback strictly for local development testing
     JWT_SECRET_KEY = _RAW_JWT_KEY.strip() if _RAW_JWT_KEY else "maths-tutor-dev-only-secret-do-not-use-in-production-12345"
@@ -224,25 +246,302 @@ def is_valid_real_email(email: str) -> tuple[bool, str]:
     return True, "OK"
 
 
-# 2. Student Registration API (Secured with Bcrypt & Real Email Validation)
+def parse_dt_safe(val) -> datetime:
+    """Safely converts SQLite/MySQL timestamp values to timezone-aware UTC datetime"""
+    if isinstance(val, datetime):
+        if val.tzinfo is None:
+            return val.replace(tzinfo=timezone.utc)
+        return val
+    val_str = str(val).strip().replace(" ", "T")
+    if not val_str.endswith("Z") and "+" not in val_str and "-" not in val_str[10:]:
+        val_str += "+00:00"
+    return datetime.fromisoformat(val_str)
+
+
+def row_val(row, key, default=None):
+    """Safely reads a field from either sqlite3.Row or dict object"""
+    if not row:
+        return default
+    if isinstance(row, dict):
+        return row.get(key, default)
+    try:
+        return row[key] if key in row.keys() else default
+    except Exception:
+        return default
+
+
+# 2. Student Registration Flow (Phase 1 & Phase 2: Dual-Step OTP Verification)
+@app.post("/api/register/initiate")
+def register_initiate(req: RegisterInitiateRequest):
+    """
+    Step 1 of Registration:
+    Validates form data, checks uniqueness, generates 6-digit OTP,
+    hashes OTP securely, and dispatches verification email.
+    """
+    if len(req.name.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Please enter your real full name.")
+
+    clean_email = req.email.strip().lower()
+    is_valid, reason = is_valid_real_email(clean_email)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=reason)
+
+    if len(req.password.strip()) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+
+    if req.confirm_password is not None and req.password.strip() != req.confirm_password.strip():
+        raise HTTPException(status_code=400, detail="Password and Confirm Password do not match.")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # Check if already registered and verified
+        cursor.execute("SELECT id, is_verified FROM users WHERE LOWER(email) = LOWER(?)", (clean_email,))
+        existing_user = cursor.fetchone()
+        if existing_user and row_val(existing_user, "is_verified", 1) == 1:
+            raise HTTPException(status_code=400, detail="This email is already registered and verified. Please log in.")
+
+        now = datetime.now(timezone.utc)
+
+        # Check for active cooldown on existing pending verification (60 seconds)
+        cursor.execute("SELECT id, last_sent_at FROM email_verifications WHERE LOWER(email) = LOWER(?) ORDER BY id DESC LIMIT 1", (clean_email,))
+        active_verif = cursor.fetchone()
+        if active_verif:
+            last_sent = parse_dt_safe(active_verif["last_sent_at"])
+            elapsed = (now - last_sent).total_seconds()
+            if elapsed < 60:
+                remaining = int(60 - elapsed)
+                raise HTTPException(status_code=429, detail=f"Please wait {remaining} seconds before requesting a new verification code.")
+
+        # Generate cryptographic 6-digit OTP & salt (never stored in plaintext)
+        otp = generate_secure_otp()
+        salt = secrets.token_hex(16)
+        otp_hash = hash_otp(otp, salt)
+
+        # Hash student password securely with bcrypt before storing in pending state
+        hashed_pwd = hash_password(req.password.strip())
+        user_payload = json.dumps({
+            "name": req.name.strip(),
+            "email": clean_email,
+            "password": hashed_pwd,
+            "grade": req.grade or "Class 10"
+        })
+
+        now_str = now.strftime("%Y-%m-%d %H:%M:%S")
+        exp_str = (now + timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S")
+
+        # Delete any previous stale verification requests for this email
+        cursor.execute("DELETE FROM email_verifications WHERE LOWER(email) = LOWER(?)", (clean_email,))
+
+        cursor.execute("""
+            INSERT INTO email_verifications (email, otp_hash, salt, user_data, attempts, max_attempts, resend_count, last_sent_at, expires_at)
+            VALUES (?, ?, ?, ?, 0, 5, 0, ?, ?)
+        """, (clean_email, otp_hash, salt, user_payload, now_str, exp_str))
+        conn.commit()
+
+        # Dispatch OTP via email service
+        sent, send_msg = send_otp_email(clean_email, otp, recipient_name=req.name.strip())
+        if not sent:
+            print(f"[Email Notice] Could not deliver email to {clean_email}: {send_msg}")
+            cursor.execute("DELETE FROM email_verifications WHERE LOWER(email) = LOWER(?)", (clean_email,))
+            conn.commit()
+            raise HTTPException(
+                status_code=500,
+                detail=send_msg if "unavailable" in send_msg.lower() else "Failed to send verification email. Please try again later."
+            )
+
+        return {
+            "success": True,
+            "message": "A 6-digit verification code has been sent to your email. Please check your inbox.",
+            "email": clean_email,
+            "cooldown_seconds": 60,
+            "expires_in_minutes": 5
+        }
+    finally:
+        conn.close()
+
+
+@app.post("/api/register/verify-otp")
+def register_verify_otp(req: VerifyOtpRequest):
+    """
+    Step 2 of Registration:
+    Validates entered OTP against stored hash, checks 5-minute expiry and attempt limit.
+    Upon success, creates verified user record and returns JWT token.
+    """
+    clean_email = req.email.strip().lower()
+    clean_otp = req.otp.strip()
+
+    if len(clean_otp) != 6 or not clean_otp.isdigit():
+        raise HTTPException(status_code=400, detail="Invalid code format. Please enter a 6-digit numeric OTP.")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT id, otp_hash, salt, user_data, attempts, max_attempts, expires_at
+            FROM email_verifications
+            WHERE LOWER(email) = LOWER(?)
+            ORDER BY id DESC LIMIT 1
+        """, (clean_email,))
+        record = cursor.fetchone()
+
+        if not record:
+            raise HTTPException(status_code=400, detail="No active verification session found. Please start registration again.")
+
+        now = datetime.now(timezone.utc)
+        expires_dt = parse_dt_safe(record["expires_at"])
+
+        # 1. Check expiration (5 minutes)
+        if now > expires_dt:
+            cursor.execute("DELETE FROM email_verifications WHERE id = ?", (record["id"],))
+            conn.commit()
+            raise HTTPException(status_code=400, detail="Verification code has expired (valid for 5 minutes). Please request a new code.")
+
+        # 2. Check attempt limit
+        attempts = record["attempts"] or 0
+        max_attempts = record["max_attempts"] or 5
+        if attempts >= max_attempts:
+            cursor.execute("DELETE FROM email_verifications WHERE id = ?", (record["id"],))
+            conn.commit()
+            raise HTTPException(status_code=400, detail="Too many failed attempts. Verification session expired. Please register again.")
+
+        # 3. Cryptographic hash comparison
+        is_match = verify_otp_hash(clean_otp, record["salt"], record["otp_hash"])
+        if not is_match:
+            new_attempts = attempts + 1
+            cursor.execute("UPDATE email_verifications SET attempts = ? WHERE id = ?", (new_attempts, record["id"]))
+            conn.commit()
+            remaining = max(0, max_attempts - new_attempts)
+            if remaining == 0:
+                cursor.execute("DELETE FROM email_verifications WHERE id = ?", (record["id"],))
+                conn.commit()
+                raise HTTPException(status_code=400, detail="Incorrect verification code. Maximum attempts reached. Please register again.")
+            raise HTTPException(status_code=400, detail=f"Incorrect verification code. {remaining} attempt(s) remaining.")
+
+        # 4. Success: Activate account in users table
+        user_data = json.loads(record["user_data"])
+        name = user_data["name"]
+        hashed_pwd = user_data["password"]
+        grade = user_data.get("grade", "Class 10")
+
+        # Clean any unverified duplicate user row if previously present
+        cursor.execute("DELETE FROM users WHERE LOWER(email) = LOWER(?) AND is_verified = 0", (clean_email,))
+
+        # Check if already present (e.g. updating unverified)
+        cursor.execute("SELECT id FROM users WHERE LOWER(email) = LOWER(?)", (clean_email,))
+        existing = cursor.fetchone()
+        if existing:
+            cursor.execute(
+                "UPDATE users SET name = ?, password = ?, grade = ?, is_verified = 1 WHERE id = ?",
+                (name, hashed_pwd, grade, existing["id"])
+            )
+            user_id = existing["id"]
+        else:
+            cursor.execute(
+                "INSERT INTO users (name, email, password, grade, role, is_verified) VALUES (?, ?, ?, ?, 'student', 1)",
+                (name, clean_email, hashed_pwd, grade)
+            )
+            user_id = cursor.lastrowid
+
+        # Clean up completed verification record
+        cursor.execute("DELETE FROM email_verifications WHERE id = ?", (record["id"],))
+        conn.commit()
+
+        token = create_access_token({"user_id": user_id, "email": clean_email, "role": "student"})
+        return {
+            "success": True,
+            "message": "Account verified and registered successfully!",
+            "token": token,
+            "user_id": user_id,
+            "name": name,
+            "email": clean_email,
+            "grade": grade
+        }
+    finally:
+        conn.close()
+
+
+@app.post("/api/register/resend-otp")
+def register_resend_otp(req: ResendOtpRequest):
+    """
+    Resends OTP with a strict 60-second cooldown and a maximum of 5 resends.
+    """
+    clean_email = req.email.strip().lower()
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT id, user_data, resend_count, last_sent_at
+            FROM email_verifications
+            WHERE LOWER(email) = LOWER(?)
+            ORDER BY id DESC LIMIT 1
+        """, (clean_email,))
+        record = cursor.fetchone()
+
+        if not record:
+            raise HTTPException(status_code=400, detail="No active registration session found for this email. Please register first.")
+
+        now = datetime.now(timezone.utc)
+        last_sent = parse_dt_safe(record["last_sent_at"])
+        elapsed = (now - last_sent).total_seconds()
+
+        if elapsed < 60:
+            remaining = int(60 - elapsed)
+            raise HTTPException(status_code=429, detail=f"Please wait {remaining} seconds before requesting a new code.")
+
+        resend_count = record["resend_count"] or 0
+        if resend_count >= 5:
+            raise HTTPException(status_code=400, detail="Maximum resend limit reached. Please restart registration.")
+
+        otp = generate_secure_otp()
+        salt = secrets.token_hex(16)
+        otp_hash = hash_otp(otp, salt)
+
+        now_str = now.strftime("%Y-%m-%d %H:%M:%S")
+        exp_str = (now + timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S")
+
+        cursor.execute("""
+            UPDATE email_verifications
+            SET otp_hash = ?, salt = ?, attempts = 0, resend_count = resend_count + 1, last_sent_at = ?, expires_at = ?
+            WHERE id = ?
+        """, (otp_hash, salt, now_str, exp_str, record["id"]))
+        conn.commit()
+
+        user_data = json.loads(record["user_data"])
+        sent, send_msg = send_otp_email(clean_email, otp, recipient_name=user_data.get("name", "Student"))
+        if not sent:
+            raise HTTPException(
+                status_code=500,
+                detail=send_msg if "unavailable" in send_msg.lower() else "Failed to send verification email. Please try again later."
+            )
+
+        return {
+            "success": True,
+            "message": "A new verification code has been sent to your email.",
+            "cooldown_seconds": 60
+        }
+    finally:
+        conn.close()
+
+
+# Fallback / Direct Programmatic Registration (Preserved for backward test compatibility)
 @app.post("/api/register")
 def register(req: RegisterRequest):
     if len(req.name.strip()) < 2:
         raise HTTPException(status_code=400, detail="Please enter your real full name.")
 
-    # Strict Real Email Verification
     is_valid, reason = is_valid_real_email(req.email)
     if not is_valid:
         raise HTTPException(status_code=400, detail=reason)
 
-    if len(req.password.strip()) < 4:
-        raise HTTPException(status_code=400, detail="Password must be at least 4 characters long")
+    if len(req.password.strip()) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
 
     conn = get_connection()
     cursor = conn.cursor()
     try:
         hashed_pwd = hash_password(req.password)
-        cursor.execute("INSERT INTO users (name, email, password, grade, role) VALUES (?, ?, ?, ?, 'student')",
+        cursor.execute("INSERT INTO users (name, email, password, grade, role, is_verified) VALUES (?, ?, ?, ?, 'student', 1)",
                        (req.name.strip(), req.email.strip().lower(), hashed_pwd, req.grade))
         conn.commit()
         user_id = cursor.lastrowid
@@ -260,63 +559,126 @@ def register(req: RegisterRequest):
     finally:
         conn.close()
 
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+_GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs"
+_google_jwk_client = None
+
+
+def get_google_jwk_client():
+    global _google_jwk_client
+    if _google_jwk_client is None:
+        _google_jwk_client = jwt.PyJWKClient(_GOOGLE_JWKS_URL)
+    return _google_jwk_client
+
+
+def verify_google_id_token(token: str, client_id: str) -> dict:
+    """
+    Cryptographically verifies Google ID Token (JWT) against Google's public JWKS certificates.
+    Enforces signature, expiration, issuer, audience, and email_verified=true.
+    """
+    if not token or not token.strip():
+        raise HTTPException(status_code=400, detail="Google credential token is required.")
+
+    effective_client_id = client_id.strip() if client_id else os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    if not effective_client_id:
+        if IS_PRODUCTION:
+            raise HTTPException(
+                status_code=500,
+                detail="Google authentication is not configured in production (missing GOOGLE_CLIENT_ID)."
+            )
+        raise HTTPException(
+            status_code=500,
+            detail="Google authentication is not configured (missing GOOGLE_CLIENT_ID)."
+        )
+
+    try:
+        jwks_client = get_google_jwk_client()
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        payload = jwt.decode(
+            token,
+            signing_key.key,
+            algorithms=["RS256"],
+            audience=effective_client_id,
+            issuer=["https://accounts.google.com", "accounts.google.com"],
+            options={
+                "verify_signature": True,
+                "verify_aud": True,
+                "verify_iss": True,
+                "verify_exp": True
+            }
+        )
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Google credential token has expired. Please sign in again.")
+    except jwt.InvalidAudienceError:
+        raise HTTPException(status_code=401, detail="Google credential audience does not match this application.")
+    except jwt.InvalidIssuerError:
+        raise HTTPException(status_code=401, detail="Google credential issuer is invalid.")
+    except (jwt.InvalidSignatureError, jwt.DecodeError):
+        raise HTTPException(status_code=401, detail="Google credential token signature is invalid or forged.")
+    except jwt.PyJWTError as e:
+        raise HTTPException(status_code=401, detail=f"Google credential token verification failed: {type(e).__name__}")
+    except Exception as e:
+        print(f"[Google Auth Error] JWKS resolution failed: {type(e).__name__}")
+        raise HTTPException(status_code=500, detail="Unable to verify Google credentials at this time.")
+
+    # Enforce verified email
+    email_verified = payload.get("email_verified")
+    if email_verified is not True and str(email_verified).lower() != "true":
+        raise HTTPException(status_code=400, detail="Google account email is not verified by Google.")
+
+    email = payload.get("email")
+    if not email or not isinstance(email, str) or not email.strip():
+        raise HTTPException(status_code=400, detail="Google token does not contain a valid email address.")
+
+    return payload
+
+
 class GoogleAuthRequest(BaseModel):
-    credential: Optional[str] = None
-    email: Optional[str] = None
-    name: Optional[str] = None
-    picture: Optional[str] = None
+    credential: str  # Mandatory Google ID token (JWT)
+
 
 @app.post("/api/auth/google")
 def google_auth(req: GoogleAuthRequest):
-    """Authenticates Google OAuth user, creates record if new, and returns signed JWT token"""
-    email = None
-    name = None
-    if req.credential:
-        try:
-            import json
-            import base64
-            parts = req.credential.split(".")
-            if len(parts) >= 2:
-                payload_str = parts[1]
-                payload_str += "=" * ((4 - len(payload_str) % 4) % 4)
-                decoded_bytes = base64.urlsafe_b64decode(payload_str)
-                google_payload = json.loads(decoded_bytes.decode("utf-8"))
-                email = google_payload.get("email")
-                name = google_payload.get("name")
-        except Exception as e:
-            print(f"Google token decode notice: {e}")
+    """
+    Authenticates Google OAuth user using cryptographically verified ID tokens.
+    Untrusted client overrides are strictly rejected.
+    """
+    if not req.credential or not req.credential.strip():
+        raise HTTPException(status_code=400, detail="Google credential token is required.")
 
-    if not email and req.email:
-        email = req.email
-    if not name and req.name:
-        name = req.name
+    # Cryptographically verify the Google ID token
+    google_payload = verify_google_id_token(req.credential.strip(), GOOGLE_CLIENT_ID)
 
-    if not email:
-        raise HTTPException(status_code=400, detail="Invalid Google authentication payload")
+    email = google_payload["email"].strip().lower()
+    name = google_payload.get("name") or email.split("@")[0].capitalize()
 
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT id, name, email, grade, role FROM users WHERE LOWER(email) = LOWER(?)", (email.strip().lower(),))
+        cursor.execute("SELECT id, name, email, grade, role, is_verified FROM users WHERE LOWER(email) = LOWER(?)", (email,))
         user = cursor.fetchone()
         if user:
             user_id = user["id"]
             user_name = user["name"]
             user_grade = user["grade"]
             user_role = user["role"] if "role" in user.keys() else "student"
+            # If account existed but was pending email verification, mark verified via trusted Google SSO
+            if row_val(user, "is_verified", 1) == 0:
+                cursor.execute("UPDATE users SET is_verified = 1 WHERE id = ?", (user_id,))
+                conn.commit()
         else:
-            user_name = name or email.split("@")[0].capitalize()
+            user_name = name
             user_grade = "Class 10"
-            user_role = "developer" if email.lower() == "dev@mathstutor.com" else "student"
-            random_pwd_hash = hash_password("GOOGLE_SSO_SECURE_" + email)
+            user_role = "developer" if email == "dev@mathstutor.com" else "student"
+            random_pwd_hash = hash_password(secrets.token_urlsafe(32))
             cursor.execute(
-                "INSERT INTO users (name, email, password, grade, role) VALUES (?, ?, ?, ?, ?)",
-                (user_name, email.strip().lower(), random_pwd_hash, user_grade, user_role)
+                "INSERT INTO users (name, email, password, grade, role, is_verified) VALUES (?, ?, ?, ?, ?, 1)",
+                (user_name, email, random_pwd_hash, user_grade, user_role)
             )
             conn.commit()
             user_id = cursor.lastrowid
 
-        token = create_access_token({"user_id": user_id, "email": email.strip().lower(), "role": user_role})
+        token = create_access_token({"user_id": user_id, "email": email, "role": user_role})
         return {
             "success": True,
             "token": token,
@@ -329,7 +691,7 @@ def google_auth(req: GoogleAuthRequest):
     finally:
         conn.close()
 
-# 3. Student / Developer Login API (Verified with Bcrypt + JWT)
+# 3. Student / Developer Login API (Verified with Bcrypt + JWT + Verification Check)
 class ChangePasswordRequest(BaseModel):
     user_id: int
     current_password: str
@@ -345,7 +707,7 @@ def login(req: LoginRequest):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id, name, email, password, grade, role 
+        SELECT id, name, email, password, grade, role, is_verified
         FROM users 
         WHERE LOWER(email) = LOWER(?) OR LOWER(name) = LOWER(?)
     """, (req.email.strip(), req.email.strip()))
@@ -354,6 +716,11 @@ def login(req: LoginRequest):
     if not user or not verify_password(req.password, user["password"]):
         conn.close()
         raise HTTPException(status_code=401, detail="Invalid email/username or password")
+
+    # Guard: Unverified accounts cannot log in
+    if row_val(user, "is_verified", 1) == 0:
+        conn.close()
+        raise HTTPException(status_code=403, detail="Email is not verified. Please complete email verification before logging in.")
 
     # Auto-upgrade plaintext password to bcrypt hash on successful login
     stored_pwd = user["password"]

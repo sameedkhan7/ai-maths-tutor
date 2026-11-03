@@ -23,9 +23,11 @@
             border-radius: 16px;
             padding: 32px 32px;
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
             text-align: center;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
         .auth-logo {
@@ -48,7 +50,7 @@
             margin-bottom: 6px;
         }
 
-        .auth-card p {
+        .auth-card p.auth-subtitle {
             font-size: 13px;
             color: #64748b;
             margin-bottom: 20px;
@@ -69,7 +71,7 @@
 
         .form-group input, .form-group select {
             width: 100%;
-            padding: 9px 12px;
+            padding: 10px 12px;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-size: 13.5px;
@@ -77,11 +79,151 @@
             box-sizing: border-box;
             background-color: #ffffff;
             color: #1e293b;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-group input:focus, .form-group select:focus {
             border-color: #4f46e5;
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        /* Password input with eye toggle */
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-input-wrapper input {
+            padding-right: 42px;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 8px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #64748b;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: color 0.15s, background-color 0.15s;
+        }
+
+        .password-toggle-btn:hover {
+            color: #1e293b;
+            background-color: #f1f5f9;
+        }
+
+        /* Password strength meter */
+        .strength-meter-container {
+            margin-top: 6px;
+        }
+
+        .strength-meter-bars {
+            display: flex;
+            gap: 4px;
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .strength-bar {
+            flex: 1;
+            height: 100%;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+
+        .strength-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11.5px;
+            margin-top: 4px;
+            color: #64748b;
+        }
+
+        .strength-text {
+            font-weight: 600;
+        }
+
+        .strength-weak { color: #ef4444; }
+        .strength-medium { color: #f59e0b; }
+        .strength-strong { color: #10b981; }
+
+        .password-rules {
+            font-size: 11.5px;
+            color: #64748b;
+            margin: 6px 0 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .password-rules li {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
+
+        .rule-icon {
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .rule-met { color: #10b981; }
+        .rule-unmet { color: #94a3b8; }
+
+        /* Match feedback */
+        .match-feedback {
+            font-size: 11.5px;
+            margin-top: 4px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .match-feedback.match {
+            display: block;
+            color: #10b981;
+        }
+
+        .match-feedback.mismatch {
+            display: block;
+            color: #ef4444;
+        }
+
+        /* Banner alerts */
+        .auth-alert {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            margin-bottom: 14px;
+            text-align: left;
+            display: none;
+            line-height: 1.4;
+        }
+
+        .auth-alert-error {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+
+        .auth-alert-success {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+        }
+
+        .auth-alert-info {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
         }
 
         .auth-submit-btn {
@@ -96,10 +238,99 @@
             cursor: pointer;
             margin-top: 10px;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .auth-submit-btn:hover {
+        .auth-submit-btn:hover:not(:disabled) {
             background-color: #4338ca;
+        }
+
+        .auth-submit-btn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* OTP Screen Styling */
+        .otp-step-container {
+            display: none;
+        }
+
+        .otp-email-badge {
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            font-size: 13px;
+            color: #3730a3;
+            text-align: left;
+        }
+
+        .otp-email-badge .change-link {
+            color: #4f46e5;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .otp-code-input {
+            width: 100%;
+            padding: 12px 14px;
+            letter-spacing: 10px;
+            font-size: 26px;
+            text-align: center;
+            font-weight: 800;
+            font-family: 'Courier New', Courier, monospace;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            color: #4f46e5;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .otp-code-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        .otp-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0 18px 0;
+            font-size: 12.5px;
+            color: #64748b;
+        }
+
+        .otp-timer {
+            font-weight: 600;
+            color: #dc2626;
+        }
+
+        .otp-resend-btn {
+            background: none;
+            border: none;
+            color: #4f46e5;
+            font-weight: 600;
+            font-size: 12.5px;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        .otp-resend-btn:disabled {
+            color: #94a3b8;
+            cursor: not-allowed;
+            text-decoration: none;
         }
 
         .google-login-btn {
@@ -143,307 +374,213 @@
             text-decoration: underline;
         }
 
-        /* Google Account Chooser Modal */
-        .google-modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
-
-        .google-modal-backdrop.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .google-modal-card {
-            background: #ffffff;
-            border-radius: 24px;
-            width: 90%;
-            max-width: 440px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            padding: 36px 32px 28px 32px;
-            text-align: center;
-            position: relative;
-            transform: scale(0.95);
-            transition: transform 0.2s ease;
-            box-sizing: border-box;
-            border: 1px solid #e2e8f0;
-        }
-
-        .google-modal-backdrop.active .google-modal-card {
-            transform: scale(1);
-        }
-
-        .google-modal-close {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            background: transparent;
-            border: none;
-            font-size: 18px;
-            color: #64748b;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .google-modal-close:hover {
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-
-        .google-modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1f1f1f;
-            margin: 12px 0 4px 0;
-        }
-
-        .google-modal-subtitle {
-            font-size: 13.5px;
-            color: #5f6368;
-            margin-bottom: 24px;
-        }
-
-        .google-account-list {
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .google-account-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: background 0.15s ease;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .google-account-item:last-child {
-            border-bottom: none;
-        }
-
-        .google-account-item:hover {
-            background-color: #f8fafc;
-        }
-
-        .google-account-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .google-account-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .google-account-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1f1f1f;
-            line-height: 1.2;
-        }
-
-        .google-account-email {
-            font-size: 12px;
-            color: #5f6368;
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .google-modal-footer {
-            font-size: 11.5px;
-            color: #5f6368;
-            line-height: 1.5;
-            text-align: left;
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px solid #f1f5f9;
-        }
-
-        .google-loading-state {
-            display: none;
-            padding: 24px 0;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .google-spinner {
-            width: 36px;
-            height: 36px;
-            border: 3px solid #e0e7ff;
-            border-top: 3px solid #4285F4;
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-top: 2px solid #ffffff;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
+            display: inline-block;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Responsive refinements */
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 24px 20px;
+            }
+            .otp-code-input {
+                letter-spacing: 6px;
+                font-size: 22px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="auth-wrapper">
-        <div class="auth-card">
+        <div class="auth-card" id="auth-card">
             <div class="auth-logo">∑</div>
-            <h2>Create Account</h2>
-            <p>Join AI Maths Tutor & master concepts easily</p>
 
-            <form id="register-form">
-                <div class="form-group">
-                    <label for="reg-name">Full Name</label>
-                    <input type="text" id="reg-name" placeholder="e.g. Alex Sharma" required />
+            <!-- ============================================== -->
+            <!-- STEP 1: REGISTRATION DETAILS FORM              -->
+            <!-- ============================================== -->
+            <div id="step-registration" class="step-container">
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Join AI Maths Tutor & master concepts easily</p>
+
+                <!-- Feedback Alert Banner -->
+                <div id="reg-alert" class="auth-alert"></div>
+
+                <form id="register-form" novalidate>
+                    <div class="form-group">
+                        <label for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" placeholder="e.g. Alex Sharma" autocomplete="name" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-email">Email Address</label>
+                        <input type="email" id="reg-email" placeholder="student@example.com" autocomplete="email" required />
+                    </div>
+
+                    <!-- NCERT Class Selector -->
+                    <div class="form-group">
+                        <label for="reg-class">Maths Curriculum / Grade</label>
+                        <select id="reg-class">
+                            <option value="10">NCERT Class 10</option>
+                            <option value="11" selected>NCERT Class 11</option>
+                            <option value="12">NCERT Class 12</option>
+                            <option value="9">NCERT Class 9</option>
+                        </select>
+                    </div>
+
+                    <!-- Password Field with Show/Hide & Strength -->
+                    <div class="form-group">
+                        <label for="reg-password">Password (Minimum 8 characters)</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="reg-password" placeholder="Create a strong password" autocomplete="new-password" required />
+                            <button type="button" class="password-toggle-btn" id="toggle-reg-pwd" title="Show or hide password" aria-label="Toggle password visibility">
+                                <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Strength Meter -->
+                        <div class="strength-meter-container">
+                            <div class="strength-meter-bars">
+                                <div class="strength-bar" id="str-bar-1"></div>
+                                <div class="strength-bar" id="str-bar-2"></div>
+                                <div class="strength-bar" id="str-bar-3"></div>
+                            </div>
+                            <div class="strength-info">
+                                <span>Password strength:</span>
+                                <span class="strength-text" id="str-text">None</span>
+                            </div>
+                        </div>
+
+                        <ul class="password-rules">
+                            <li id="rule-length" class="rule-unmet"><span class="rule-icon">○</span> At least 8 characters</li>
+                            <li id="rule-num" class="rule-unmet"><span class="rule-icon">○</span> Contains a number or symbol</li>
+                            <li id="rule-letter" class="rule-unmet"><span class="rule-icon">○</span> Contains uppercase & lowercase letters</li>
+                        </ul>
+                    </div>
+
+                    <!-- Confirm Password Field with Show/Hide -->
+                    <div class="form-group">
+                        <label for="reg-confirm-password">Confirm Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="reg-confirm-password" placeholder="Re-enter your password" autocomplete="new-password" required />
+                            <button type="button" class="password-toggle-btn" id="toggle-reg-confirm-pwd" title="Show or hide confirm password" aria-label="Toggle confirm password visibility">
+                                <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="match-feedback" class="match-feedback"></div>
+                    </div>
+
+                    <button type="submit" class="auth-submit-btn" id="submit-btn-reg">
+                        <span id="btn-reg-text">Continue with Email Verification</span>
+                        <span id="btn-reg-spinner" class="spinner" style="display:none;"></span>
+                    </button>
+                </form>
+
+                <div style="display: flex; align-items: center; margin: 18px 0; color: #94a3b8; font-size: 11px;">
+                    <hr style="flex:1; border:none; border-top:1px solid #e2e8f0;">
+                    <span style="padding: 0 8px;">OR SIGN UP WITH</span>
+                    <hr style="flex:1; border:none; border-top:1px solid #e2e8f0;">
                 </div>
 
-                <div class="form-group">
-                    <label for="reg-email">Email Address</label>
-                    <input type="email" id="reg-email" placeholder="student@example.com" required />
+                <!-- Styled Continue with Google Button -->
+                <div id="google-btn-container" style="display: flex; justify-content: center; margin-bottom: 12px; width: 100%;">
+                    <button type="button" class="google-login-btn" id="google-login-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.33 24 12 24z"/>
+                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
                 </div>
 
-                <!-- NCERT Class Selector -->
-                <div class="form-group">
-                    <label for="reg-class">Maths Curriculum / Grade</label>
-                    <select id="reg-class">
-                        <option value="10">NCERT Class 10</option>
-                        <option value="11" selected>NCERT Class 11</option>
-                        <option value="12">NCERT Class 12</option>
-                        <option value="9">NCERT Class 9</option>
-                    </select>
+                <div class="auth-footer">
+                    Already have an account? <a href="login.html">Sign In</a>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- STEP 2: EMAIL OTP VERIFICATION SCREEN          -->
+            <!-- ============================================== -->
+            <div id="step-otp" class="step-container otp-step-container">
+                <h2>Verify Your Email</h2>
+                <p class="auth-subtitle">Enter the 6-digit verification code sent to your inbox</p>
+
+                <!-- Feedback Alert Banner -->
+                <div id="otp-alert" class="auth-alert"></div>
+
+                <div class="otp-email-badge">
+                    <div>
+                        <span style="font-size: 11.5px; color: #64748b; display: block;">Verification code sent to:</span>
+                        <strong id="display-otp-email" style="word-break: break-all;">student@example.com</strong>
+                    </div>
+                    <span class="change-link" id="btn-change-email">Edit</span>
                 </div>
 
-                <div class="form-group">
-                    <label for="reg-password">Password</label>
-                    <input type="password" id="reg-password" placeholder="Create a password" required />
-                </div>
+                <form id="otp-form" novalidate>
+                    <div class="form-group" style="text-align: center;">
+                        <label for="otp-code" style="text-align: center; margin-bottom: 8px;">6-Digit OTP Code</label>
+                        <input
+                            type="text"
+                            id="otp-code"
+                            class="otp-code-input"
+                            placeholder="······"
+                            maxlength="6"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            autocomplete="one-time-code"
+                            required
+                        />
+                    </div>
 
-                <button type="submit" class="auth-submit-btn">Create Student Account</button>
-            </form>
-
-            <div style="display: flex; align-items: center; margin: 16px 0; color: #94a3b8; font-size: 11px;">
-                <hr style="flex:1; border:none; border-top:1px solid #e2e8f0;">
-                <span style="padding: 0 8px;">OR SIGN UP WITH</span>
-                <hr style="flex:1; border:none; border-top:1px solid #e2e8f0;">
-            </div>
-
-            <!-- Official Google Sign-In Container -->
-            <div id="g_id_onload"
-                 data-client_id="165303629004-0thk2v4o8vn0m6eh6ug0kq4hgbn05nhh.apps.googleusercontent.com"
-                 data-callback="handleGoogleCredentialResponse"
-                 data-auto_prompt="false"
-                 data-cancel_on_tap_outside="true">
-            </div>
-
-            <!-- Styled Continue with Google Button -->
-            <div id="google-btn-container" style="display: flex; justify-content: center; margin-bottom: 12px; width: 100%;">
-                <button type="button" class="google-login-btn" id="google-login-btn">
-                    <svg width="18" height="18" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.33 24 12 24z"/>
-                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/>
-                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                    </svg>
-                    <span>Continue with Google</span>
-                </button>
-            </div>
-
-            <div class="auth-footer">
-                Already have an account? <a href="login.html">Sign In</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================== -->
-    <!-- 🌐 Authentic Google Account Chooser Modal     -->
-    <!-- ============================================== -->
-    <div id="google-modal-backdrop" class="google-modal-backdrop">
-        <div class="google-modal-card">
-            <button type="button" class="google-modal-close" id="google-modal-close" title="Close">✕</button>
-            
-            <div id="google-modal-main">
-                <svg width="28" height="28" viewBox="0 0 24 24" style="margin-bottom: 4px;">
-                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.33 24 12 24z"/>
-                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.17 0 9.99 0 12s.46 3.83 1.26 5.42l4.02-3.15z"/>
-                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
-                
-                <h3 class="google-modal-title">Choose an account</h3>
-                <p class="google-modal-subtitle">to register with <strong>AI Maths Tutor</strong></p>
-
-                <!-- Accounts List -->
-                <div class="google-account-list">
-                    <div class="google-account-item" onclick="selectGoogleAccount('Sameed Khan', 'sameedkhan7@gmail.com')">
-                        <div class="google-account-avatar" style="background-color: #4f46e5;">SK</div>
-                        <div class="google-account-info">
-                            <div class="google-account-name">Sameed Khan</div>
-                            <div class="google-account-email">sameedkhan7@gmail.com</div>
+                    <div class="otp-meta">
+                        <div>
+                            <span>Expires in: </span>
+                            <span class="otp-timer" id="otp-timer-display">05:00</span>
+                        </div>
+                        <div>
+                            <button type="button" class="otp-resend-btn" id="btn-resend-otp" disabled>
+                                Resend code (<span id="resend-countdown">60</span>s)
+                            </button>
                         </div>
                     </div>
 
-                    <div class="google-account-item" onclick="selectGoogleAccount('Alex Sharma', 'alex.student@ncert.ac.in')">
-                        <div class="google-account-avatar" style="background-color: #059669;">AS</div>
-                        <div class="google-account-info">
-                            <div class="google-account-name">Alex Sharma</div>
-                            <div class="google-account-email">alex.student@ncert.ac.in</div>
-                        </div>
-                    </div>
+                    <button type="submit" class="auth-submit-btn" id="submit-btn-otp">
+                        <span id="btn-otp-text">Verify & Activate Account</span>
+                        <span id="btn-otp-spinner" class="spinner" style="display:none;"></span>
+                    </button>
+                </form>
 
-                    <div class="google-account-item" onclick="promptGoogleAccount()">
-                        <div class="google-account-avatar" style="background-color: #64748b;">👤</div>
-                        <div class="google-account-info">
-                            <div class="google-account-name">Use another account</div>
-                            <div class="google-account-email">Sign up with a different Google ID</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="google-modal-footer">
-                    To continue, Google will share your name, email address, and language preference with <strong>AI Maths Tutor</strong>.
+                <div class="auth-footer" style="margin-top: 24px;">
+                    Having trouble? <a href="#" id="btn-back-to-reg">Return to registration</a>
                 </div>
             </div>
 
-            <div id="google-loading-state" class="google-loading-state">
-                <div class="google-spinner"></div>
-                <h4 style="margin: 0; font-size: 15px; color: #1e293b;" id="google-loading-text">Signing in...</h4>
-            </div>
         </div>
     </div>
 
     <script>
+        // ==========================================
+        // 🌐 Dynamic API URL Detection
+        // ==========================================
         function getApiBaseUrl() {
             const saved = localStorage.getItem('customApiBaseUrl');
             if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
@@ -457,96 +594,464 @@
         }
         const API_BASE_URL = getApiBaseUrl();
 
-        const registerForm = document.getElementById('register-form');
-        const googleModalBackdrop = document.getElementById('google-modal-backdrop');
-        const googleModalClose = document.getElementById('google-modal-close');
-        const googleBtn = document.getElementById('google-login-btn');
+        // Eye icons SVG templates
+        const EYE_OPEN_SVG = `<svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+        const EYE_CLOSED_SVG = `<svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
-        registerForm.addEventListener('submit', async (e) => {
+        // DOM Elements
+        const stepReg = document.getElementById('step-registration');
+        const stepOtp = document.getElementById('step-otp');
+        const regForm = document.getElementById('register-form');
+        const otpForm = document.getElementById('otp-form');
+        const regAlert = document.getElementById('reg-alert');
+        const otpAlert = document.getElementById('otp-alert');
+
+        const nameInput = document.getElementById('reg-name');
+        const emailInput = document.getElementById('reg-email');
+        const classSelect = document.getElementById('reg-class');
+        const passwordInput = document.getElementById('reg-password');
+        const confirmPasswordInput = document.getElementById('reg-confirm-password');
+
+        const toggleRegPwdBtn = document.getElementById('toggle-reg-pwd');
+        const toggleRegConfirmPwdBtn = document.getElementById('toggle-reg-confirm-pwd');
+        const submitBtnReg = document.getElementById('submit-btn-reg');
+        const btnRegText = document.getElementById('btn-reg-text');
+        const btnRegSpinner = document.getElementById('btn-reg-spinner');
+
+        const submitBtnOtp = document.getElementById('submit-btn-otp');
+        const btnOtpText = document.getElementById('btn-otp-text');
+        const btnOtpSpinner = document.getElementById('btn-otp-spinner');
+
+        const displayOtpEmail = document.getElementById('display-otp-email');
+        const otpCodeInput = document.getElementById('otp-code');
+        const otpTimerDisplay = document.getElementById('otp-timer-display');
+        const btnResendOtp = document.getElementById('btn-resend-otp');
+        const resendCountdown = document.getElementById('resend-countdown');
+        const btnChangeEmail = document.getElementById('btn-change-email');
+        const btnBackToReg = document.getElementById('btn-back-to-reg');
+
+        // Password strength elements
+        const strBar1 = document.getElementById('str-bar-1');
+        const strBar2 = document.getElementById('str-bar-2');
+        const strBar3 = document.getElementById('str-bar-3');
+        const strText = document.getElementById('str-text');
+        const ruleLength = document.getElementById('rule-length');
+        const ruleNum = document.getElementById('rule-num');
+        const ruleLetter = document.getElementById('rule-letter');
+        const matchFeedback = document.getElementById('match-feedback');
+
+        // State trackers
+        let activeRegistrationEmail = '';
+        let resendTimerInterval = null;
+        let expiryTimerInterval = null;
+
+        // ==========================================
+        // 1. Password Visibility Toggles
+        // ==========================================
+        function setupPasswordToggle(inputEl, btnEl) {
+            btnEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isPassword = inputEl.type === 'password';
+                inputEl.type = isPassword ? 'text' : 'password';
+                btnEl.innerHTML = isPassword ? EYE_CLOSED_SVG : EYE_OPEN_SVG;
+                inputEl.focus();
+            });
+        }
+        setupPasswordToggle(passwordInput, toggleRegPwdBtn);
+        setupPasswordToggle(confirmPasswordInput, toggleRegConfirmPwdBtn);
+
+        // ==========================================
+        // 2. Real-Time Password Strength Meter
+        // ==========================================
+        function evaluatePasswordStrength(pwd) {
+            const hasLength = pwd.length >= 8;
+            const hasNumOrSymbol = /[0-9!@#$%^&*(),.?":{}|<>]/.test(pwd);
+            const hasMixedCase = /[a-z]/.test(pwd) && /[A-Z]/.test(pwd);
+
+            // Update Rule Indicators
+            updateRule(ruleLength, hasLength);
+            updateRule(ruleNum, hasNumOrSymbol);
+            updateRule(ruleLetter, hasMixedCase);
+
+            let score = 0;
+            if (hasLength) score += 1;
+            if (hasLength && hasNumOrSymbol) score += 1;
+            if (hasLength && hasNumOrSymbol && hasMixedCase) score += 1;
+
+            if (pwd.length === 0) {
+                resetBars();
+                strText.innerText = 'None';
+                strText.className = 'strength-text';
+                return 0;
+            }
+
+            if (score <= 1) {
+                strBar1.style.background = '#ef4444';
+                strBar2.style.background = 'transparent';
+                strBar3.style.background = 'transparent';
+                strText.innerText = 'Weak';
+                strText.className = 'strength-text strength-weak';
+            } else if (score === 2) {
+                strBar1.style.background = '#f59e0b';
+                strBar2.style.background = '#f59e0b';
+                strBar3.style.background = 'transparent';
+                strText.innerText = 'Medium';
+                strText.className = 'strength-text strength-medium';
+            } else {
+                strBar1.style.background = '#10b981';
+                strBar2.style.background = '#10b981';
+                strBar3.style.background = '#10b981';
+                strText.innerText = 'Strong';
+                strText.className = 'strength-text strength-strong';
+            }
+            return score;
+        }
+
+        function updateRule(el, isMet) {
+            if (isMet) {
+                el.className = 'rule-met';
+                el.querySelector('.rule-icon').innerText = '✓';
+            } else {
+                el.className = 'rule-unmet';
+                el.querySelector('.rule-icon').innerText = '○';
+            }
+        }
+
+        function resetBars() {
+            strBar1.style.background = 'transparent';
+            strBar2.style.background = 'transparent';
+            strBar3.style.background = 'transparent';
+        }
+
+        passwordInput.addEventListener('input', () => {
+            evaluatePasswordStrength(passwordInput.value);
+            checkPasswordMatch();
+        });
+
+        // ==========================================
+        // 3. Confirm Password Match Validation
+        // ==========================================
+        function checkPasswordMatch() {
+            const pwd = passwordInput.value;
+            const confirm = confirmPasswordInput.value;
+
+            if (!confirm) {
+                matchFeedback.style.display = 'none';
+                return true;
+            }
+
+            if (pwd === confirm) {
+                matchFeedback.className = 'match-feedback match';
+                matchFeedback.innerText = '✓ Passwords match';
+                return true;
+            } else {
+                matchFeedback.className = 'match-feedback mismatch';
+                matchFeedback.innerText = '✕ Passwords do not match';
+                return false;
+            }
+        }
+
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+        // Normalize email input live
+        emailInput.addEventListener('blur', () => {
+            emailInput.value = emailInput.value.trim().toLowerCase();
+        });
+
+        // Alert display helpers
+        function showAlert(el, msg, type = 'error') {
+            el.className = `auth-alert auth-alert-${type}`;
+            el.innerHTML = msg;
+            el.style.display = 'block';
+        }
+        function hideAlert(el) {
+            el.style.display = 'none';
+            el.innerHTML = '';
+        }
+
+        // ==========================================
+        // 4. Step 1: Submit Registration (Initiate OTP)
+        // ==========================================
+        regForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const grade = document.getElementById('reg-class').value;
-            const password = document.getElementById('reg-password').value.trim();
-            const submitBtn = registerForm.querySelector('button[type="submit"]');
+            hideAlert(regAlert);
 
-            if (!name || !email || !password) return;
-            if (password.length < 4) {
-                alert("⚠️ Password must be at least 4 characters long.");
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim().toLowerCase();
+            const grade = classSelect.value;
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Frontend Validations
+            if (name.length < 2) {
+                showAlert(regAlert, '⚠️ Please enter your real full name (at least 2 letters).');
+                nameInput.focus();
                 return;
             }
 
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerText = "Creating account...";
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showAlert(regAlert, '⚠️ Please enter a valid email address (e.g. name@gmail.com).');
+                emailInput.focus();
+                return;
             }
 
+            if (password.length < 8) {
+                showAlert(regAlert, '⚠️ Password must be at least 8 characters long.');
+                passwordInput.focus();
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAlert(regAlert, '⚠️ Password and Confirm Password do not match.');
+                confirmPasswordInput.focus();
+                return;
+            }
+
+            // Disable button and show spinner
+            submitBtnReg.disabled = true;
+            btnRegText.innerText = 'Sending verification code...';
+            btnRegSpinner.style.display = 'inline-block';
+
             try {
-                const res = await fetch(`${API_BASE_URL}/api/register`, {
+                const res = await fetch(`${API_BASE_URL}/api/register/initiate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: name,
                         email: email,
+                        grade: `Class ${grade}`,
                         password: password,
-                        grade: `Class ${grade}`
+                        confirm_password: confirmPassword
                     })
                 });
+
                 const data = await res.json();
+
                 if (res.ok && data.success) {
-                    localStorage.setItem('studentName', data.name || name);
-                    localStorage.setItem('studentEmail', email);
-                    localStorage.setItem('userRole', 'student');
-                    localStorage.setItem('userId', String(data.user_id));
-                    if (data.token) localStorage.setItem('authToken', data.token);
-                    localStorage.setItem('studentGrade', `Class ${grade}`);
-                    localStorage.removeItem('activeChatId');
-                    window.location.href = 'maths.html';
-                    return;
+                    activeRegistrationEmail = email;
+                    displayOtpEmail.innerText = email;
+
+                    // Transition to OTP screen
+                    stepReg.style.display = 'none';
+                    stepOtp.style.display = 'block';
+                    otpCodeInput.value = '';
+                    otpCodeInput.focus();
+
+                    showAlert(otpAlert, `✉️ ${data.message || 'Verification code sent! Please check your email.'}`, 'info');
+
+                    // Start Timers
+                    startResendCooldown(data.cooldown_seconds || 60);
+                    startExpiryTimer(5 * 60);
                 } else {
-                    alert('⚠️ ' + (data.detail || 'Registration failed. Email might already exist.'));
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerText = "Create Student Account";
-                    }
-                    return;
+                    showAlert(regAlert, '⚠️ ' + (data.detail || 'Registration failed. Please check your details.'));
                 }
             } catch (err) {
-                console.warn('Backend server offline during registration, using local fallback:', err);
-                localStorage.setItem('studentName', name);
-                localStorage.setItem('registeredName', name);
-                localStorage.setItem('registeredEmail', email);
-                localStorage.setItem('studentGrade', `Class ${grade}`);
-                localStorage.removeItem('activeChatId');
-                window.location.href = 'maths.html';
+                console.error('Registration initiate error:', err);
+                showAlert(regAlert, '⚠️ Network error: Unable to connect to server. Please check your connection.');
+            } finally {
+                submitBtnReg.disabled = false;
+                btnRegText.innerText = 'Continue with Email Verification';
+                btnRegSpinner.style.display = 'none';
             }
         });
 
         // ==========================================
-        // 🌐 Official Google Identity Services Handler
+        // 5. Step 2: OTP Verification & Activation
+        // ==========================================
+        otpCodeInput.addEventListener('input', (e) => {
+            // Strip non-digits
+            otpCodeInput.value = otpCodeInput.value.replace(/[^0-9]/g, '');
+            if (otpCodeInput.value.length === 6) {
+                otpForm.requestSubmit();
+            }
+        });
+
+        otpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert(otpAlert);
+
+            const otp = otpCodeInput.value.trim();
+            if (otp.length !== 6) {
+                showAlert(otpAlert, '⚠️ Please enter all 6 digits of your verification code.');
+                otpCodeInput.focus();
+                return;
+            }
+
+            submitBtnOtp.disabled = true;
+            btnOtpText.innerText = 'Verifying code...';
+            btnOtpSpinner.style.display = 'inline-block';
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/register/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: activeRegistrationEmail,
+                        otp: otp
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    showAlert(otpAlert, '🎉 Account verified successfully! Loading your classroom...', 'success');
+
+                    // Store authenticated session credentials
+                    localStorage.setItem('studentName', data.name);
+                    localStorage.setItem('studentEmail', data.email);
+                    localStorage.setItem('userRole', 'student');
+                    localStorage.setItem('userId', String(data.user_id));
+                    if (data.token) localStorage.setItem('authToken', data.token);
+                    if (data.grade) localStorage.setItem('studentGrade', data.grade);
+                    localStorage.removeItem('activeChatId');
+
+                    // Redirect to AI Maths Tutor dashboard
+                    setTimeout(() => {
+                        window.location.href = 'maths.html';
+                    }, 800);
+                } else {
+                    showAlert(otpAlert, '⚠️ ' + (data.detail || 'Verification failed. Please check your code.'));
+                    otpCodeInput.value = '';
+                    otpCodeInput.focus();
+                }
+            } catch (err) {
+                console.error('OTP verification error:', err);
+                showAlert(otpAlert, '⚠️ Connection error. Please try again.');
+            } finally {
+                submitBtnOtp.disabled = false;
+                btnOtpText.innerText = 'Verify & Activate Account';
+                btnOtpSpinner.style.display = 'none';
+            }
+        });
+
+        // ==========================================
+        // 6. Resend OTP Handler
+        // ==========================================
+        btnResendOtp.addEventListener('click', async () => {
+            if (btnResendOtp.disabled || !activeRegistrationEmail) return;
+
+            btnResendOtp.disabled = true;
+            btnResendOtp.innerText = 'Sending...';
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/register/resend-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: activeRegistrationEmail })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    showAlert(otpAlert, '✉️ A new 6-digit code has been dispatched to your email.', 'info');
+                    startResendCooldown(data.cooldown_seconds || 60);
+                    startExpiryTimer(5 * 60);
+                    otpCodeInput.value = '';
+                    otpCodeInput.focus();
+                } else {
+                    showAlert(otpAlert, '⚠️ ' + (data.detail || 'Failed to resend code. Please try again later.'));
+                    btnResendOtp.disabled = false;
+                    btnResendOtp.innerText = 'Resend code';
+                }
+            } catch (err) {
+                showAlert(otpAlert, '⚠️ Network error while requesting new code.');
+                btnResendOtp.disabled = false;
+                btnResendOtp.innerText = 'Resend code';
+            }
+        });
+
+        // Switch back to edit details
+        function returnToRegistration() {
+            clearInterval(resendTimerInterval);
+            clearInterval(expiryTimerInterval);
+            stepOtp.style.display = 'none';
+            stepReg.style.display = 'block';
+            hideAlert(otpAlert);
+            hideAlert(regAlert);
+            nameInput.focus();
+        }
+
+        btnChangeEmail.addEventListener('click', returnToRegistration);
+        btnBackToReg.addEventListener('click', (e) => {
+            e.preventDefault();
+            returnToRegistration();
+        });
+
+        // Countdown timers
+        function startResendCooldown(seconds) {
+            clearInterval(resendTimerInterval);
+            let remaining = seconds;
+            btnResendOtp.disabled = true;
+            resendCountdown.innerText = remaining;
+            btnResendOtp.innerHTML = `Resend code (<span id="resend-countdown">${remaining}</span>s)`;
+
+            resendTimerInterval = setInterval(() => {
+                remaining -= 1;
+                const span = document.getElementById('resend-countdown');
+                if (span) span.innerText = remaining;
+
+                if (remaining <= 0) {
+                    clearInterval(resendTimerInterval);
+                    btnResendOtp.disabled = false;
+                    btnResendOtp.innerText = 'Resend code';
+                }
+            }, 1000);
+        }
+
+        function startExpiryTimer(totalSeconds) {
+            clearInterval(expiryTimerInterval);
+            let remaining = totalSeconds;
+
+            function formatTime(s) {
+                const mins = Math.floor(s / 60);
+                const secs = s % 60;
+                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+
+            otpTimerDisplay.innerText = formatTime(remaining);
+
+            expiryTimerInterval = setInterval(() => {
+                remaining -= 1;
+                otpTimerDisplay.innerText = formatTime(remaining);
+
+                if (remaining <= 0) {
+                    clearInterval(expiryTimerInterval);
+                    otpTimerDisplay.innerText = 'Expired';
+                    showAlert(otpAlert, '⏰ Your code has expired. Please click "Resend code" above to receive a fresh OTP.', 'error');
+                }
+            }, 1000);
+        }
+
+        // ==========================================
+        // 7. Google OAuth Authentication Handling
         // ==========================================
         const GOOGLE_CLIENT_ID = '165303629004-0thk2v4o8vn0m6eh6ug0kq4hgbn05nhh.apps.googleusercontent.com';
 
         function initGoogleClient() {
             if (window.google && window.google.accounts) {
-                google.accounts.id.initialize({
-                    client_id: GOOGLE_CLIENT_ID,
-                    callback: handleGoogleCredentialResponse,
-                    auto_select: false,
-                    cancel_on_tap_outside: true
-                });
-
-                const btnContainer = document.getElementById('google-btn-container');
-                if (btnContainer) {
-                    btnContainer.innerHTML = '';
-                    google.accounts.id.renderButton(btnContainer, {
-                        theme: 'outline',
-                        size: 'large',
-                        width: 356,
-                        text: 'signup_with',
-                        shape: 'rectangular',
-                        logo_alignment: 'left'
+                try {
+                    google.accounts.id.initialize({
+                        client_id: GOOGLE_CLIENT_ID,
+                        callback: handleGoogleCredentialResponse,
+                        auto_select: false,
+                        cancel_on_tap_outside: true
                     });
+
+                    const btnContainer = document.getElementById('google-btn-container');
+                    if (btnContainer) {
+                        btnContainer.innerHTML = '';
+                        google.accounts.id.renderButton(btnContainer, {
+                            theme: 'outline',
+                            size: 'large',
+                            width: 356,
+                            text: 'signup_with',
+                            shape: 'rectangular',
+                            logo_alignment: 'left'
+                        });
+                    }
+                } catch (e) {
+                    console.warn('Google GSI button initialization notice:', e);
                 }
             }
         }
@@ -560,6 +1065,8 @@
             googleLoginBtn.addEventListener('click', () => {
                 if (window.google && window.google.accounts) {
                     google.accounts.id.prompt();
+                } else {
+                    showAlert(regAlert, 'ℹ️ Google Sign-In SDK is initializing. If you are developing locally, please use standard email registration with OTP.');
                 }
             });
         }
@@ -584,11 +1091,11 @@
                     localStorage.removeItem('activeChatId');
                     window.location.href = 'maths.html';
                 } else {
-                    alert('⚠️ Google Registration failed: ' + (data.detail || 'Could not verify token'));
+                    showAlert(regAlert, '⚠️ Google Registration notice: ' + (data.detail || 'Could not verify token'));
                 }
             } catch (err) {
                 console.error('Network error during Google auth:', err);
-                alert('⚠️ Server connection error during Google sign-up.');
+                showAlert(regAlert, '⚠️ Server connection error during Google sign-up.');
             }
         }
     </script>

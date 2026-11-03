@@ -9,12 +9,30 @@ try:
 except ImportError:
     HAS_PYMYSQL = False
 
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development").strip().lower()
+IS_PRODUCTION = ENVIRONMENT in ("production", "prod") or bool(os.getenv("RENDER"))
+
 # Database Settings from Environment or Defaults
 USE_MYSQL = bool(os.getenv("MYSQL_HOST")) and os.getenv("USE_MYSQL", "true").lower() in ("true", "1", "yes")
 MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
 MYSQL_USER = os.getenv("MYSQL_USER", "root")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "1234")
-MYSQL_DB = os.getenv("MYSQL_DB", "maths_tutor_db")
+
+# Canonical variable is MYSQL_DB, with MYSQL_DATABASE supported as backward-compatible alias.
+# Precedence: MYSQL_DB takes priority if both are present.
+_raw_db = (os.getenv("MYSQL_DB") or os.getenv("MYSQL_DATABASE") or "").strip()
+
+if IS_PRODUCTION and USE_MYSQL:
+    if not _raw_db:
+        raise RuntimeError(
+            "FATAL DATABASE CONFIGURATION ERROR: In production with MySQL enabled, "
+            "'MYSQL_DB' (or 'MYSQL_DATABASE') must be explicitly set via environment variables. "
+            "Connecting to an unconfigured default database in production is prohibited."
+        )
+    MYSQL_DB = _raw_db
+else:
+    MYSQL_DB = _raw_db if _raw_db else "maths_tutor_db"
+
 MYSQL_PORT = int(os.getenv("MYSQL_PORT", 3306))
 
 SQLITE_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tutor.db")
@@ -64,9 +82,6 @@ class MySQLConnectionWrapper:
     def close(self):
         return self._conn.close()
 
-
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development").strip().lower()
-IS_PRODUCTION = ENVIRONMENT in ("production", "prod") or bool(os.getenv("RENDER"))
 
 def build_mysql_ssl_context(is_production: bool = False):
     """
@@ -165,9 +180,33 @@ def init_db():
             password VARCHAR(255) NOT NULL,
             grade VARCHAR(100) DEFAULT 'Class 10',
             role VARCHAR(50) DEFAULT 'student',
+            is_verified TINYINT DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         """)
+
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS email_verifications (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(255) NOT NULL,
+            otp_hash VARCHAR(255) NOT NULL,
+            salt VARCHAR(64) NOT NULL,
+            user_data MEDIUMTEXT NOT NULL,
+            attempts INT DEFAULT 0,
+            max_attempts INT DEFAULT 5,
+            resend_count INT DEFAULT 0,
+            last_sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_email_verif (email)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        """)
+
+        # Migration: ensure is_verified exists on older MySQL tables
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN is_verified TINYINT DEFAULT 1")
+        except Exception:
+            pass
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS chats (
@@ -202,8 +241,8 @@ def init_db():
         for s_name, s_email, s_pwd, s_grade, s_role in default_seed_users:
             try:
                 cursor.execute("""
-                INSERT IGNORE INTO users (name, email, password, grade, role)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT IGNORE INTO users (name, email, password, grade, role, is_verified)
+                VALUES (?, ?, ?, ?, ?, 1)
                 """, (s_name, s_email, s_pwd, s_grade, s_role))
             except Exception:
                 pass
@@ -218,9 +257,33 @@ def init_db():
             password TEXT NOT NULL,
             grade TEXT DEFAULT 'Class 10',
             role TEXT DEFAULT 'student',
+            is_verified INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """)
+
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS email_verifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            otp_hash TEXT NOT NULL,
+            salt TEXT NOT NULL,
+            user_data TEXT NOT NULL,
+            attempts INTEGER DEFAULT 0,
+            max_attempts INTEGER DEFAULT 5,
+            resend_count INTEGER DEFAULT 0,
+            last_sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_email_verif ON email_verifications(email)")
+
+        # Migration: ensure is_verified exists on older SQLite tables
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 1")
+        except Exception:
+            pass
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS chats (
