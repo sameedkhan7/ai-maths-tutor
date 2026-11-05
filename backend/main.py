@@ -1385,6 +1385,7 @@ def chat_with_tutor(request: ChatRequest):
         image_data = {"image_url": None, "theme": None, "prompt": None, "provider": None}
         visual_explicit_triggers = [
             "visualize", "visualization", "visualise", "visualisation",
+            "viualoze", "visualoze", "visulize", "visulaize", "visulise",
             "diagram", "image", "photo", "picture", "chitra", "graph",
             "figure", "draw", "banao", "dikhao", "visual", "3d", "infographic", "poster"
         ]

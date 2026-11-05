@@ -17,6 +17,7 @@ def detect_visual_intent(question: str, response_text: str = "") -> dict:
 
     visual_triggers = [
         "image", "photo", "picture", "chitra", "visualize", "visualization", "visualise", "visualisation",
+        "viualoze", "visualoze", "visulize", "visulaize", "visulise",
         "diagram", "graph", "figure", "draw", "banao", "dikhao", "visual", "3d", "infographic", "poster"
     ]
     should_visualize = any(trigger in question.lower() for trigger in visual_triggers)
