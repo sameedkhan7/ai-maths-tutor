@@ -37,7 +37,19 @@ init_db()
 app = FastAPI(title="AI Maths Tutor API", version="1.0")
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").strip().lower()
-IS_PRODUCTION = ENVIRONMENT in ("production", "prod") or bool(os.getenv("RENDER"))
+
+def _determine_production_status() -> bool:
+    raw_env = os.getenv("ENVIRONMENT", "").strip().lower()
+    if raw_env:
+        return raw_env in ("production", "prod")
+    if bool(os.getenv("RENDER")):
+        if os.getenv("REQUIRE_SMTP", "").lower() in ("true", "1", "yes"):
+            return True
+        from backend.email_service import is_smtp_configured
+        return is_smtp_configured()
+    return False
+
+IS_PRODUCTION = _determine_production_status()
 
 # CORS setup with explicit allowed origins (Never use wildcard with credentials)
 DEFAULT_PROD_ORIGINS = [

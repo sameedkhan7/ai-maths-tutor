@@ -10,7 +10,16 @@ except ImportError:
     HAS_PYMYSQL = False
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").strip().lower()
-IS_PRODUCTION = ENVIRONMENT in ("production", "prod") or bool(os.getenv("RENDER"))
+
+def _determine_production_status() -> bool:
+    raw_env = os.getenv("ENVIRONMENT", "").strip().lower()
+    if raw_env:
+        return raw_env in ("production", "prod")
+    if bool(os.getenv("RENDER")):
+        return bool(os.getenv("MYSQL_HOST") or os.getenv("REQUIRE_SMTP", "").lower() in ("true", "1", "yes"))
+    return False
+
+IS_PRODUCTION = _determine_production_status()
 
 # Database Settings from Environment or Defaults
 USE_MYSQL = bool(os.getenv("MYSQL_HOST")) and os.getenv("USE_MYSQL", "true").lower() in ("true", "1", "yes")

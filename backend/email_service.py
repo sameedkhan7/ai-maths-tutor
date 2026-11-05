@@ -8,8 +8,15 @@ from typing import Tuple
 
 # Environment Detection
 def is_production_env() -> bool:
-    env = os.getenv("ENVIRONMENT", "development").strip().lower()
-    return env in ("production", "prod") or bool(os.getenv("RENDER"))
+    raw_env = os.getenv("ENVIRONMENT", "").strip().lower()
+    if raw_env:
+        return raw_env in ("production", "prod")
+    # On Render: strict production applies if SMTP is configured or REQUIRE_SMTP is enabled
+    if bool(os.getenv("RENDER")):
+        if os.getenv("REQUIRE_SMTP", "").lower() in ("true", "1", "yes"):
+            return True
+        return is_smtp_configured()
+    return False
 
 
 def is_smtp_configured() -> bool:
@@ -125,8 +132,7 @@ def send_otp_email(recipient_email: str, otp: str, recipient_name: str = "Studen
     # In development/test mode when Mock Mode is active
     if get_mock_email_mode():
         _LAST_DISPATCHED_OTP[clean_email] = otp
-        if not is_prod:
-            print(f"[Email Service Notice] Mock mode active: OTP generated for {clean_email} (Length: {len(otp)})")
+        print(f"[Email Service Notice] Mock/Demo mode active: OTP generated for {clean_email} -> {otp} (Length: {len(otp)})")
         return True, "Verification code generated (Mock/Local mode active)."
 
     # Load dynamic SMTP settings from environment
