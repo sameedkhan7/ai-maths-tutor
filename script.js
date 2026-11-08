@@ -9,26 +9,23 @@
 // 🌐 Dynamic API URL (Automatically connects to local 8000 on laptop, phone Wi-Fi LAN IP, or custom tunnel)
 
 function getApiBaseUrl() {
-
-    const saved = localStorage.getItem('customApiBaseUrl');
-
-    if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
-
-    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
-
-        return 'http://127.0.0.1:8000';
-
-    }
-
-    if (window.location.protocol === 'http:' && /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname)) {
-
-        return `http://${window.location.hostname}:8000`;
-
-    }
-
-    return (window.location.protocol === 'https:') ? '' : 'http://127.0.0.1:8000';
-
-}
+            const saved = localStorage.getItem('customApiBaseUrl');
+            if (window.location.protocol === 'https:') {
+                if (saved && (saved.startsWith('http://') || saved.includes('localhost') || saved.includes('127.0.0.1'))) {
+                    try { localStorage.removeItem('customApiBaseUrl'); } catch (e) {}
+                    return '';
+                }
+                return (saved && saved.trim()) ? saved.trim().replace(/\/+$/, '') : '';
+            }
+            if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
+            if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+                return 'http://127.0.0.1:8000';
+            }
+            if (window.location.protocol === 'http:' && /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname)) {
+                return 'http://' + window.location.hostname + ':8000';
+            }
+            return (window.location.protocol === 'https:') ? '' : 'http://127.0.0.1:8000';
+        }
 
 const API_BASE_URL = getApiBaseUrl();
 
