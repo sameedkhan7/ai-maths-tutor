@@ -21,38 +21,64 @@ def create_groq_client() -> Groq:
 
 def call_ollama(messages: list[dict], model: str = "qwen2.5:7b") -> str | None:
     """
-    Sends prompt to local Ollama running on user/friend's RTX GPU (http://localhost:11434/api/chat).
-    Returns response text if successful, or None if Ollama is unreachable.
+    Sends prompt to local Ollama or local LLM server running on RTX GPU.
+    Supports both native Ollama (/api/chat) and OpenAI-compatible endpoints (/v1/chat/completions),
+    with optional API key authentication (OLLAMA_API_KEY or LOCAL_LLM_KEY).
     """
     import os
     import requests
     import logging
 
     logger = logging.getLogger("groq_client")
-    ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
+    raw_url = os.getenv("OLLAMA_URL") or os.getenv("LOCAL_LLM_URL") or "http://localhost:11434"
+    raw_url = raw_url.rstrip("/")
+
+    # Detect endpoint format
+    if raw_url.endswith("/v1/chat/completions") or raw_url.endswith("/api/chat"):
+        ollama_url = raw_url
+    elif raw_url.endswith("/v1"):
+        ollama_url = f"{raw_url}/chat/completions"
+    else:
+        ollama_url = f"{raw_url}/api/chat"
+
+    api_key = (os.getenv("OLLAMA_API_KEY") or os.getenv("LOCAL_LLM_KEY") or "").strip()
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+
+    is_v1 = "chat/completions" in ollama_url
+    if is_v1:
+        payload = {
+            "model": model,
+            "messages": messages,
+            "temperature": TEMPERATURE,
+            "max_tokens": MAX_TOKENS
+        }
+    else:
+        payload = {
+            "model": model,
+            "messages": messages,
+            "stream": False,
+            "options": {
+                "temperature": TEMPERATURE,
+                "num_predict": MAX_TOKENS
+            }
+        }
+
     try:
-        logger.info(f"[Ollama] Calling local GPU model={model} at {ollama_url}")
-        resp = requests.post(
-            ollama_url,
-            json={
-                "model": model,
-                "messages": messages,
-                "stream": False,
-                "options": {
-                    "temperature": TEMPERATURE,
-                    "num_predict": MAX_TOKENS
-                }
-            },
-            timeout=120
-        )
+        logger.info(f"[Local Qwen] Calling RTX GPU at {ollama_url} (model={model})")
+        resp = requests.post(ollama_url, json=payload, headers=headers, timeout=120)
         if resp.status_code == 200:
             data = resp.json()
-            content = data.get("message", {}).get("content", "")
+            if is_v1:
+                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+            else:
+                content = data.get("message", {}).get("content", "")
             if content and content.strip():
-                logger.info(f"[Ollama] Received successful response from local GPU ({len(content)} chars)")
+                logger.info(f"[Local Qwen] Received response from RTX GPU ({len(content)} chars)")
                 return content
     except Exception as e:
-        logger.info(f"[Ollama] Local inference not available or error ({e}). Falling back to cloud cascade.")
+        logger.info(f"[Local Qwen] Local RTX connection not reached ({e}). Falling back to cloud...")
     return None
 
 
