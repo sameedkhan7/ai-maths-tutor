@@ -56,6 +56,41 @@ def call_ollama(messages: list[dict], model: str = "qwen2.5:7b") -> str | None:
     return None
 
 
+def call_qwen_cloud(messages: list[dict], model: str = "qwen-plus") -> str | None:
+    """Sends prompt to Alibaba Cloud Qwen DashScope API using QWEN_API_KEY."""
+    import os
+    import requests
+    import logging
+
+    api_key = os.getenv("QWEN_API_KEY", "").strip()
+    if not api_key:
+        return None
+    base_url = os.getenv("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions").strip()
+    if not base_url.endswith("/chat/completions"):
+        base_url = base_url.rstrip("/") + "/chat/completions"
+    try:
+        resp = requests.post(
+            base_url,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": model,
+                "messages": messages,
+                "temperature": TEMPERATURE,
+                "max_tokens": MAX_TOKENS
+            },
+            timeout=60
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            return data["choices"][0]["message"]["content"]
+    except Exception as e:
+        logging.getLogger("groq_client").warning(f"[Qwen Cloud] API call failed: {e}")
+    return None
+
+
 def call_groq(
     messages: list[dict],
     model: str | None = None,
@@ -79,7 +114,15 @@ def call_groq(
         local_result = call_ollama(messages, model=local_target)
         if local_result:
             return local_result
-        logger.info(f"[LLM Router] Local model '{local_target}' not reached. Falling back to Groq Cloud...")
+        logger.info(f"[LLM Router] Local model '{local_target}' not reached. Falling back to Cloud...")
+
+    # 2. Check if official Qwen Cloud API key is configured
+    qwen_api_key = os.getenv("QWEN_API_KEY", "").strip()
+    if qwen_api_key and (is_local_model_requested or "qwen" in (model or "").lower()):
+        cloud_target = os.getenv("QWEN_MODEL", "qwen-plus")
+        cloud_result = call_qwen_cloud(messages, model=cloud_target)
+        if cloud_result:
+            return cloud_result
 
     client = create_groq_client()
     default_model = GROQ_MODEL or "openai/gpt-oss-120b"
