@@ -19,21 +19,75 @@ def create_groq_client() -> Groq:
     return Groq(api_key=GROQ_API_KEY)
 
 
+def call_ollama(messages: list[dict], model: str = "qwen2.5:7b") -> str | None:
+    """
+    Sends prompt to local Ollama running on user/friend's RTX GPU (http://localhost:11434/api/chat).
+    Returns response text if successful, or None if Ollama is unreachable.
+    """
+    import os
+    import requests
+    import logging
+
+    logger = logging.getLogger("groq_client")
+    ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
+    try:
+        logger.info(f"[Ollama] Calling local GPU model={model} at {ollama_url}")
+        resp = requests.post(
+            ollama_url,
+            json={
+                "model": model,
+                "messages": messages,
+                "stream": False,
+                "options": {
+                    "temperature": TEMPERATURE,
+                    "num_predict": MAX_TOKENS
+                }
+            },
+            timeout=120
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            content = data.get("message", {}).get("content", "")
+            if content and content.strip():
+                logger.info(f"[Ollama] Received successful response from local GPU ({len(content)} chars)")
+                return content
+    except Exception as e:
+        logger.info(f"[Ollama] Local inference not available or error ({e}). Falling back to cloud cascade.")
+    return None
+
+
 def call_groq(
     messages: list[dict],
     model: str | None = None,
     retries: int = 3,
 ) -> str:
     """
-    Send messages to Groq and return the model response with cascade fallback and retry logic.
+    Send messages to local Ollama (if selected or available) or Groq with cascade fallback and retry logic.
     """
     import logging
     import time
+    import os
 
     logger = logging.getLogger("groq_client")
+
+    # 1. Check if Local RTX Qwen / Ollama model is requested
+    use_local_env = os.getenv("USE_LOCAL_LLM", "").lower() in ("true", "1", "yes")
+    is_local_model_requested = bool(model and ("qwen2.5" in model.lower() or "local" in model.lower()))
+
+    if is_local_model_requested or use_local_env:
+        local_target = model if (model and "qwen2.5" in model.lower()) else "qwen2.5:7b"
+        local_result = call_ollama(messages, model=local_target)
+        if local_result:
+            return local_result
+        logger.info(f"[LLM Router] Local model '{local_target}' not reached. Falling back to Groq Cloud...")
+
     client = create_groq_client()
     default_model = GROQ_MODEL or "openai/gpt-oss-120b"
     primary_model = model or default_model
+
+    # If local model was requested but failed, fallback to cloud default
+    if "qwen2.5" in primary_model.lower() or "local" in primary_model.lower():
+        primary_model = default_model
 
     # Verified active Groq models for reliable fallback cascade
     verified_fallbacks = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"]
