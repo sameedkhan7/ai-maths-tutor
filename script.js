@@ -7006,13 +7006,11 @@ devTabBtns.forEach(btn => {
 
 
         if (targetTab === 'dev-tab-stats') {
-
             fetchRagStats();
-
+        } else if (targetTab === 'dev-tab-models') {
+            fetchModelConfig();
         } else if (targetTab === 'dev-tab-analytics') {
-
             fetchStudentAnalytics();
-
         }
 
     });
@@ -7858,4 +7856,270 @@ if (exportCsvBtn) {
 }
 
 window.fetchStudentAnalytics = fetchStudentAnalytics;
+
+// ==========================================
+// 🎛️ AI Engine & Model Control Hub Controller
+// ==========================================
+let currentDevModelConfig = {
+    force_local_only: false,
+    local_rtx_enabled: true,
+    groq_enabled: true,
+    allowed_models: {
+        "qwen2.5:7b": true,
+        "openai/gpt-oss-120b": true,
+        "openai/gpt-oss-20b": true,
+        "qwen/qwen3.8-27b": true,
+        "allam-2-7b": true
+    },
+    default_model: "openai/gpt-oss-120b"
+};
+
+async function fetchModelConfig() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/dev/model-config`);
+        const data = await res.json();
+        if (data.success && data.config) {
+            currentDevModelConfig = data.config;
+            syncModelConfigUI();
+            updateChatModelDropdown();
+        }
+    } catch (e) {
+        const saved = localStorage.getItem('dev_model_config');
+        if (saved) {
+            try {
+                currentDevModelConfig = JSON.parse(saved);
+                syncModelConfigUI();
+                updateChatModelDropdown();
+            } catch (_) {}
+        }
+    }
+}
+
+function syncModelConfigUI() {
+    const masterLocal = document.getElementById('toggle-master-local');
+    const masterGroq = document.getElementById('toggle-master-groq');
+    const forceLocal = document.getElementById('toggle-force-local');
+    if (masterLocal) masterLocal.checked = !!currentDevModelConfig.local_rtx_enabled;
+    if (masterGroq) masterGroq.checked = !!currentDevModelConfig.groq_enabled;
+    if (forceLocal) forceLocal.checked = !!currentDevModelConfig.force_local_only;
+
+    const toggles = document.querySelectorAll('.model-item-toggle');
+    toggles.forEach(t => {
+        const mId = t.getAttribute('data-model-id');
+        if (mId && currentDevModelConfig.allowed_models && currentDevModelConfig.allowed_models[mId] !== undefined) {
+            t.checked = !!currentDevModelConfig.allowed_models[mId];
+        }
+    });
+}
+
+function updateChatModelDropdown() {
+    const items = document.querySelectorAll('.model-dropdown-menu .menu-item');
+    let hasActiveEnabled = false;
+
+    items.forEach(item => {
+        const mId = item.getAttribute('data-model-id') || item.getAttribute('data-model');
+        const isLocal = mId && (mId.includes('qwen2.5') || mId.includes('local'));
+        let isEnabled = true;
+
+        if (currentDevModelConfig.force_local_only) {
+            isEnabled = isLocal;
+        } else if (isLocal && !currentDevModelConfig.local_rtx_enabled) {
+            isEnabled = false;
+        } else if (!isLocal && !currentDevModelConfig.groq_enabled) {
+            isEnabled = false;
+        } else if (currentDevModelConfig.allowed_models && currentDevModelConfig.allowed_models[mId] === false) {
+            isEnabled = false;
+        }
+
+        if (isEnabled) {
+            item.style.display = 'block';
+            item.style.opacity = '1';
+            item.style.pointerEvents = 'auto';
+            if (mId === currentModel) hasActiveEnabled = true;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+
+    if (!hasActiveEnabled) {
+        for (const item of items) {
+            if (item.style.display !== 'none') {
+                items.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                currentModel = item.getAttribute('data-model');
+                localStorage.setItem('tutorModel', currentModel);
+                if (typeof updateModelPillUI === 'function') {
+                    updateModelPillUI(item);
+                }
+                break;
+            }
+        }
+    }
+}
+
+async function saveModelConfig(showToast = true) {
+    const masterLocal = document.getElementById('toggle-master-local');
+    const masterGroq = document.getElementById('toggle-master-groq');
+    const forceLocal = document.getElementById('toggle-force-local');
+
+    const allowed = {};
+    const toggles = document.querySelectorAll('.model-item-toggle');
+    toggles.forEach(t => {
+        const mId = t.getAttribute('data-model-id');
+        if (mId) allowed[mId] = t.checked;
+    });
+
+    currentDevModelConfig = {
+        force_local_only: forceLocal ? forceLocal.checked : false,
+        local_rtx_enabled: masterLocal ? masterLocal.checked : true,
+        groq_enabled: masterGroq ? masterGroq.checked : true,
+        allowed_models: allowed,
+        default_model: currentModel
+    };
+
+    localStorage.setItem('dev_model_config', JSON.stringify(currentDevModelConfig));
+    updateChatModelDropdown();
+
+    const saveBtn = document.getElementById('dev-save-model-config-btn');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerText = '⌛ Applying Model Settings...';
+    }
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/dev/model-config`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentDevModelConfig)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            if (showToast) {
+                showDevAlert('🎉 Model configuration saved & applied successfully!', 'success');
+            }
+        } else {
+            if (showToast) showDevAlert(`⚠️ ${data.message || 'Error updating config'}`, 'error');
+        }
+    } catch (e) {
+        if (showToast) showDevAlert('💾 Saved locally! (Offline/Local mode active)', 'success');
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerText = '💾 Save & Apply Model Settings';
+        }
+    }
+}
+
+// Preset Handlers
+const presetLocalBtn = document.getElementById('preset-local-only-btn');
+if (presetLocalBtn) {
+    presetLocalBtn.addEventListener('click', async () => {
+        const masterLocal = document.getElementById('toggle-master-local');
+        const masterGroq = document.getElementById('toggle-master-groq');
+        const forceLocal = document.getElementById('toggle-force-local');
+        if (masterLocal) masterLocal.checked = true;
+        if (masterGroq) masterGroq.checked = false;
+        if (forceLocal) forceLocal.checked = true;
+
+        const toggles = document.querySelectorAll('.model-item-toggle');
+        toggles.forEach(t => {
+            const mId = t.getAttribute('data-model-id');
+            t.checked = mId && (mId.includes('qwen2.5') || mId.includes('local'));
+        });
+
+        await saveModelConfig(false);
+        showDevAlert('💻 [Preset Applied] Force Local RTX Only activated! Groq Cloud turned OFF.', 'success');
+    });
+}
+
+const presetCloudBtn = document.getElementById('preset-cloud-only-btn');
+if (presetCloudBtn) {
+    presetCloudBtn.addEventListener('click', async () => {
+        const masterLocal = document.getElementById('toggle-master-local');
+        const masterGroq = document.getElementById('toggle-master-groq');
+        const forceLocal = document.getElementById('toggle-force-local');
+        if (masterLocal) masterLocal.checked = false;
+        if (masterGroq) masterGroq.checked = true;
+        if (forceLocal) forceLocal.checked = false;
+
+        const toggles = document.querySelectorAll('.model-item-toggle');
+        toggles.forEach(t => {
+            const mId = t.getAttribute('data-model-id');
+            t.checked = mId && !mId.includes('qwen2.5');
+        });
+
+        await saveModelConfig(false);
+        showDevAlert('☁️ [Preset Applied] Cloud Only (Groq) activated! Local RTX bypassed.', 'success');
+    });
+}
+
+const presetHybridBtn = document.getElementById('preset-hybrid-btn');
+if (presetHybridBtn) {
+    presetHybridBtn.addEventListener('click', async () => {
+        const masterLocal = document.getElementById('toggle-master-local');
+        const masterGroq = document.getElementById('toggle-master-groq');
+        const forceLocal = document.getElementById('toggle-force-local');
+        if (masterLocal) masterLocal.checked = true;
+        if (masterGroq) masterGroq.checked = true;
+        if (forceLocal) forceLocal.checked = false;
+
+        const toggles = document.querySelectorAll('.model-item-toggle');
+        toggles.forEach(t => t.checked = true);
+
+        await saveModelConfig(false);
+        showDevAlert('🔄 [Preset Applied] Hybrid Dual-Mode activated! (Local RTX primary + Cloud fallback)', 'success');
+    });
+}
+
+const saveModelConfigBtn = document.getElementById('dev-save-model-config-btn');
+if (saveModelConfigBtn) {
+    saveModelConfigBtn.addEventListener('click', () => saveModelConfig(true));
+}
+
+const refreshModelsBtn = document.getElementById('dev-refresh-models-btn');
+if (refreshModelsBtn) {
+    refreshModelsBtn.addEventListener('click', async () => {
+        await fetchModelConfig();
+        showDevAlert('🔄 Model status refreshed from server.', 'success');
+    });
+}
+
+// Master Local toggle dependency logic
+const masterLocalToggle = document.getElementById('toggle-master-local');
+if (masterLocalToggle) {
+    masterLocalToggle.addEventListener('change', () => {
+        const forceLocal = document.getElementById('toggle-force-local');
+        if (!masterLocalToggle.checked && forceLocal && forceLocal.checked) {
+            forceLocal.checked = false;
+        }
+    });
+}
+
+// Master Groq toggle dependency logic
+const masterGroqToggle = document.getElementById('toggle-master-groq');
+if (masterGroqToggle) {
+    masterGroqToggle.addEventListener('change', () => {
+        const forceLocal = document.getElementById('toggle-force-local');
+        if (masterGroqToggle.checked && forceLocal && forceLocal.checked) {
+            forceLocal.checked = false;
+        }
+    });
+}
+
+// Force Local toggle dependency logic
+const forceLocalToggle = document.getElementById('toggle-force-local');
+if (forceLocalToggle) {
+    forceLocalToggle.addEventListener('change', () => {
+        if (forceLocalToggle.checked) {
+            const masterLocal = document.getElementById('toggle-master-local');
+            const masterGroq = document.getElementById('toggle-master-groq');
+            if (masterLocal) masterLocal.checked = true;
+            if (masterGroq) masterGroq.checked = false;
+        }
+    });
+}
+
+// Preload model config on initial script load
+fetchModelConfig();
+
 

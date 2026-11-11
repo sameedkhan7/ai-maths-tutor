@@ -136,18 +136,49 @@ def call_groq(
     logger = logging.getLogger("groq_client")
     target_model = model or os.getenv("LOCAL_MODEL") or "qwen2.5:3b"
 
-    # 1. Check if Local RTX Qwen / Ollama model is requested
+    # Load dynamic Developer Admin model configuration (if set via Dev RAG Control Panel)
+    try:
+        try:
+            from backend.ai.model_manager import get_model_config
+        except ImportError:
+            from ai.model_manager import get_model_config
+        dev_cfg = get_model_config()
+    except Exception:
+        dev_cfg = {}
+
+    force_local_only = dev_cfg.get("force_local_only", False)
+    local_rtx_enabled = dev_cfg.get("local_rtx_enabled", True)
+    groq_enabled = dev_cfg.get("groq_enabled", True)
+    allowed_models = dev_cfg.get("allowed_models", {})
+
+    # 1. Check if Local RTX Qwen / Ollama model is requested or forced
     use_local_env = os.getenv("USE_LOCAL_LLM", "").lower() in ("true", "1", "yes")
     is_local_model_requested = bool(model and ("qwen2.5" in model.lower() or "local" in model.lower()))
 
-    if is_local_model_requested or use_local_env:
+    if force_local_only or (local_rtx_enabled and (is_local_model_requested or use_local_env)):
         local_target = model if (model and "qwen" in model.lower()) else (os.getenv("LOCAL_MODEL") or "qwen2.5:3b")
         local_result = call_ollama(messages, model=local_target)
         if local_result:
             return local_result
+        if force_local_only or not groq_enabled:
+            return (
+                "💻 **[Local RTX Offline Notice]**\n\n"
+                "Developer Admin Panel mein **'Force Local RTX Only'** ya **'Groq Disabled'** active hai. "
+                f"Aapka local RTX GPU server (`{local_target}`) filhaal offline ya unreachable hai, "
+                "aur cloud fallback developer settings ke dwara band (OFF) kiya gaya hai.\n\n"
+                "👉 Local Ollama server start karein (`ollama run qwen2.5:7b`) ya Dev RAG Control Panel se Groq ko ON karein."
+            )
         logger.info(f"[LLM Router] Local model '{local_target}' not reached. Falling back to Cloud...")
 
-    # 2. Check if official Qwen Cloud API key is configured
+    # 2. If Groq is disabled by Developer Admin, do not call Groq API
+    if not groq_enabled:
+        return (
+            "⚡ **[Groq Cloud Disabled Notice]**\n\n"
+            "Developer Admin Panel mein **Groq Cloud API** ko OFF kiya gaya hai. "
+            "Kripya Dev RAG Control Panel mein jaakar Groq ko ON karein ya Local RTX server chalayein."
+        )
+
+    # 3. Check if official Qwen Cloud API key is configured
     qwen_api_key = os.getenv("QWEN_API_KEY", "").strip()
     if qwen_api_key and (is_local_model_requested or "qwen" in (model or "").lower()):
         cloud_target = os.getenv("QWEN_MODEL", "qwen-plus")
@@ -162,6 +193,13 @@ def call_groq(
     # If local model was requested but failed, fallback to cloud default
     if "qwen2.5" in primary_model.lower() or "local" in primary_model.lower():
         primary_model = default_model
+
+    # Filter by allowed models if specified in dev configuration
+    if allowed_models and primary_model in allowed_models and not allowed_models[primary_model]:
+        for candidate_name, is_allowed in allowed_models.items():
+            if is_allowed and "qwen2.5" not in candidate_name:
+                primary_model = candidate_name
+                break
 
     # Verified active Groq models for reliable fallback cascade
     verified_fallbacks = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"]

@@ -947,6 +947,35 @@ def dev_rag_stats():
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+class ModelConfigRequest(BaseModel):
+    force_local_only: Optional[bool] = None
+    local_rtx_enabled: Optional[bool] = None
+    groq_enabled: Optional[bool] = None
+    allowed_models: Optional[dict] = None
+    default_model: Optional[str] = None
+
+@app.get("/api/dev/model-config")
+def dev_get_model_config():
+    """Returns Developer Admin model configuration (Local RTX & Groq ON/OFF status)"""
+    try:
+        from backend.ai.model_manager import get_model_config
+    except ImportError:
+        from ai.model_manager import get_model_config
+    return {"success": True, "config": get_model_config()}
+
+@app.post("/api/dev/model-config")
+def dev_update_model_config(req: ModelConfigRequest):
+    """Updates Developer Admin model configuration (Toggle Local RTX, Groq, or individual models)"""
+    try:
+        from backend.ai.model_manager import update_model_config
+    except ImportError:
+        from ai.model_manager import update_model_config
+    
+    update_data = req.dict(exclude_unset=True)
+    updated = update_model_config(update_data)
+    return {"success": True, "message": "Model configuration updated successfully!", "config": updated}
+
+
 @app.post("/api/dev/upload-pdf")
 async def dev_upload_pdf(file: UploadFile = File(...)):
     """Uploads a PDF file and ingests it into RAG vector store"""

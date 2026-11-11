@@ -1,0 +1,14 @@
+{
+  "force_local_only": false,
+  "local_rtx_enabled": true,
+  "groq_enabled": true,
+  "allowed_models": {
+    "qwen2.5:7b": true,
+    "openai/gpt-oss-120b": true,
+    "openai/gpt-oss-20b": true,
+    "qwen/qwen3.8-27b": true,
+    "allam-2-7b": true
+  },
+  "default_model": "openai/gpt-oss-120b",
+  "last_updated": "2026-11-12T01:00:41.108736"
+}
