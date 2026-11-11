@@ -800,8 +800,8 @@
     <!-- ⚡ DEVELOPER RAG CONTROL CENTER MODAL       -->
     <!-- ========================================== -->
     <div id="dev-modal-backdrop" class="modal-backdrop settings-backdrop" style="display: none;">
-        <div class="settings-card dev-settings-card" style="max-width: 860px; width: 95%; max-height: 90vh;">
-            <div class="settings-header" style="border-bottom: 1px solid #334155;">
+        <div class="settings-card dev-settings-card" style="max-width: 880px; width: 95%; max-height: 86vh; height: 86vh; display: flex; flex-direction: column; overflow: hidden; border-radius: 14px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75); border: 1px solid #334155;">
+            <div class="settings-header" style="border-bottom: 1px solid #334155; flex-shrink: 0; padding: 14px 20px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 22px;">⚡</span>
                     <div>
@@ -812,9 +812,9 @@
                 <button type="button" id="dev-modal-close" class="settings-close-btn">&times;</button>
             </div>
 
-            <div class="settings-body" style="display: flex; gap: 0; min-height: 480px; padding: 0;">
+            <div class="settings-body" style="display: flex; gap: 0; flex: 1; min-height: 0; overflow: hidden; padding: 0;">
                 <!-- Dev Left Sidebar -->
-                <div class="settings-sidebar" style="width: 195px; border-right: 1px solid #334155; padding: 12px 8px; background: #0f172a;">
+                <div class="settings-sidebar" style="width: 195px; border-right: 1px solid #334155; padding: 12px 8px; background: #0f172a; overflow-y: auto; flex-shrink: 0;">
                     <div class="settings-tab-btn dev-tab-btn active" data-dev-tab="dev-tab-pdf" style="padding: 10px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
                         <span>📄</span> PDF Upload
                     </div>
@@ -839,7 +839,7 @@
                 </div>
 
                 <!-- Dev Right Content Area -->
-                <div class="settings-content" style="flex: 1; padding: 20px; background: #1e293b; overflow-y: auto;">
+                <div class="settings-content" style="flex: 1; padding: 18px 20px; background: #1e293b; overflow-y: auto; height: 100%;">
                     <!-- Alert Status Banner -->
                     <div id="dev-status-alert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
 
@@ -922,143 +922,129 @@
 
                     <!-- Dev Tab: AI Models Switch & Engine Controls -->
                     <div id="dev-tab-models" class="dev-tab-pane" style="display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <!-- Top Header with Title and Visible Action Toolbar -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid #334155;">
                             <div>
-                                <h4 style="margin: 0; color: #f8fafc; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                                <h4 style="margin: 0; color: #f8fafc; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
                                     <span>🎛️</span> AI Engine & Model Control Hub
                                 </h4>
-                                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Single-click ON/OFF toggle for Local RTX GPU & Groq Cloud models</div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">⚡ Har toggle par settings <strong>Auto-Save</strong> hoti hain! Manual save anivarya nahi hai.</div>
                             </div>
-                            <button type="button" id="dev-refresh-models-btn" style="background: #334155; color: #cbd5e1; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;">🔄 Refresh</button>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span id="dev-autosave-badge" style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #34d399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); padding: 5px 10px; border-radius: 6px; font-weight: 600;">
+                                    ⚡ Auto-Save Active
+                                </span>
+                                <button type="button" id="dev-save-model-config-top-btn" style="background: #6366f1; color: white; border: none; border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);">
+                                    💾 Save Now
+                                </button>
+                                <button type="button" id="dev-refresh-models-btn" style="background: #334155; color: #cbd5e1; border: 1px solid #475569; border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer;">
+                                    🔄 Refresh
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Quick 1-Click Preset Modes -->
-                        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; margin-bottom: 16px;">
-                            <div style="font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">⚡ Quick Presets (Single Click):</div>
-                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                <button type="button" id="preset-local-only-btn" style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                                    💻 Force Local RTX Only (Testing Mode)
-                                </button>
-                                <button type="button" id="preset-cloud-only-btn" style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #7dd3fc; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                                    ☁️ Cloud Only (Groq Versatile)
-                                </button>
-                                <button type="button" id="preset-hybrid-btn" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                                    🔄 Hybrid Dual-Mode (Default)
-                                </button>
+                        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                                <span style="font-size: 11px; font-weight: 700; color: #cbd5e1;">⚡ 1-Click Presets:</span>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <button type="button" id="preset-local-only-btn" style="background: rgba(99, 102, 241, 0.2); border: 1px solid #6366f1; color: #a5b4fc; padding: 5px 11px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                        💻 Force Local RTX Only (Test Mode)
+                                    </button>
+                                    <button type="button" id="preset-cloud-only-btn" style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #7dd3fc; padding: 5px 11px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                        ☁️ Cloud Only (Groq)
+                                    </button>
+                                    <button type="button" id="preset-hybrid-btn" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; padding: 5px 11px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                        🔄 Hybrid (Auto-Fallback)
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Master Switch Cards -->
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px;">
+                        <!-- Master Switches: 3 Compact Cards in One Row -->
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
                             <!-- Local RTX Card -->
-                            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                    <span style="font-weight: 700; font-size: 13px; color: #f8fafc; display: flex; align-items: center; gap: 6px;">
-                                        💻 Local RTX GPU
-                                    </span>
-                                    <label class="dev-switch">
-                                        <input type="checkbox" id="toggle-master-local" checked>
-                                        <span class="dev-slider"></span>
-                                    </label>
+                            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                    <span style="font-weight: 700; font-size: 12px; color: #f8fafc;">💻 Local RTX GPU</span>
+                                    <label class="dev-switch"><input type="checkbox" id="toggle-master-local" checked><span class="dev-slider"></span></label>
                                 </div>
-                                <div style="font-size: 11px; color: #94a3b8;">Qwen 2.5 (3B / 7B) on private GPU</div>
+                                <div style="font-size: 10px; color: #94a3b8;">Qwen 2.5 on private GPU</div>
                             </div>
 
                             <!-- Groq Cloud Card -->
-                            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                    <span style="font-weight: 700; font-size: 13px; color: #f8fafc; display: flex; align-items: center; gap: 6px;">
-                                        ⚡ Groq Cloud API
-                                    </span>
-                                    <label class="dev-switch">
-                                        <input type="checkbox" id="toggle-master-groq" checked>
-                                        <span class="dev-slider"></span>
-                                    </label>
+                            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                    <span style="font-weight: 700; font-size: 12px; color: #f8fafc;">⚡ Groq Cloud API</span>
+                                    <label class="dev-switch"><input type="checkbox" id="toggle-master-groq" checked><span class="dev-slider"></span></label>
                                 </div>
-                                <div style="font-size: 11px; color: #94a3b8;">Cloud Inference Engine & Fallback</div>
+                                <div style="font-size: 10px; color: #94a3b8;">Cloud Inference Engine</div>
+                            </div>
+
+                            <!-- Force Local Only Card -->
+                            <div style="background: #0f172a; border: 1px solid #4338ca; border-radius: 8px; padding: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                    <span style="font-weight: 700; font-size: 12px; color: #c7d2fe;">🔒 Force Local Only</span>
+                                    <label class="dev-switch"><input type="checkbox" id="toggle-force-local"><span class="dev-slider"></span></label>
+                                </div>
+                                <div style="font-size: 10px; color: #94a3b8;">Never fallback to cloud</div>
                             </div>
                         </div>
 
-                        <!-- Force Local Only Option -->
-                        <div style="background: #0f172a; border: 1px solid #4338ca; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
-                            <div>
-                                <span style="font-size: 12px; font-weight: 700; color: #c7d2fe;">🔒 Force Local RTX Only (Never Fallback to Cloud)</span>
-                                <div style="font-size: 11px; color: #94a3b8;">Ideal for private testing. Shows offline notice if RTX is down instead of calling Groq.</div>
-                            </div>
-                            <label class="dev-switch">
-                                <input type="checkbox" id="toggle-force-local">
-                                <span class="dev-slider"></span>
-                            </label>
-                        </div>
-
-                        <!-- Individual Models Switch List -->
-                        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
-                            <div style="font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 10px;">Individual Model Toggles:</div>
+                        <!-- Individual Models Switch List (Sleek Compact Rows) -->
+                        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+                            <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">Individual Model Toggles:</div>
                             
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
                                 <!-- Model 1: Local Qwen 2.5 -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; background: #1e293b; border-radius: 6px; border: 1px solid #334155;">
                                     <div>
-                                        <div style="font-size: 12px; font-weight: 600; color: #f8fafc;">💻 Local RTX · Qwen 2.5 (7B GPU)</div>
-                                        <div style="font-size: 10px; color: #94a3b8;">Model ID: qwen2.5:7b (Local Ollama Engine)</div>
+                                        <div style="font-size: 11.5px; font-weight: 600; color: #f8fafc;">💻 Local RTX · Qwen 2.5 (7B GPU)</div>
+                                        <div style="font-size: 10px; color: #94a3b8;">Local Ollama Engine (qwen2.5:7b)</div>
                                     </div>
-                                    <label class="dev-switch">
-                                        <input type="checkbox" class="model-item-toggle" data-model-id="qwen2.5:7b" checked>
-                                        <span class="dev-slider"></span>
-                                    </label>
+                                    <label class="dev-switch"><input type="checkbox" class="model-item-toggle" data-model-id="qwen2.5:7b" checked><span class="dev-slider"></span></label>
                                 </div>
 
                                 <!-- Model 2: Groq 120B -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; background: #1e293b; border-radius: 6px; border: 1px solid #334155;">
                                     <div>
-                                        <div style="font-size: 12px; font-weight: 600; color: #f8fafc;">⚡ Groq · GPT-OSS (120B Versatile)</div>
+                                        <div style="font-size: 11.5px; font-weight: 600; color: #f8fafc;">⚡ Groq · GPT-OSS (120B Versatile)</div>
                                         <div style="font-size: 10px; color: #94a3b8;">Model ID: openai/gpt-oss-120b</div>
                                     </div>
-                                    <label class="dev-switch">
-                                        <input type="checkbox" class="model-item-toggle" data-model-id="openai/gpt-oss-120b" checked>
-                                        <span class="dev-slider"></span>
-                                    </label>
+                                    <label class="dev-switch"><input type="checkbox" class="model-item-toggle" data-model-id="openai/gpt-oss-120b" checked><span class="dev-slider"></span></label>
                                 </div>
 
                                 <!-- Model 3: Groq 20B -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; background: #1e293b; border-radius: 6px; border: 1px solid #334155;">
                                     <div>
-                                        <div style="font-size: 12px; font-weight: 600; color: #f8fafc;">🚀 Groq · GPT-OSS (20B Fast)</div>
+                                        <div style="font-size: 11.5px; font-weight: 600; color: #f8fafc;">🚀 Groq · GPT-OSS (20B Fast)</div>
                                         <div style="font-size: 10px; color: #94a3b8;">Model ID: openai/gpt-oss-20b</div>
                                     </div>
-                                    <label class="dev-switch">
-                                        <input type="checkbox" class="model-item-toggle" data-model-id="openai/gpt-oss-20b" checked>
-                                        <span class="dev-slider"></span>
-                                    </label>
+                                    <label class="dev-switch"><input type="checkbox" class="model-item-toggle" data-model-id="openai/gpt-oss-20b" checked><span class="dev-slider"></span></label>
                                 </div>
 
                                 <!-- Model 4: Groq Qwen 3.8 27B -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; background: #1e293b; border-radius: 6px; border: 1px solid #334155;">
                                     <div>
-                                        <div style="font-size: 12px; font-weight: 600; color: #f8fafc;">🧠 Groq · Qwen 3.8 (27B Math)</div>
+                                        <div style="font-size: 11.5px; font-weight: 600; color: #f8fafc;">🧠 Groq · Qwen 3.8 (27B Math)</div>
                                         <div style="font-size: 10px; color: #94a3b8;">Model ID: qwen/qwen3.8-27b</div>
                                     </div>
-                                    <label class="dev-switch">
-                                        <input type="checkbox" class="model-item-toggle" data-model-id="qwen/qwen3.8-27b" checked>
-                                        <span class="dev-slider"></span>
-                                    </label>
+                                    <label class="dev-switch"><input type="checkbox" class="model-item-toggle" data-model-id="qwen/qwen3.8-27b" checked><span class="dev-slider"></span></label>
                                 </div>
 
                                 <!-- Model 5: Groq Allam 7B -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; background: #1e293b; border-radius: 6px; border: 1px solid #334155;">
                                     <div>
-                                        <div style="font-size: 12px; font-weight: 600; color: #f8fafc;">🌍 Groq · Allam (7B Multilingual)</div>
+                                        <div style="font-size: 11.5px; font-weight: 600; color: #f8fafc;">🌍 Groq · Allam (7B Multilingual)</div>
                                         <div style="font-size: 10px; color: #94a3b8;">Model ID: allam-2-7b</div>
                                     </div>
-                                    <label class="dev-switch">
-                                        <input type="checkbox" class="model-item-toggle" data-model-id="allam-2-7b" checked>
-                                        <span class="dev-slider"></span>
-                                    </label>
+                                    <label class="dev-switch"><input type="checkbox" class="model-item-toggle" data-model-id="allam-2-7b" checked><span class="dev-slider"></span></label>
                                 </div>
                             </div>
                         </div>
 
-                        <button type="button" id="dev-save-model-config-btn" style="width: 100%; background: #6366f1; color: white; border: none; border-radius: 8px; padding: 11px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">
+                        <!-- Bottom Save button (Also available) -->
+                        <button type="button" id="dev-save-model-config-btn" style="width: 100%; background: #6366f1; color: white; border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);">
                             💾 Save & Apply Model Settings
                         </button>
                     </div>

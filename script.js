@@ -7980,11 +7980,15 @@ async function saveModelConfig(showToast = true) {
     localStorage.setItem('dev_model_config', JSON.stringify(currentDevModelConfig));
     updateChatModelDropdown();
 
-    const saveBtn = document.getElementById('dev-save-model-config-btn');
-    if (saveBtn) {
-        saveBtn.disabled = true;
-        saveBtn.innerText = '⌛ Applying Model Settings...';
-    }
+    const saveBtns = [
+        document.getElementById('dev-save-model-config-btn'),
+        document.getElementById('dev-save-model-config-top-btn')
+    ].filter(Boolean);
+
+    saveBtns.forEach(btn => {
+        btn.disabled = true;
+        btn.innerText = '⌛ Saving...';
+    });
 
     try {
         const res = await fetch(`${API_BASE_URL}/api/dev/model-config`, {
@@ -8003,9 +8007,21 @@ async function saveModelConfig(showToast = true) {
     } catch (e) {
         if (showToast) showDevAlert('💾 Saved locally! (Offline/Local mode active)', 'success');
     } finally {
-        if (saveBtn) {
-            saveBtn.disabled = false;
-            saveBtn.innerText = '💾 Save & Apply Model Settings';
+        saveBtns.forEach(btn => {
+            btn.disabled = false;
+            btn.innerText = btn.id && btn.id.includes('top') ? '💾 Save Now' : '💾 Save & Apply Model Settings';
+        });
+
+        const badge = document.getElementById('dev-autosave-badge');
+        if (badge) {
+            badge.innerHTML = '✅ Saved & Live!';
+            badge.style.color = '#10b981';
+            badge.style.background = 'rgba(16, 185, 129, 0.25)';
+            setTimeout(() => {
+                badge.innerHTML = '⚡ Auto-Save Active';
+                badge.style.color = '#34d399';
+                badge.style.background = 'rgba(16, 185, 129, 0.15)';
+            }, 1800);
         }
     }
 }
@@ -8076,6 +8092,11 @@ if (saveModelConfigBtn) {
     saveModelConfigBtn.addEventListener('click', () => saveModelConfig(true));
 }
 
+const saveModelConfigTopBtn = document.getElementById('dev-save-model-config-top-btn');
+if (saveModelConfigTopBtn) {
+    saveModelConfigTopBtn.addEventListener('click', () => saveModelConfig(true));
+}
+
 const refreshModelsBtn = document.getElementById('dev-refresh-models-btn');
 if (refreshModelsBtn) {
     refreshModelsBtn.addEventListener('click', async () => {
@@ -8084,7 +8105,7 @@ if (refreshModelsBtn) {
     });
 }
 
-// Master Local toggle dependency logic
+// ⚡ AUTO-SAVE: Every toggle change immediately auto-saves without needing to click Save!
 const masterLocalToggle = document.getElementById('toggle-master-local');
 if (masterLocalToggle) {
     masterLocalToggle.addEventListener('change', () => {
@@ -8092,10 +8113,10 @@ if (masterLocalToggle) {
         if (!masterLocalToggle.checked && forceLocal && forceLocal.checked) {
             forceLocal.checked = false;
         }
+        saveModelConfig(false);
     });
 }
 
-// Master Groq toggle dependency logic
 const masterGroqToggle = document.getElementById('toggle-master-groq');
 if (masterGroqToggle) {
     masterGroqToggle.addEventListener('change', () => {
@@ -8103,10 +8124,10 @@ if (masterGroqToggle) {
         if (masterGroqToggle.checked && forceLocal && forceLocal.checked) {
             forceLocal.checked = false;
         }
+        saveModelConfig(false);
     });
 }
 
-// Force Local toggle dependency logic
 const forceLocalToggle = document.getElementById('toggle-force-local');
 if (forceLocalToggle) {
     forceLocalToggle.addEventListener('change', () => {
@@ -8116,8 +8137,16 @@ if (forceLocalToggle) {
             if (masterLocal) masterLocal.checked = true;
             if (masterGroq) masterGroq.checked = false;
         }
+        saveModelConfig(false);
     });
 }
+
+// Auto-save on individual model toggle change
+document.querySelectorAll('.model-item-toggle').forEach(t => {
+    t.addEventListener('change', () => {
+        saveModelConfig(false);
+    });
+});
 
 // Preload model config on initial script load
 fetchModelConfig();
