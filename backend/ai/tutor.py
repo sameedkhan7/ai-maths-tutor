@@ -145,13 +145,13 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
 
         try:
 
-            from backend.ai.guardrails import inspect_guardrails
+            from backend.ai.guardrails import inspect_guardrails, normalize_math_query
 
         except ImportError:
 
-            from ai.guardrails import inspect_guardrails
+            from ai.guardrails import inspect_guardrails, normalize_math_query
 
-
+        req.question = normalize_math_query(req.question)
 
         history_len = len(req.chat_history) if req.chat_history else 0
 

@@ -54,9 +54,13 @@ COMPILED_INJECTION_REGEXES = [re.compile(p, re.IGNORECASE) for p in INJECTION_PA
 
 # Common mathematical operators, symbols & KaTeX tokens
 MATH_SYMBOL_PATTERN = re.compile(
-    r"[\d]+[\s]*[\+\-\*\/\^=><÷×±√∫∑∏]\s*[\d]+|"  # 2 + 2, x = 5
+    r"\b\d+\b|"  # Standalone numbers (e.g. 5, 42, 100)
+    r"[\d]+[\s]*[\+\-\*\/\^=><÷×±√∫∑∏−–·]\s*[\d]+|"  # 2 + 2, x = 5, unicode minus
+    r"[−–×÷±∓√∛∜∫∑∏∂∇∆≈≠≡≤≥∝∞°∠πθ²³⁴ⁿ]|"  # Unicode mathematical symbols & superscripts
     r"\\(?:frac|sqrt|sin|cos|tan|cot|sec|csc|int|lim|sum|pm|cdot|alpha|beta|theta|pi|partial|times|div)|"
-    r"\b(?:dy\/dx|d\/dx|dx|dy|dt|f\(x\)|g\(x\)|x\^2|y\^2|x\^3)\b|"
+    r"\b(?:dy\/dx|d\/dx|dx|dy|dt|f\(x\)|g\(x\)|x\^2|y\^2|x\^3|x\^n)\b|"
+    r"\b[a-zA-Z]\s*[\^]?\s*\d+\b|"  # Algebraic powers: x^3, x 3, x2, ax 2
+    r"\([a-zA-Z0-9\s\+\-\*\/−–]+\)|"  # Factors: (x-1), (x+3), (x−1)
     r"[\$]+[\s\S]+?[\$]+"  # Inline or display LaTeX
 )
 
@@ -73,7 +77,7 @@ MATH_TERMS = {
     # Numbers & Arithmetic
     "math", "maths", "mathematics", "number", "numbers", "digit", "fraction", "decimal",
     "prime number", "prime numbers", "prime factor", "prime factorisation", "composite", "rational", "irrational", "real number", "integer", "integers",
-    "hcf", "lcm", "factor", "factorisation", "factorization", "multiple", "divisible",
+    "hcf", "lcm", "factor", "factors", "factorize", "factorise", "factorisation", "factorization", "value", "values", "values of", "cubic", "expression", "multiple", "divisible",
     "remainder", "exponent", "power", "log", "logarithm", "modulus", "complex number",
 
     # Algebra
@@ -337,9 +341,25 @@ def is_contextual_math_follow_up(
     if any(p in q_lower for p in format_phrases):
         return True
 
-    # 6. Conversational Pronouns & Connectives (Require active conversation context)
+    # 6. Conversational Continuity & Doubt Clarification (With active history)
     if not has_history:
         return False
+
+    if CONTEXT_PRONOUNS & word_set:
+        if (CONTEXT_INQUIRIES & word_set) or (EXPLANATION_VERBS & word_set):
+            return True
+
+    comprehension_phrases = [
+        "samajh nahi", "nahi samjha", "didn't understand", "did not understand",
+        "not clear", "clear nahi", "doubt hai", "fir se", "phir se", "ek baar aur",
+        "once more", "again please", "repeat please", "one more time",
+        "step by step", "next step", "agla step", "phir kya", "fir kya", "kya karenge"
+    ]
+    if any(p in q_lower for p in comprehension_phrases):
+        return True
+
+    if len(words) <= 4 and (FOLLOW_UP_CONVERSATIONAL_TOKENS & word_set):
+        return True
 
     if CONTEXT_PRONOUNS & word_set:
         if (CONTEXT_INQUIRIES & word_set) or (EXPLANATION_VERBS & word_set):
@@ -359,6 +379,17 @@ def is_contextual_math_follow_up(
     return False
 
 
+def normalize_math_query(q: str) -> str:
+    """Normalizes broken multiline pasted formulas and Unicode math symbols."""
+    # Collapse broken multiline superscripts like 'x\n3' or 'ax\n2'
+    q = re.sub(r'([a-zA-Z0-9\)])\s*[\r\n]+\s*(\d+)', r'\1^\2', q)
+    # Replace Unicode minuses and dashes with standard hyphen-minus
+    q = q.replace('\u2212', '-').replace('\u2013', '-').replace('\u2014', '-')
+    # Collapse remaining newlines and excessive whitespace into single clean line
+    q = re.sub(r'[\r\n]+', ' ', q)
+    return re.sub(r'\s+', ' ', q).strip()
+
+
 def inspect_guardrails(
     query: str,
     chat_history_len: int = 0,
@@ -368,7 +399,7 @@ def inspect_guardrails(
     Evaluates incoming query against Security and Math-Scope Guardrails.
     Returns: (is_allowed: bool, blocked_response: Optional[str])
     """
-    clean_q = query.strip()
+    clean_q = normalize_math_query(query.strip())
     q_lower = clean_q.lower()
 
     # ----------------------------------------------------------

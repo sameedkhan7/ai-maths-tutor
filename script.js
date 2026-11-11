@@ -825,6 +825,29 @@ if (userInput) {
 
     });
 
+    // 📋 Smart Math Clipboard Paste Normalizer (Collapses broken multi-line formula pastes into single-line)
+    userInput.addEventListener('paste', function (e) {
+        const clipboard = (e.clipboardData || window.clipboardData);
+        if (!clipboard) return;
+        const pasted = clipboard.getData('text');
+        if (!pasted) return;
+
+        if (pasted.includes('\n') || pasted.includes('\r')) {
+            e.preventDefault();
+            let cleaned = pasted.replace(/([a-zA-Z0-9\)])\s*[\r\n]+\s*(\d+)/g, '$1^$2');
+            cleaned = cleaned.replace(/[\u2212\u2013\u2014]/g, '-');
+            cleaned = cleaned.replace(/[\r\n]+/g, ' ');
+            cleaned = cleaned.replace(/\s+/g, ' ').trim();
+
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const val = this.value;
+            this.value = val.substring(0, start) + cleaned + val.substring(end);
+            this.selectionStart = this.selectionEnd = start + cleaned.length;
+            autoResizeInput();
+        }
+    });
+
 }
 
 
@@ -1583,9 +1606,7 @@ if (selectedModelText && currentModel) {
 
             item.classList.add('active');
 
-            selectedModelText.innerText = 'Groq';
-
-            if (modelPillBtn) modelPillBtn.title = `Current Model: ${item.innerText.trim()}`;
+            updateModelPillUI(item);
 
             found = true;
 
@@ -1629,6 +1650,22 @@ if (modelPillBtn && modelDropdown) {
 
 
 
+function updateModelPillUI(item) {
+    if (!modelPillBtn || !item) return;
+    const labelText = item.getAttribute('data-text') || item.innerText.trim();
+    const shortName = labelText.includes('Local RTX') ? 'Local RTX' :
+                      labelText.includes('120B') ? '120B' :
+                      labelText.includes('20B') ? '20B' :
+                      labelText.includes('Qwen 3.8') ? 'Qwen 3.8' :
+                      labelText.includes('Allam') ? 'Allam' : 'Groq';
+    const icon = labelText.includes('Local RTX') ? '💻' :
+                 labelText.includes('20B') ? '🚀' :
+                 labelText.includes('Qwen') ? '🧠' :
+                 labelText.includes('Allam') ? '🌍' : '⚡';
+    modelPillBtn.innerHTML = `${icon} <span id="selected-model-text">${shortName}</span> ▾`;
+    modelPillBtn.title = `Current Model: ${labelText}`;
+}
+
 menuItems.forEach(item => {
 
     item.addEventListener('click', () => {
@@ -1641,17 +1678,7 @@ menuItems.forEach(item => {
 
         localStorage.setItem('tutorModel', currentModel);
 
-        if (selectedModelText) {
-
-            selectedModelText.innerText = 'Groq';
-
-        }
-
-        if (modelPillBtn) {
-
-            modelPillBtn.title = `Current Model: ${item.innerText.trim()}`;
-
-        }
+        updateModelPillUI(item);
 
         modelDropdown.style.display = 'none';
 

@@ -19,7 +19,7 @@ def create_groq_client() -> Groq:
     return Groq(api_key=GROQ_API_KEY)
 
 
-def call_ollama(messages: list[dict], model: str = "qwen2.5:7b") -> str | None:
+def call_ollama(messages: list[dict], model: str | None = None) -> str | None:
     """
     Sends prompt to local Ollama or local LLM server running on RTX GPU.
     Supports both native Ollama (/api/chat) and OpenAI-compatible endpoints (/v1/chat/completions),
@@ -30,6 +30,8 @@ def call_ollama(messages: list[dict], model: str = "qwen2.5:7b") -> str | None:
     import logging
 
     logger = logging.getLogger("groq_client")
+    target_model = model or os.getenv("LOCAL_MODEL") or "qwen2.5:3b"
+    api_key = (os.getenv("OLLAMA_API_KEY") or os.getenv("LOCAL_LLM_KEY") or "").strip()
     raw_url = os.getenv("OLLAMA_URL") or os.getenv("LOCAL_LLM_URL") or "http://localhost:11434"
     raw_url = raw_url.rstrip("/")
 
@@ -38,6 +40,8 @@ def call_ollama(messages: list[dict], model: str = "qwen2.5:7b") -> str | None:
         ollama_url = raw_url
     elif raw_url.endswith("/v1"):
         ollama_url = f"{raw_url}/chat/completions"
+    elif api_key.startswith("sk-") and "11434" not in raw_url:
+        ollama_url = f"{raw_url}/v1/chat/completions"
     else:
         ollama_url = f"{raw_url}/api/chat"
 
@@ -49,14 +53,14 @@ def call_ollama(messages: list[dict], model: str = "qwen2.5:7b") -> str | None:
     is_v1 = "chat/completions" in ollama_url
     if is_v1:
         payload = {
-            "model": model,
+            "model": target_model,
             "messages": messages,
             "temperature": TEMPERATURE,
             "max_tokens": MAX_TOKENS
         }
     else:
         payload = {
-            "model": model,
+            "model": target_model,
             "messages": messages,
             "stream": False,
             "options": {
@@ -66,7 +70,7 @@ def call_ollama(messages: list[dict], model: str = "qwen2.5:7b") -> str | None:
         }
 
     try:
-        logger.info(f"[Local Qwen] Calling RTX GPU at {ollama_url} (model={model})")
+        logger.info(f"[Local Qwen] Calling RTX GPU at {ollama_url} (model={target_model})")
         resp = requests.post(ollama_url, json=payload, headers=headers, timeout=120)
         if resp.status_code == 200:
             data = resp.json()
@@ -130,13 +134,14 @@ def call_groq(
     import os
 
     logger = logging.getLogger("groq_client")
+    target_model = model or os.getenv("LOCAL_MODEL") or "qwen2.5:3b"
 
     # 1. Check if Local RTX Qwen / Ollama model is requested
     use_local_env = os.getenv("USE_LOCAL_LLM", "").lower() in ("true", "1", "yes")
     is_local_model_requested = bool(model and ("qwen2.5" in model.lower() or "local" in model.lower()))
 
     if is_local_model_requested or use_local_env:
-        local_target = model if (model and "qwen2.5" in model.lower()) else "qwen2.5:7b"
+        local_target = model if (model and "qwen" in model.lower()) else (os.getenv("LOCAL_MODEL") or "qwen2.5:3b")
         local_result = call_ollama(messages, model=local_target)
         if local_result:
             return local_result
