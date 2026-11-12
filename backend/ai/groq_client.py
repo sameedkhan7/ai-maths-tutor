@@ -163,7 +163,9 @@ def call_groq(
         if local_result:
             return local_result
         if force_local_only or not groq_enabled:
+            # Strictly enforce Developer Admin's master toggle for ALL users (no bypass)
             if is_admin:
+                # Diagnostic notice with internal commands visible ONLY to verified Developer Admin
                 return (
                     "💻 **[Local RTX Offline Notice]**\n\n"
                     "Developer Admin Panel mein **'Force Local RTX Only'** ya **'Groq Disabled'** active hai. "
@@ -172,15 +174,12 @@ def call_groq(
                     "👉 Local Ollama server start karein (`ollama run qwen2.5:7b`) ya Dev RAG Control Panel se Groq ko ON karein."
                 )
             else:
-                # Regular student / visitor: if Groq is enabled, do not break student experience!
-                if groq_enabled:
-                    logger.info(f"[LLM Router] Student request during local RTX offline. Gracefully falling back to Cloud Groq...")
-                else:
-                    return (
-                        "⚡ **[AI Maths Tutor Service Notice]**\n\n"
-                        "AI Maths Tutor server abhi ek scheduled model update / maintenance mode mein hai. "
-                        "Kripya 1-2 minute baad dobara koshish karein ya page refresh karein."
-                    )
+                # Sanitized, zero-information-disclosure notice for public students & users (No internal server/panel leaks)
+                return (
+                    "⚡ **[AI Maths Tutor Service Notice]**\n\n"
+                    "AI Maths Tutor server abhi ek scheduled system update / maintenance mode mein hai. "
+                    "Kripya thodi der baad dobara koshish karein ya page refresh karein."
+                )
         logger.info(f"[LLM Router] Local model '{local_target}' not reached. Falling back to Cloud...")
 
     # 2. If Groq is disabled by Developer Admin, do not call Groq API
