@@ -3961,6 +3961,31 @@ body.dark-mode .thinking-label {
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
 }
 
+/* ===================================================
+   ⏳ LOADING TTS AUDIO SYNTHESIS STATE
+   =================================================== */
+.tts-btn-loading {
+    background: rgba(234, 179, 8, 0.15) !important;
+    border-color: rgba(234, 179, 8, 0.6) !important;
+    color: #fde047 !important;
+    cursor: wait !important;
+    pointer-events: none;
+    opacity: 0.95;
+    transition: all 0.25s ease-in-out;
+}
+
+.tts-spinner-icon {
+    display: inline-block;
+    animation: ttsSpinPulse 1s infinite linear;
+    margin-right: 3px;
+}
+
+@keyframes ttsSpinPulse {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.18); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
 
 /* ==========================================================================
    CHATGPT STYLE VOICE SETTINGS PANEL & ANIMATED ORB

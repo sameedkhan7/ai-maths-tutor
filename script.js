@@ -3541,13 +3541,10 @@ function stopCurrentSpeech() {
     }
 
     if (activeTtsBtn) {
-
         activeTtsBtn.classList.remove('tts-btn-active');
-
+        activeTtsBtn.classList.remove('tts-btn-loading');
         activeTtsBtn.innerHTML = '🔊 <span>Listen</span>';
-
         activeTtsBtn = null;
-
     }
 
     const orbTrigger = document.getElementById('voice-orb-trigger');
@@ -3729,63 +3726,55 @@ function fallbackBrowserSpeech(cleanText, persona, onStart, onEnd, onError) {
 // 🔊 Listen button on chat messages
 
 function toggleSpeech(rawText, btnElement) {
-
-    if (activeTtsBtn === btnElement && isSpeakingActive) {
-
+    if (activeTtsBtn === btnElement && (isSpeakingActive || (btnElement && btnElement.classList.contains('tts-btn-loading')))) {
         stopCurrentSpeech();
-
         return;
-
     }
 
+    stopCurrentSpeech();
 
-
-    const persona = CHATGPT_VOICE_PERSONAS[activePersonaIndex] || CHATGPT_VOICE_PERSONAS[0];
-
+    const persona = CHATGPT_VOICE_PERSONAS[activePersonaIndex] || CHATGPT_VOICE_PERSONAS[1];
     const cleanText = cleanMathTextForSpeech(rawText, persona);
-
     if (!cleanText) return;
 
-
+    // Show immediate loading animation so user knows voice is generating
+    activeTtsBtn = btnElement;
+    if (btnElement) {
+        btnElement.classList.add('tts-btn-loading');
+        btnElement.innerHTML = `<span class="tts-spinner-icon">⏳</span> <span>Loading voice...</span>`;
+    }
 
     playNeuralOrBrowserSpeech(
-
         cleanText,
-
         persona,
-
         // onStart
-
         () => {
-
             isSpeakingActive = true;
-
-            activeTtsBtn = btnElement;
-
-            btnElement.classList.add('tts-btn-active');
-
-            btnElement.innerHTML = '⏹️ <span>Stop</span>';
-
+            if (btnElement) {
+                btnElement.classList.remove('tts-btn-loading');
+                btnElement.classList.add('tts-btn-active');
+                btnElement.innerHTML = '⏹️ <span>Stop</span>';
+            }
         },
-
         // onEnd
-
         () => {
-
             stopCurrentSpeech();
-
         },
-
         // onError
-
         () => {
-
+            if (btnElement) {
+                btnElement.classList.remove('tts-btn-loading');
+                btnElement.classList.remove('tts-btn-active');
+                btnElement.innerHTML = '⚠️ <span>Voice Error</span>';
+                setTimeout(() => {
+                    if (btnElement && !isSpeakingActive) {
+                        btnElement.innerHTML = '🔊 <span>Listen</span>';
+                    }
+                }, 1600);
+            }
             stopCurrentSpeech();
-
         }
-
     );
-
 }
 
 
