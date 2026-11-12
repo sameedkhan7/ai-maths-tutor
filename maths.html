@@ -598,10 +598,16 @@
                             <!-- Carousel Dots -->
                             <div class="voice-carousel-dots" id="voice-carousel-dots"></div>
 
-                            <button type="button" id="voice-sample-btn" class="voice-sample-action-btn">
-                                <span class="voice-sample-icon" id="voice-sample-icon">▶</span>
-                                <span id="voice-sample-text">Sample voice</span>
-                            </button>
+                            <div class="voice-action-buttons-row" style="display: inline-flex; gap: 10px; justify-content: center; align-items: center; margin-top: 6px; flex-wrap: wrap;">
+                                <button type="button" id="voice-sample-btn" class="voice-sample-action-btn">
+                                    <span class="voice-sample-icon" id="voice-sample-icon">▶</span>
+                                    <span id="voice-sample-text">Sample voice</span>
+                                </button>
+                                <button type="button" id="voice-select-active-btn" class="voice-select-action-btn">
+                                    <span id="voice-select-active-icon">✓</span>
+                                    <span id="voice-select-active-text">Active Voice</span>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Speech Settings Controls -->

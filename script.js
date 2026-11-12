@@ -3482,13 +3482,23 @@ const CHATGPT_VOICE_PERSONAS = [
 
 
 
-let activePersonaIndex = parseInt(localStorage.getItem('selectedVoicePersonaIndex') || '0', 10);
-
-if (isNaN(activePersonaIndex) || activePersonaIndex < 0 || activePersonaIndex >= CHATGPT_VOICE_PERSONAS.length) {
-
-    activePersonaIndex = 0;
-
+// Default voice persona: Priya (index 1: Warm, expressive Class Teacher) as requested
+function getInitialVoicePersonaIndex() {
+    const savedId = localStorage.getItem('selectedVoicePersonaId');
+    if (savedId) {
+        const found = CHATGPT_VOICE_PERSONAS.findIndex(p => p.id === savedId);
+        if (found !== -1) return found;
+    }
+    const savedIdx = localStorage.getItem('selectedVoicePersonaIndex');
+    if (savedIdx !== null && !isNaN(parseInt(savedIdx, 10))) {
+        const idx = parseInt(savedIdx, 10);
+        if (idx >= 0 && idx < CHATGPT_VOICE_PERSONAS.length) return idx;
+    }
+    return 1; // Default: Priya
 }
+
+let activePersonaIndex = getInitialVoicePersonaIndex();
+let browsingPersonaIndex = activePersonaIndex;
 
 
 
@@ -3781,199 +3791,130 @@ function toggleSpeech(rawText, btnElement) {
 
 
 // 🔮 Orb / Sample button click
-
 function sampleActivePersona() {
-
-    const persona = CHATGPT_VOICE_PERSONAS[activePersonaIndex] || CHATGPT_VOICE_PERSONAS[0];
-
+    const persona = CHATGPT_VOICE_PERSONAS[browsingPersonaIndex] || CHATGPT_VOICE_PERSONAS[activePersonaIndex] || CHATGPT_VOICE_PERSONAS[1];
     const orbTrigger = document.getElementById('voice-orb-trigger');
-
     const sampleIcon = document.getElementById('voice-sample-icon');
-
     const sampleText = document.getElementById('voice-sample-text');
 
-
-
     if (isSampleAudioPlaying) {
-
         stopCurrentSpeech();
-
         return;
-
     }
-
-
 
     playNeuralOrBrowserSpeech(
-
         persona.sample,
-
         persona,
-
         // onStart
-
         () => {
-
             isSampleAudioPlaying = true;
-
             if (orbTrigger) orbTrigger.classList.add('speaking');
-
             if (sampleIcon) sampleIcon.textContent = '⏹️';
-
             if (sampleText) sampleText.textContent = 'Stop sample';
-
         },
-
         // onEnd
-
         () => {
-
             isSampleAudioPlaying = false;
-
             if (orbTrigger) orbTrigger.classList.remove('speaking');
-
             if (sampleIcon) sampleIcon.textContent = '▶';
-
             if (sampleText) sampleText.textContent = 'Sample voice';
-
         },
-
         // onError
-
         () => {
-
             isSampleAudioPlaying = false;
-
             if (orbTrigger) orbTrigger.classList.remove('speaking');
-
             if (sampleIcon) sampleIcon.textContent = '▶';
-
             if (sampleText) sampleText.textContent = 'Sample voice';
-
         }
-
     );
-
 }
-
-
 
 function updateVoicePersonaUI(playSampleAfterChange = false) {
-
-    const persona = CHATGPT_VOICE_PERSONAS[activePersonaIndex] || CHATGPT_VOICE_PERSONAS[0];
-
-    localStorage.setItem('selectedVoicePersonaIndex', activePersonaIndex.toString());
-
-    localStorage.setItem('selectedVoicePersonaId', persona.id);
-
-
+    const persona = CHATGPT_VOICE_PERSONAS[browsingPersonaIndex] || CHATGPT_VOICE_PERSONAS[1];
 
     const nameEl = document.getElementById('voice-persona-name');
-
     const vibeEl = document.getElementById('voice-persona-vibe');
-
     const orbEl = document.getElementById('voice-orb-celestial');
-
     const dotsContainer = document.getElementById('voice-carousel-dots');
-
-
+    const selectBtn = document.getElementById('voice-select-active-btn');
+    const selectIcon = document.getElementById('voice-select-active-icon');
+    const selectText = document.getElementById('voice-select-active-text');
 
     if (nameEl) nameEl.textContent = persona.name;
-
     if (vibeEl) vibeEl.textContent = `${persona.vibe} • ${persona.role}`;
-
     if (orbEl) {
-
         orbEl.style.background = persona.gradient;
-
         orbEl.style.boxShadow = `0 0 45px ${persona.glow}, inset 0 -12px 24px rgba(15, 23, 42, 0.45), inset 0 10px 18px rgba(255, 255, 255, 0.6)`;
-
     }
 
-
-
+    // Carousel Dots
     if (dotsContainer) {
-
         dotsContainer.innerHTML = '';
-
         CHATGPT_VOICE_PERSONAS.forEach((p, idx) => {
-
             const dot = document.createElement('div');
-
-            dot.className = 'voice-dot' + (idx === activePersonaIndex ? ' active' : '');
-
+            dot.className = 'voice-dot' + (idx === browsingPersonaIndex ? ' active' : '');
             dot.title = `${p.name} (${p.vibe})`;
-
             dot.onclick = () => {
-
-                if (activePersonaIndex !== idx) {
-
-                    activePersonaIndex = idx;
-
+                if (browsingPersonaIndex !== idx) {
+                    browsingPersonaIndex = idx;
                     updateVoicePersonaUI(true);
-
                 }
-
             };
-
             dotsContainer.appendChild(dot);
-
         });
-
     }
 
-
+    // Explicit Voice Selection Button
+    const isCurrentlyActive = (browsingPersonaIndex === activePersonaIndex);
+    if (selectBtn) {
+        if (isCurrentlyActive) {
+            selectBtn.classList.add('is-active-voice');
+            if (selectIcon) selectIcon.textContent = '✓';
+            if (selectText) selectText.textContent = 'Active Voice';
+            selectBtn.onclick = null;
+        } else {
+            selectBtn.classList.remove('is-active-voice');
+            if (selectIcon) selectIcon.textContent = '✨';
+            if (selectText) selectText.textContent = `Select ${persona.name}`;
+            selectBtn.onclick = () => {
+                activePersonaIndex = browsingPersonaIndex;
+                localStorage.setItem('selectedVoicePersonaIndex', activePersonaIndex.toString());
+                localStorage.setItem('selectedVoicePersonaId', persona.id);
+                updateVoicePersonaUI(false);
+                if (selectText) selectText.textContent = `✓ ${persona.name} Selected!`;
+                setTimeout(() => {
+                    updateVoicePersonaUI(false);
+                }, 1000);
+            };
+        }
+    }
 
     if (playSampleAfterChange) {
-
         sampleActivePersona();
-
     }
-
 }
 
-
-
 function initChatGPTVoiceSettings() {
-
+    browsingPersonaIndex = activePersonaIndex;
     updateVoicePersonaUI(false);
 
-
-
     const prevBtn = document.getElementById('voice-prev-arrow');
-
     const nextBtn = document.getElementById('voice-next-arrow');
-
     const orbTrigger = document.getElementById('voice-orb-trigger');
-
     const sampleBtn = document.getElementById('voice-sample-btn');
 
-
-
     if (prevBtn) {
-
         prevBtn.onclick = () => {
-
-            activePersonaIndex = (activePersonaIndex - 1 + CHATGPT_VOICE_PERSONAS.length) % CHATGPT_VOICE_PERSONAS.length;
-
+            browsingPersonaIndex = (browsingPersonaIndex - 1 + CHATGPT_VOICE_PERSONAS.length) % CHATGPT_VOICE_PERSONAS.length;
             updateVoicePersonaUI(true);
-
         };
-
     }
 
-
-
     if (nextBtn) {
-
         nextBtn.onclick = () => {
-
-            activePersonaIndex = (activePersonaIndex + 1) % CHATGPT_VOICE_PERSONAS.length;
-
+            browsingPersonaIndex = (browsingPersonaIndex + 1) % CHATGPT_VOICE_PERSONAS.length;
             updateVoicePersonaUI(true);
-
         };
-
     }
 
 
