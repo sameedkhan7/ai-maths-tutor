@@ -31,6 +31,8 @@ class TutorRequest(BaseModel):
     student_grade: str = "Class 10"
     rag_chunks: list[RAGChunk] = Field(default_factory=list)
     model: str = "openai/gpt-oss-120b"
+    is_admin: bool = False
+    user_role: str = "student"
 
 # =========================
 # TUTOR RESPONSE

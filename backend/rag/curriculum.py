@@ -275,7 +275,7 @@ NCERT_CURRICULUM = {
         {
             "chapter_no": 12,
             "title": "Limits and Derivatives",
-            "keywords": ["limits", "derivatives", "limit of function", "lim x->0", "sin x / x", "derivative of function", "first principle", "power rule", "product rule", "quotient rule", "dy/dx"],
+            "keywords": ["limits", "derivatives", "derivative", "what is a derivative", "calculus", "limit of function", "lim x->0", "sin x / x", "derivative of function", "first principle", "first principle of derivative", "definition of derivative", "power rule", "product rule", "quotient rule", "dy/dx"],
             "summary": "Intuitive idea of limit, limits of polynomials and trigonometric functions, derivative introduced as rate of change / slope of tangent, standard rules (product, quotient, power)."
         },
         {
@@ -320,19 +320,19 @@ NCERT_CURRICULUM = {
         {
             "chapter_no": 5,
             "title": "Continuity and Differentiability",
-            "keywords": ["continuity", "differentiability", "continuous function", "chain rule", "derivative of composite functions", "derivative of implicit functions", "logarithmic differentiation", "parametric differentiation", "second order derivative", "rolle's theorem", "mean value theorem"],
-            "summary": "Continuity and differentiability, derivative of composite functions, chain rule, derivative of inverse trigonometric functions, implicit functions, exponential and logarithmic functions, logarithmic differentiation, second order derivatives."
+            "keywords": ["continuity", "differentiability", "derivative", "derivatives", "differentiation", "what is a derivative", "calculus", "differential calculus", "d/dx", "dy/dx", "continuous function", "chain rule", "derivative of composite functions", "derivative of implicit functions", "logarithmic differentiation", "parametric differentiation", "second order derivative", "rolle's theorem", "mean value theorem"],
+            "summary": "Continuity and differentiability, concept and definition of derivatives, chain rule, derivative of inverse trigonometric functions, implicit functions, exponential and logarithmic functions, logarithmic differentiation, second order derivatives."
         },
         {
             "chapter_no": 6,
             "title": "Applications of Derivatives",
-            "keywords": ["application of derivatives", "aod", "rate of change", "increasing and decreasing functions", "tangents and normals", "maxima and minima", "first derivative test", "second derivative test", "point of inflection"],
+            "keywords": ["application of derivatives", "applications of derivatives", "aod", "rate of change of quantities", "increasing and decreasing functions", "tangents and normals", "maxima and minima", "first derivative test", "second derivative test", "point of inflection", "optimization word problems"],
             "summary": "Applications of derivatives: rate of change of quantities, increasing/decreasing functions, tangents and normals, maxima and minima (first and second derivative tests), optimization word problems."
         },
         {
             "chapter_no": 7,
             "title": "Integrals",
-            "keywords": ["integral", "integrals", "integration", "antiderivative", "indefinite integral", "integration by substitution", "integration by parts", "partial fractions", "definite integral", "fundamental theorem of calculus", "properties of definite integrals"],
+            "keywords": ["integrate", "integral", "integrals", "integration", "antiderivative", "indefinite integral", "definite integral", "integration by substitution", "integration by parts", "partial fractions", "fundamental theorem of calculus", "properties of definite integrals", "dx"],
             "summary": "Integration as inverse process of differentiation, integration by substitution, partial fractions, and integration by parts; evaluation of simple integrals, Fundamental Theorem of Calculus, properties of definite integrals."
         },
         {
@@ -390,6 +390,43 @@ def normalize_class_name(grade_str: Optional[str]) -> str:
     return "Class 10"
 
 
+CURRICULUM_STOP_WORDS = {
+    "and", "the", "for", "with", "from", "that", "this", "what", "why", "how",
+    "when", "where", "can", "you", "use", "using", "used", "does", "into", "give",
+    "tell", "explain", "about", "which", "are", "have", "has", "had", "we", "do",
+    "is", "a", "an", "in", "it", "to", "of", "by", "as", "at", "be"
+}
+
+def get_official_ncert_pdf_url(class_name: str, ch_no: Any) -> str:
+    """
+    Returns verified official NCERT textbook PDF download URL.
+    Handles single-book grades (Class 9, 10, 11) and dual-part books (Class 12 Part 1 & Part 2).
+    - Class 9: iemh101.pdf to iemh112.pdf
+    - Class 10: jemh101.pdf to jemh114.pdf
+    - Class 11: kemh101.pdf to kemh114.pdf
+    - Class 12 Part 1 (Ch 1 to 6): lemh101.pdf to lemh106.pdf
+    - Class 12 Part 2 (Ch 7 to 13): lemh201.pdf to lemh207.pdf
+    """
+    try:
+        ch = int(ch_no)
+    except (ValueError, TypeError):
+        return ""
+
+    if class_name == "Class 9" and 1 <= ch <= 12:
+        return f"https://ncert.nic.in/textbook/pdf/iemh1{ch:02d}.pdf"
+    elif class_name == "Class 10" and 1 <= ch <= 14:
+        return f"https://ncert.nic.in/textbook/pdf/jemh1{ch:02d}.pdf"
+    elif class_name == "Class 11" and 1 <= ch <= 14:
+        return f"https://ncert.nic.in/textbook/pdf/kemh1{ch:02d}.pdf"
+    elif class_name == "Class 12":
+        if 1 <= ch <= 6:
+            return f"https://ncert.nic.in/textbook/pdf/lemh1{ch:02d}.pdf"
+        elif 7 <= ch <= 13:
+            part2_ch = ch - 6
+            return f"https://ncert.nic.in/textbook/pdf/lemh2{part2_ch:02d}.pdf"
+    return ""
+
+
 def find_matching_chapter(query: str, class_key: str) -> Optional[Dict[str, Any]]:
     """Scores chapters within a single class based on query keyword matches."""
     q_lower = query.lower()
@@ -405,7 +442,8 @@ def find_matching_chapter(query: str, class_key: str) -> Optional[Dict[str, Any]
             
     for typo, correction in COMMON_MATH_TYPOS.items():
         q_lower = re.sub(r'\b' + re.escape(typo) + r'\b', correction, q_lower)
-    words = set(re.findall(r'[a-zA-Z0-9_\^]+', q_lower))
+    raw_words = set(re.findall(r'[a-zA-Z0-9_\^]+', q_lower))
+    words = raw_words - CURRICULUM_STOP_WORDS
     best_match = None
     best_score = 0
 
@@ -418,22 +456,45 @@ def find_matching_chapter(query: str, class_key: str) -> Optional[Dict[str, Any]
         # Exact keyword phrase match (high weight)
         for kw in ch["keywords"]:
             if kw in q_lower:
-                score += 4
+                score += 5.0
             else:
-                # Word-level match (only for meaningful words > 2 chars, excluding single math variables like 2x, 3x)
-                kw_words = {w for w in kw.split() if len(w) > 2 and not re.match(r'^[0-9]+[a-z]$', w)}
+                # Word-level match (only for meaningful words > 2 chars, excluding stop words and variables like 2x, 3x)
+                kw_words = {w for w in kw.split() if len(w) > 2 and w not in CURRICULUM_STOP_WORDS and not re.match(r'^[0-9]+[a-z]$', w)}
                 overlap = words.intersection(kw_words)
                 if overlap:
                     score += len(overlap) * 1.5
 
-        # Title match
+        # Title match (excluding stop words)
         title_lower = ch["title"].lower()
-        if any(w in title_lower for w in words if len(w) > 3):
-            score += 3
+        title_words = {w for w in title_lower.split() if w not in CURRICULUM_STOP_WORDS and len(w) > 3}
+        if any(w in title_words for w in words):
+            score += 3.5
 
-        # Add calculus / differentiation intent bonus for Class 11 Ch 12 or Class 12 Ch 5
-        if ("differentiate" in q_lower or "derivative" in q_lower) and class_key in ["Class 11", "Class 12"]:
-            if ch["title"] in ["Limits and Derivatives", "Continuity and Differentiability"]:
+        # Add calculus / differentiation intent bonus:
+        # If question asks what is a derivative or why do we use it in calculus, prioritize core concept chapter
+        is_fundamental_derivative = any(k in q_lower for k in ["what is a derivative", "why do we use", "define derivative", "meaning of derivative", "definition of derivative"]) or ("derivative" in q_lower and "calculus" in q_lower)
+        has_derivative_application = any(k in q_lower for k in ["rate of change", "tangent", "normal", "maxima", "minima", "increasing and decreasing", "optimization"])
+
+        if class_key == "Class 12":
+            if ch["chapter_no"] == 5 and ("differentiate" in q_lower or "derivative" in q_lower or "calculus" in q_lower):
+                score += 5.0
+                if is_fundamental_derivative and not has_derivative_application:
+                    score += 6.0
+            elif ch["chapter_no"] == 6:
+                if has_derivative_application:
+                    score += 6.0
+                elif is_fundamental_derivative:
+                    score -= 4.0
+        elif class_key == "Class 11":
+            if ch["chapter_no"] == 12 and ("differentiate" in q_lower or "derivative" in q_lower or "calculus" in q_lower):
+                score += 5.0
+                if is_fundamental_derivative and not has_derivative_application:
+                    score += 6.0
+        elif class_key == "Class 10":
+            # Trigonometry distinction: Ch 8 (ratios/identities) vs Ch 9 (heights & distances)
+            if ch["chapter_no"] == 9 and any(k in q_lower for k in ["heights and distances", "elevation", "depression", "line of sight", "tower", "shadow"]):
+                score += 8.0
+            elif ch["chapter_no"] == 8 and any(k in q_lower for k in ["ratio", "identity", "identities", "sin", "cos", "tan", "cot", "sec", "table"]):
                 score += 5.0
 
         if score > best_score and score >= 3.0:

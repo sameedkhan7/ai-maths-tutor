@@ -1396,6 +1396,22 @@ def chat_with_tutor(request: ChatRequest):
 
     print(f"📡 [API Chat] Received Request | Grade: {request.grade} | Lang: {normalized_lang} | Style: {normalized_style} | Model: {request.model}")
 
+    # Determine if user is developer admin
+    is_developer_user = False
+    if uid:
+        try:
+            conn_u = get_connection()
+            c_u = conn_u.cursor()
+            c_u.execute("SELECT role FROM users WHERE id = ?", (uid,))
+            u_row = c_u.fetchone()
+            if u_row and u_row["role"] in ["developer", "admin"]:
+                is_developer_user = True
+        except Exception:
+            pass
+        finally:
+            try: conn_u.close()
+            except: pass
+
     # 🚀 Call Real Groq LLaMA 3.3 AI Tutor Engine
     try:
         tutor_req = TutorRequest(
@@ -1404,7 +1420,9 @@ def chat_with_tutor(request: ChatRequest):
             explanation_style=normalized_style,
             language=normalized_lang,
             student_grade=request.grade or "Class 10",
-            model=request.model or "openai/gpt-oss-120b"
+            model=request.model or "openai/gpt-oss-120b",
+            is_admin=is_developer_user,
+            user_role="developer" if is_developer_user else "student"
         )
         tutor_res = generate_tutor_response(tutor_req)
         reply = tutor_res.answer

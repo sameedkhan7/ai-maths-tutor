@@ -24,6 +24,10 @@ from backend.ai.groq_client import call_groq
 from backend.ai.math_engine import get_exact_math_context
 
 from backend.rag.retriever import retrieve_math_context
+try:
+    from backend.rag.curriculum import get_official_ncert_pdf_url
+except ImportError:
+    from rag.curriculum import get_official_ncert_pdf_url
 
 
 
@@ -265,22 +269,12 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
 
                         note_text = rag_res.get("note_text")
 
-                        # Generate direct official NCERT PDF link
-
+                        # Generate direct verified official NCERT PDF link
                         ch_no = rag_res.get("chapter_no")
-
                         matched_class_name = rag_res.get("matched_class", "Class 10")
-
-                        book_codes = {"Class 9": "iemh1", "Class 10": "jemh1", "Class 11": "kemh1", "Class 12": "lemh1"}
-
+                        pdf_url = get_official_ncert_pdf_url(matched_class_name, ch_no)
                         pdf_link_md = ""
-
-                        if ch_no and matched_class_name in book_codes:
-
-                            b_code = book_codes[matched_class_name]
-
-                            pdf_url = f"https://ncert.nic.in/textbook/pdf/{b_code}{int(ch_no):02d}.pdf"
-
+                        if pdf_url and ch_no:
                             pdf_link_md = f'  \n> 🔗 **Official Textbook:** <a href="{pdf_url}" target="_blank" rel="noopener noreferrer" class="chat-ncert-btn">📖 Open NCERT Chapter {ch_no} PDF ↗</a>'
 
                         is_cross = rag_res.get("is_cross_class", False)
@@ -882,8 +876,8 @@ The student asked for CRICKET!
 
 
         # Call Groq with selected model
-
-        answer = call_groq(messages, model=req.model)
+        is_adm = getattr(req, "is_admin", False)
+        answer = call_groq(messages, model=req.model, is_admin=is_adm)
 
 
 

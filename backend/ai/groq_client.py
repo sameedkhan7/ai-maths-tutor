@@ -125,9 +125,11 @@ def call_groq(
     messages: list[dict],
     model: str | None = None,
     retries: int = 3,
+    is_admin: bool = False,
 ) -> str:
     """
     Send messages to local Ollama (if selected or available) or Groq with cascade fallback and retry logic.
+    Provides diagnostic instructions for Developer Admin and polite service messages for regular students.
     """
     import logging
     import time
@@ -161,22 +163,40 @@ def call_groq(
         if local_result:
             return local_result
         if force_local_only or not groq_enabled:
-            return (
-                "💻 **[Local RTX Offline Notice]**\n\n"
-                "Developer Admin Panel mein **'Force Local RTX Only'** ya **'Groq Disabled'** active hai. "
-                f"Aapka local RTX GPU server (`{local_target}`) filhaal offline ya unreachable hai, "
-                "aur cloud fallback developer settings ke dwara band (OFF) kiya gaya hai.\n\n"
-                "👉 Local Ollama server start karein (`ollama run qwen2.5:7b`) ya Dev RAG Control Panel se Groq ko ON karein."
-            )
+            if is_admin:
+                return (
+                    "💻 **[Local RTX Offline Notice]**\n\n"
+                    "Developer Admin Panel mein **'Force Local RTX Only'** ya **'Groq Disabled'** active hai. "
+                    f"Aapka local RTX GPU server (`{local_target}`) filhaal offline ya unreachable hai, "
+                    "aur cloud fallback developer settings ke dwara band (OFF) kiya gaya hai.\n\n"
+                    "👉 Local Ollama server start karein (`ollama run qwen2.5:7b`) ya Dev RAG Control Panel se Groq ko ON karein."
+                )
+            else:
+                # Regular student / visitor: if Groq is enabled, do not break student experience!
+                if groq_enabled:
+                    logger.info(f"[LLM Router] Student request during local RTX offline. Gracefully falling back to Cloud Groq...")
+                else:
+                    return (
+                        "⚡ **[AI Maths Tutor Service Notice]**\n\n"
+                        "AI Maths Tutor server abhi ek scheduled model update / maintenance mode mein hai. "
+                        "Kripya 1-2 minute baad dobara koshish karein ya page refresh karein."
+                    )
         logger.info(f"[LLM Router] Local model '{local_target}' not reached. Falling back to Cloud...")
 
     # 2. If Groq is disabled by Developer Admin, do not call Groq API
     if not groq_enabled:
-        return (
-            "⚡ **[Groq Cloud Disabled Notice]**\n\n"
-            "Developer Admin Panel mein **Groq Cloud API** ko OFF kiya gaya hai. "
-            "Kripya Dev RAG Control Panel mein jaakar Groq ko ON karein ya Local RTX server chalayein."
-        )
+        if is_admin:
+            return (
+                "⚡ **[Groq Cloud Disabled Notice]**\n\n"
+                "Developer Admin Panel mein **Groq Cloud API** ko OFF kiya gaya hai. "
+                "Kripya Dev RAG Control Panel mein jaakar Groq ko ON karein ya Local RTX server chalayein."
+            )
+        else:
+            return (
+                "⚡ **[AI Maths Tutor Service Notice]**\n\n"
+                "AI Maths Tutor server abhi ek scheduled model update / maintenance mode mein hai. "
+                "Kripya 1-2 minute baad dobara koshish karein ya page refresh karein."
+            )
 
     # 3. Check if official Qwen Cloud API key is configured
     qwen_api_key = os.getenv("QWEN_API_KEY", "").strip()

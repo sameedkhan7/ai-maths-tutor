@@ -4,11 +4,11 @@
   "groq_enabled": true,
   "allowed_models": {
     "qwen2.5:7b": true,
-    "openai/gpt-oss-120b": true,
-    "openai/gpt-oss-20b": true,
-    "qwen/qwen3.8-27b": true,
-    "allam-2-7b": true
+    "openai/gpt-oss-120b": false,
+    "openai/gpt-oss-20b": false,
+    "qwen/qwen3.8-27b": false,
+    "allam-2-7b": false
   },
-  "default_model": "openai/gpt-oss-120b",
-  "last_updated": "2026-11-12T01:00:41.108736"
+  "default_model": "qwen2.5:7b",
+  "last_updated": "2026-11-12T01:53:32.741175"
 }
