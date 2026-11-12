@@ -165,20 +165,18 @@ def call_groq(
         if force_local_only or not groq_enabled:
             # Strictly enforce Developer Admin's master toggle for ALL users (no bypass)
             if is_admin:
-                # Diagnostic notice with internal commands visible ONLY to verified Developer Admin
-                return (
-                    "💻 **[Local RTX Offline Notice]**\n\n"
-                    "Developer Admin Panel mein **'Force Local RTX Only'** ya **'Groq Disabled'** active hai. "
-                    f"Aapka local RTX GPU server (`{local_target}`) filhaal offline ya unreachable hai, "
-                    "aur cloud fallback developer settings ke dwara band (OFF) kiya gaya hai.\n\n"
-                    "👉 Local Ollama server start karein (`ollama run qwen2.5:7b`) ya Dev RAG Control Panel se Groq ko ON karein."
-                )
-            else:
-                # Sanitized, zero-information-disclosure notice for public students & users (No internal server/panel leaks)
                 return (
                     "⚡ **[AI Maths Tutor Service Notice]**\n\n"
-                    "AI Maths Tutor server abhi ek scheduled system update / maintenance mode mein hai. "
-                    "Kripya thodi der baad dobara koshish karein ya page refresh karein."
+                    "AI Maths Tutor server is currently undergoing a scheduled system update / maintenance mode. "
+                    "Kripya thodi der baad koshish karein ya page refresh karein.\n\n"
+                    f"*(🛠️ Dev Note: 'Force Local RTX Only' active hai aur server `{local_target}` unreachable hai. Ollama start karein ya Groq ON karein).* "
+                )
+            else:
+                # Sanitized, zero-information-disclosure notice for students & public users (No internal server/panel leaks)
+                return (
+                    "⚡ **[AI Maths Tutor Service Notice]**\n\n"
+                    "AI Maths Tutor server is currently undergoing a scheduled system update / maintenance mode. "
+                    "Kripya thodi der baad koshish karein ya page refresh karein."
                 )
         logger.info(f"[LLM Router] Local model '{local_target}' not reached. Falling back to Cloud...")
 
@@ -186,15 +184,16 @@ def call_groq(
     if not groq_enabled:
         if is_admin:
             return (
-                "⚡ **[Groq Cloud Disabled Notice]**\n\n"
-                "Developer Admin Panel mein **Groq Cloud API** ko OFF kiya gaya hai. "
-                "Kripya Dev RAG Control Panel mein jaakar Groq ko ON karein ya Local RTX server chalayein."
+                "⚡ **[AI Maths Tutor Service Notice]**\n\n"
+                "AI Maths Tutor server is currently undergoing a scheduled system update / maintenance mode. "
+                "Kripya thodi der baad koshish karein ya page refresh karein.\n\n"
+                "*(🛠️ Dev Note: Groq Cloud API Developer Panel mein OFF kiya gaya hai).* "
             )
         else:
             return (
                 "⚡ **[AI Maths Tutor Service Notice]**\n\n"
-                "AI Maths Tutor server abhi ek scheduled model update / maintenance mode mein hai. "
-                "Kripya 1-2 minute baad dobara koshish karein ya page refresh karein."
+                "AI Maths Tutor server is currently undergoing a scheduled system update / maintenance mode. "
+                "Kripya thodi der baad koshish karein ya page refresh karein."
             )
 
     # 3. Check if official Qwen Cloud API key is configured
