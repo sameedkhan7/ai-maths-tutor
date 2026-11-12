@@ -54,13 +54,13 @@ COMPILED_INJECTION_REGEXES = [re.compile(p, re.IGNORECASE) for p in INJECTION_PA
 
 # Common mathematical operators, symbols & KaTeX tokens
 MATH_SYMBOL_PATTERN = re.compile(
-    r"\b\d+\b|"  # Standalone numbers (e.g. 5, 42, 100)
-    r"[\d]+[\s]*[\+\-\*\/\^=><÷×±√∫∑∏−–·]\s*[\d]+|"  # 2 + 2, x = 5, unicode minus
-    r"[−–×÷±∓√∛∜∫∑∏∂∇∆≈≠≡≤≥∝∞°∠πθ²³⁴ⁿ]|"  # Unicode mathematical symbols & superscripts
+    r"\b\d+(?:\.\d+)?%?\b|"  # Numbers, decimals, percentages (e.g. 5, 42, 100, 10%, 3.14)
+    r"[\d]+[\s]*[\+\-\*\/\^=><÷×±√∫∑∏−–·%][\s]*[\d%]*|"  # 1000 - 10%, 2 + 2, x = 5, unicode minus
+    r"[−–×÷±∓√∛∜∫∑∏∂∇∆≈≠≡≤≥∝∞°∠πθ²³⁴ⁿ%]|"  # Unicode mathematical symbols, angles, percentages
     r"\\(?:frac|sqrt|sin|cos|tan|cot|sec|csc|int|lim|sum|pm|cdot|alpha|beta|theta|pi|partial|times|div)|"
     r"\b(?:dy\/dx|d\/dx|dx|dy|dt|f\(x\)|g\(x\)|x\^2|y\^2|x\^3|x\^n)\b|"
-    r"\b[a-zA-Z]\s*[\^]?\s*\d+\b|"  # Algebraic powers: x^3, x 3, x2, ax 2
-    r"\([a-zA-Z0-9\s\+\-\*\/−–]+\)|"  # Factors: (x-1), (x+3), (x−1)
+    r"\b[a-zA-Z]\s*[\^]?\s*\d+\b|"  # Algebraic powers: x^3, x 3, x2, ax 2, ax^2
+    r"\([a-zA-Z0-9\s\+\-\*\/−–,]+\)|"  # Factors & Coordinates: (x-1), (x+3), (3, 4)
     r"[\$]+[\s\S]+?[\$]+"  # Inline or display LaTeX
 )
 
@@ -343,40 +343,36 @@ def is_contextual_math_follow_up(
     if any(p in q_lower for p in format_phrases):
         return True
 
-    # 6. Conversational Continuity & Doubt Clarification (With active history)
-    if not has_history:
-        return False
-
-    if CONTEXT_PRONOUNS & word_set:
-        if (CONTEXT_INQUIRIES & word_set) or (EXPLANATION_VERBS & word_set):
+    # 6. Conversational Continuity & Dialogue Flow (With active history)
+    if has_history:
+        # 6a. Any follow-up containing numbers, math symbols, algebra, or coordinates
+        if bool(re.search(r'\d|[−–×÷±∓√∛∜∫∑∏∂∇∆≈≠≡≤≥∝∞°∠πθ²³⁴ⁿ%+\-*/^=><]|\b[xyz]\b|\([^\)]+\)', clean_q, re.IGNORECASE)):
             return True
 
-    comprehension_phrases = [
-        "samajh nahi", "nahi samjha", "didn't understand", "did not understand",
-        "not clear", "clear nahi", "doubt hai", "fir se", "phir se", "ek baar aur",
-        "once more", "again please", "repeat please", "one more time",
-        "step by step", "next step", "agla step", "phir kya", "fir kya", "kya karenge"
-    ]
-    if any(p in q_lower for p in comprehension_phrases):
-        return True
-
-    if len(words) <= 4 and (FOLLOW_UP_CONVERSATIONAL_TOKENS & word_set):
-        return True
-
-    if CONTEXT_PRONOUNS & word_set:
-        if (CONTEXT_INQUIRIES & word_set) or (EXPLANATION_VERBS & word_set):
+        # 6b. Short follow-up inquiries (<= 4 words)
+        SHORT_INQUIRY_TOKENS = {
+            "why", "how", "what", "where", "next", "step", "again", "repeat", "more",
+            "done", "understood", "right", "correct", "wrong", "false", "true", "help",
+            "kyu", "kyun", "kaise", "kese", "kya", "aur", "doubt", "samajh", "aage", "agla",
+            "phir", "fir", "theek", "thik", "sahi", "nahi", "ha", "haan", "accha", "achha"
+        }
+        if len(words) <= 4 and (word_set & SHORT_INQUIRY_TOKENS):
             return True
 
-    comprehension_phrases = [
-        "samajh nahi", "nahi samjha", "didn't understand", "did not understand",
-        "not clear", "clear nahi", "doubt hai", "fir se", "phir se", "ek baar aur",
-        "once more", "again please", "repeat please", "one more time"
-    ]
-    if any(p in q_lower for p in comprehension_phrases):
-        return True
+        # 6c. Conversational context pronouns paired with explanation/verbs
+        if CONTEXT_PRONOUNS & word_set:
+            if (EXPLANATION_VERBS & word_set) or (CONTEXT_INQUIRIES & word_set) or bool(word_set & {"in", "is", "mein", "me", "se", "bhi"}):
+                return True
 
-    if len(words) <= 3 and (FOLLOW_UP_CONVERSATIONAL_TOKENS & word_set):
-        return True
+        # 6d. Comprehension & doubt phrases
+        comprehension_phrases = [
+            "samajh nahi", "nahi samjha", "didn't understand", "did not understand",
+            "not clear", "clear nahi", "doubt hai", "fir se", "phir se", "ek baar aur",
+            "once more", "again please", "repeat please", "one more time", "aasan bhasha",
+            "short me", "detail me", "step by step", "next step", "agla step", "phir kya"
+        ]
+        if any(p in q_lower for p in comprehension_phrases):
+            return True
 
     return False
 
