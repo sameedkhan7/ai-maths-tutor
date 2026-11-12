@@ -87,7 +87,8 @@ STYLE_INSTRUCTIONS = {
         "TEACHING STYLE — SPORTS ANALOGY (CRICKET / FOOTBALL):\n"
         "• Core goal: Connect the mathematical concept directly to a sports situation when it genuinely helps (e.g. cricket batting trajectory, ball tracking velocity, football kick angles).\n"
         "• Connect the sports analogy clearly to the mathematical concept and equations.\n"
-        "• Do not force a sports analogy into every single sentence. Maintain clean mathematical accuracy and complete the solution."
+        "• Do not force a sports analogy into every single sentence. Maintain clean mathematical accuracy and complete the solution.\n"
+        "• BROAD OVERVIEW GUARDRAIL: If the student asks a broad curriculum question across multiple classes (e.g. 'Explain NCERT Class 10/11/12 key concept') or formula lists, DO NOT hijack the whole response with a single sports story. Provide the structured multi-grade educational overview first, and reserve sports analogies for specific problem-solving questions."
     ),
 
     # 7. Real-Life Analogy Mode

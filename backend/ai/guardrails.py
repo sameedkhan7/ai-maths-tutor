@@ -151,6 +151,8 @@ COMMON_MATH_TYPOS = {
     # Geometry
     "geometery": "geometry", "geomentry": "geometry", "geom": "geometry",
     "triangal": "triangle", "triangls": "triangles", "pythogoras": "pythagoras", "pythagores": "pythagoras",
+    "pytha gouras": "pythagoras", "pytha": "pythagoras", "prama": "theorem", "pramin": "theorem", "prameya": "theorem",
+    "difine": "define", "samantar shredi": "arithmetic progression",
     "hypotenuous": "hypotenuse", "hypotenus": "hypotenuse",
     # Arithmetic & Numbers
     "arithmatic": "arithmetic", "airthmetic": "arithmetic", "mathemetics": "mathematics",

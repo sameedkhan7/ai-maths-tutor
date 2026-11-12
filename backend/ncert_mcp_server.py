@@ -100,6 +100,22 @@ NCERT_CATALOG = {
 # TOOL 1: Get Chapter Info and Official PDF URL
 # ==========================================
 @mcp.tool()
+def build_ncert_pdf_url(clean_cls: str, chapter_num: int) -> str:
+    """Accurately generates official NCERT textbook PDF URL, including Class 12 Part 1 & 2."""
+    if clean_cls == "9" and 1 <= chapter_num <= 12:
+        return f"https://ncert.nic.in/textbook/pdf/iemh1{chapter_num:02d}.pdf"
+    elif clean_cls == "10" and 1 <= chapter_num <= 14:
+        return f"https://ncert.nic.in/textbook/pdf/jemh1{chapter_num:02d}.pdf"
+    elif clean_cls == "11" and 1 <= chapter_num <= 14:
+        return f"https://ncert.nic.in/textbook/pdf/kemh1{chapter_num:02d}.pdf"
+    elif clean_cls == "12":
+        if 1 <= chapter_num <= 6:
+            return f"https://ncert.nic.in/textbook/pdf/lemh1{chapter_num:02d}.pdf"
+        elif 7 <= chapter_num <= 13:
+            part2_ch = chapter_num - 6
+            return f"https://ncert.nic.in/textbook/pdf/lemh2{part2_ch:02d}.pdf"
+    return f"https://ncert.nic.in/textbook/pdf/{NCERT_CATALOG.get(clean_cls, {}).get('code', 'jemh1')}{chapter_num:02d}.pdf"
+
 def get_ncert_chapter_info(class_num: str, chapter_num: int) -> str:
     """
     Returns official chapter details and direct NCERT official PDF textbook link.
@@ -113,11 +129,8 @@ def get_ncert_chapter_info(class_num: str, chapter_num: int) -> str:
         })
 
     cat = NCERT_CATALOG[clean_cls]
-    book_code = cat["code"]
     ch_title = cat["chapters"].get(chapter_num, f"Chapter {chapter_num}")
-    
-    # Official NCERT PDF URL format: e.g. jemh108.pdf
-    pdf_url = f"https://ncert.nic.in/textbook/pdf/{book_code}{chapter_num:02d}.pdf"
+    pdf_url = build_ncert_pdf_url(clean_cls, chapter_num)
 
     return json.dumps({
         "status": "success",
@@ -254,7 +267,56 @@ def fetch_ncert_context_for_query(query: str, student_grade: str = "Class 10") -
     if target_num and target_num in cat["chapters"]:
         matched_chapter = (target_num, cat["chapters"][target_num])
 
-    # 2. Match chapter title keywords
+    # 2. Match curated math concept & topic synonyms (handles phonetic & sub-chapter concepts)
+    NCERT_TOPIC_ALIASES = {
+        "10": [
+            (6, "Triangles", ["pythagoras", "pytha gouras", "pytha", "prama", "pramin", "prameya", "thales", "bpt", "similarity"]),
+            (8, "Introduction to Trigonometry", ["trigonometry", "trigo", "sin cos tan", "sin theta", "cos theta", "tan theta", "trigonometric ratio", "trig identity"]),
+            (9, "Some Applications of Trigonometry", ["heights and distances", "elevation", "depression", "line of sight", "tower shadow"]),
+            (4, "Quadratic Equations", ["quadratic", "shridharacharya", "roots of quadratic", "b^2 - 4ac", "discriminant"]),
+            (5, "Arithmetic Progressions", ["arithmetic progression", "difine ap", "what is ap", "common difference", "nth term of ap"]),
+            (3, "Pair of Linear Equations in Two Variables", ["linear equations", "elimination method", "substitution method"]),
+            (1, "Real Numbers", ["euclid", "prime factorisation", "irrational number proof", "hcf", "lcm"]),
+        ],
+        "11": [
+            (12, "Limits and Derivatives", ["limit", "limits", "derivative", "derivatives", "differentiate", "dy/dx", "first principle", "power rule"]),
+            (3, "Trigonometric Functions", ["trigonometric functions", "radian", "compound angles", "double angle"]),
+            (10, "Conic Sections", ["parabola", "ellipse", "hyperbola", "conic"]),
+            (1, "Sets", ["sets", "subset", "venn diagram"]),
+        ],
+        "12": [
+            (5, "Continuity and Differentiability", ["derivative", "derivatives", "differentiate", "differentiation", "continuity", "differentiability", "dy/dx", "chain rule", "logarithmic differentiation", "avkalana", "अवकलन"]),
+            (6, "Application of Derivatives", ["rate of change", "tangent", "normal", "maxima", "minima", "increasing decreasing", "optimization"]),
+            (7, "Integrals", ["integral", "integrals", "integration", "antiderivative", "samakalan", "समाकलन", "by parts"]),
+            (3, "Matrices", ["matrix", "matrices", "transpose", "symmetric matrix"]),
+            (4, "Determinants", ["determinant", "determinants", "cramer"]),
+            (9, "Differential Equations", ["differential equation", "differential equations", "degree and order"]),
+            (10, "Vector Algebra", ["vector", "vectors", "cross product", "dot product"]),
+            (11, "Three Dimensional Geometry", ["3d geometry", "direction cosines", "plane equation", "line in space"]),
+        ]
+    }
+
+    # First check aliases for the current selected class
+    if not matched_chapter and clean_cls in NCERT_TOPIC_ALIASES:
+        for ch_num, ch_title, aliases in NCERT_TOPIC_ALIASES[clean_cls]:
+            if any(alias in q_lower for alias in aliases):
+                matched_chapter = (ch_num, ch_title)
+                break
+
+    # If still not matched, check other classes for topic alias (cross-class fallback)
+    matched_cls_final = clean_cls
+    if not matched_chapter:
+        for other_cls, alias_list in NCERT_TOPIC_ALIASES.items():
+            if other_cls != clean_cls:
+                for ch_num, ch_title, aliases in alias_list:
+                    if any(alias in q_lower for alias in aliases):
+                        matched_chapter = (ch_num, ch_title)
+                        matched_cls_final = other_cls
+                        break
+                if matched_chapter:
+                    break
+
+    # 3. Match chapter title keywords fallback
     if not matched_chapter:
         for ch_num, ch_title in cat["chapters"].items():
             words = [w.lower() for w in ch_title.split() if len(w) > 3]
@@ -263,12 +325,13 @@ def fetch_ncert_context_for_query(query: str, student_grade: str = "Class 10") -
                 break
                 
     if matched_chapter:
+        pdf_link = build_ncert_pdf_url(matched_cls_final, matched_chapter[0])
         return {
             "found": True,
-            "class": f"Class {clean_cls}",
+            "class": f"Class {matched_cls_final}",
             "chapter_number": matched_chapter[0],
             "chapter_title": matched_chapter[1],
-            "official_link": f"https://ncert.nic.in/textbook/pdf/{cat['code']}{matched_chapter[0]:02d}.pdf"
+            "official_link": pdf_link
         }
     return {"found": False}
 

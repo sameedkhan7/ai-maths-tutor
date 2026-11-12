@@ -1517,35 +1517,17 @@ if (fileInput) {
 
 
 // Popup Menu Item: NCERT Book Library
-
 const menuNcertLibrary = document.getElementById('menu-ncert-library');
-
 if (menuNcertLibrary) {
-
     menuNcertLibrary.addEventListener('click', () => {
-
         if (attachDropdown) attachDropdown.style.display = 'none';
-
-        const devModal = document.getElementById('dev-admin-modal-backdrop');
-
-        if (devModal) {
-
-            devModal.style.display = 'flex';
-
-            if (typeof fetchRagStats === 'function') fetchRagStats();
-
-        } else if (userInput) {
-
-            userInput.value = "Explain NCERT Class 10/11/12 key concept: ";
-
+        if (userInput) {
+            const currentGrade = localStorage.getItem('studentGrade') || 'Class 10';
+            userInput.value = `Explain NCERT ${currentGrade} Mathematics key concepts, formulas and chapters: `;
             autoResizeInput();
-
             userInput.focus();
-
         }
-
     });
-
 }
 
 
