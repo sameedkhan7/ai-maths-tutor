@@ -5839,13 +5839,89 @@ function performAppLogout() {
 
 
 
+// 🚪 Logout Confirmation Dialog Handler
+
+const logoutConfirmModalBackdrop = document.getElementById('logout-confirm-modal-backdrop');
+
+const logoutConfirmOkBtn = document.getElementById('logout-confirm-ok-btn');
+
+const logoutConfirmCancelBtn = document.getElementById('logout-confirm-cancel-btn');
+
+
+
+function showLogoutConfirmation() {
+
+    if (profilePopupMenu) profilePopupMenu.style.display = 'none';
+
+    if (logoutConfirmModalBackdrop) {
+
+        logoutConfirmModalBackdrop.style.display = 'flex';
+
+    } else {
+
+        if (confirm("Are you sure you want to log out of AI Maths Tutor?")) {
+
+            performAppLogout();
+
+        }
+
+    }
+
+}
+
+
+
+function hideLogoutConfirmation() {
+
+    if (logoutConfirmModalBackdrop) {
+
+        logoutConfirmModalBackdrop.style.display = 'none';
+
+    }
+
+}
+
+
+
+if (logoutConfirmOkBtn) {
+
+    logoutConfirmOkBtn.addEventListener('click', performAppLogout);
+
+}
+
+
+
+if (logoutConfirmCancelBtn) {
+
+    logoutConfirmCancelBtn.addEventListener('click', hideLogoutConfirmation);
+
+}
+
+
+
+if (logoutConfirmModalBackdrop) {
+
+    logoutConfirmModalBackdrop.addEventListener('click', (e) => {
+
+        if (e.target === logoutConfirmModalBackdrop) {
+
+            hideLogoutConfirmation();
+
+        }
+
+    });
+
+}
+
+
+
 // 9. Logout Button Handler inside Profile Popup
 
 const popupLogoutItem = document.getElementById('popup-logout-item');
 
 if (popupLogoutItem) {
 
-    popupLogoutItem.addEventListener('click', performAppLogout);
+    popupLogoutItem.addEventListener('click', showLogoutConfirmation);
 
 }
 
@@ -6419,7 +6495,7 @@ if (clearAllChatsBtn) {
 
 if (settingsLogoutBtn) {
 
-    settingsLogoutBtn.addEventListener('click', performAppLogout);
+    settingsLogoutBtn.addEventListener('click', showLogoutConfirmation);
 
 }
 

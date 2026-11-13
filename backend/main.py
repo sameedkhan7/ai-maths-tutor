@@ -700,7 +700,8 @@ def register(req: RegisterRequest):
         detail="Direct registration is disabled. You must verify ownership of your Gmail address via 6-digit OTP."
     )
 
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+DEFAULT_GOOGLE_CLIENT_ID = "165303629004-0thk2v4o8vn0m6eh6ug0kq4hgbn05nhh.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip() or DEFAULT_GOOGLE_CLIENT_ID
 _GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs"
 _google_jwk_client = None
 
@@ -720,8 +721,9 @@ def verify_google_id_token(token: str, client_id: str) -> dict:
     if not token or not token.strip():
         raise HTTPException(status_code=400, detail="Google credential token is required.")
 
+    # Allow client_id passed or from module GOOGLE_CLIENT_ID or env var
     effective_client_id = client_id.strip() if client_id else os.getenv("GOOGLE_CLIENT_ID", "").strip()
-    if not effective_client_id:
+    if not effective_client_id and not GOOGLE_CLIENT_ID:
         if IS_PRODUCTION:
             raise HTTPException(
                 status_code=500,
@@ -732,6 +734,8 @@ def verify_google_id_token(token: str, client_id: str) -> dict:
             detail="Google authentication is not configured (missing GOOGLE_CLIENT_ID)."
         )
 
+    target_audience = effective_client_id or GOOGLE_CLIENT_ID
+
     try:
         jwks_client = get_google_jwk_client()
         signing_key = jwks_client.get_signing_key_from_jwt(token)
@@ -739,7 +743,7 @@ def verify_google_id_token(token: str, client_id: str) -> dict:
             token,
             signing_key.key,
             algorithms=["RS256"],
-            audience=effective_client_id,
+            audience=target_audience,
             issuer=["https://accounts.google.com", "accounts.google.com"],
             options={
                 "verify_signature": True,
