@@ -550,7 +550,7 @@ The student asked for FOOTBALL!
    - For Calculus/Derivatives: Explain using a Footballer / Striker taking a curved free-kick. The ball position vector is s(t). The derivative is the instantaneous velocity v(t) = s'(t) = lim_{h->0} [s(t+h) - s(t)] / h (the tangent vector slope to the trajectory curve as it curls towards the goal).
    - For Class 10 Trigonometry (Heights and Distances): Straight line-of-sight from penalty spot to the top crossbar of the goal net at angle of elevation theta θ. Crossbar vertical height is Perpendicular (p), ground distance is Base (b), and straight sightline distance is Hypotenuse (h) [tan θ = p/b, sin θ = p/h].
    - For Class 11 Projectile Motion: The ball follows a true parabolic path under gravity: y(x) = x tan θ - (g x²) / (2 u² cos² θ). Range R = u² sin(2θ) / g, Max Height H_max = u² sin²θ / (2g). DO NOT confuse the curved trajectory with a straight hypotenuse!
-2. Include a clean SVG diagram showing the Football Pitch, Striker kicking, goalpost, and ball trajectory!
+2. STRICT PROHIBITION: DO NOT generate any SVG diagram or visualization unless the student EXPLICITLY asks (e.g. "diagram banao", "visualize", "draw").
 """
 
             elif active_theme == "badminton":
@@ -558,7 +558,7 @@ The student asked for FOOTBALL!
 STRICT CONTEXT THEME DIRECTIVE — BADMINTON (HIGHEST PRIORITY):
 The student asked for BADMINTON!
 1. EXPLAIN 100% USING BADMINTON: Player executing a jump smash over the net. Shuttlecock trajectory dipping steeply into opponent court. Instantaneous smash speed is derivative v(t) = s'(t).
-2. Include Badminton Court SVG diagram with player, net, and shuttlecock path!
+2. STRICT PROHIBITION: DO NOT generate any SVG diagram or visualization unless the student EXPLICITLY asks (e.g. "diagram banao", "visualize", "draw").
 """
 
             elif active_theme == "car":
@@ -566,7 +566,7 @@ The student asked for BADMINTON!
 STRICT CONTEXT THEME DIRECTIVE — CAR RACING & SPEEDOMETER (HIGHEST PRIORITY):
 The student asked for CAR DRIVING / RACING!
 1. EXPLAIN 100% USING A RACING CAR: Car accelerating along highway track. Speedometer needle shows instantaneous speed v(t) = ds/dt at that exact second. Distance vs time curve s(t).
-2. Include Car / Speedometer SVG diagram!
+2. STRICT PROHIBITION: DO NOT generate any SVG diagram or visualization unless the student EXPLICITLY asks (e.g. "diagram banao", "visualize", "draw").
 """
 
             elif active_theme == "coding":
@@ -574,6 +574,7 @@ The student asked for CAR DRIVING / RACING!
 STRICT CONTEXT THEME DIRECTIVE — CODING & GAME PHYSICS (HIGHEST PRIORITY):
 The student asked for CODING / GAMING!
 1. EXPLAIN USING GAME DEVELOPMENT: Frame delta time (dt), player velocity update (position += velocity * dt), and physics engine collision calculations.
+2. STRICT PROHIBITION: DO NOT generate any SVG diagram or visualization unless the student EXPLICITLY asks.
 """
 
             else:
@@ -588,7 +589,7 @@ The student asked for CRICKET!
      * Maximum Height: H_max = u² sin²θ / (2g)
      * Time of Flight: T = 2u sin θ / g
      * STRICT PROHIBITION: NEVER describe a curved projectile flight path as a straight-line hypotenuse!
-2. Include the Cricket Stadium SVG diagram showing pitch, batsman in action, and boundary!
+2. STRICT PROHIBITION: DO NOT generate any SVG diagram or visualization unless the student EXPLICITLY asks (e.g. "diagram banao", "visualize", "cricket ka diagram banao").
 """
 
 
@@ -739,7 +740,8 @@ The student asked for CRICKET!
         ]
         q_lower = req.question.lower()
         has_explicit_visual_word = any(kw in q_lower for kw in visual_explicit_triggers)
-        is_visual_topic = has_explicit_visual_word or (explanation_style == "visual")
+        # FIX: ONLY trigger visual injection when student EXPLICITLY asks. Never auto-trigger for sports/visual mode.
+        is_visual_topic = has_explicit_visual_word
 
 
 
@@ -751,7 +753,7 @@ The student asked for CRICKET!
 
                     f"\n\n{'='*50}\n"
 
-                    f"MANDATORY FOOTBALL SVG DIAGRAM & VISUALIZATION (STRICT):\n"
+                    f"FOOTBALL SVG DIAGRAM & VISUALIZATION (Student explicitly asked):\n"
 
                     f"{'='*50}\n"
 
@@ -771,7 +773,7 @@ The student asked for CRICKET!
 
                     f"\n\n{'='*50}\n"
 
-                    f"MANDATORY BADMINTON SVG DIAGRAM & VISUALIZATION (STRICT):\n"
+                    f"BADMINTON SVG DIAGRAM & VISUALIZATION (Student explicitly asked):\n"
 
                     f"{'='*50}\n"
 
@@ -789,7 +791,7 @@ The student asked for CRICKET!
 
                     f"\n\n{'='*50}\n"
 
-                    f"MANDATORY CAR RACING SVG DIAGRAM & VISUALIZATION (STRICT):\n"
+                    f"CAR RACING SVG DIAGRAM & VISUALIZATION (Student explicitly asked):\n"
 
                     f"{'='*50}\n"
 
@@ -807,7 +809,7 @@ The student asked for CRICKET!
 
                     f"\n\n{'='*50}\n"
 
-                    f"MANDATORY CRICKET SPORTS SVG DIAGRAM & VISUALIZATION (STRICT):\n"
+                    f"CRICKET SPORTS SVG DIAGRAM & VISUALIZATION (Student explicitly asked):\n"
 
                     f"{'='*50}\n"
 
@@ -825,19 +827,19 @@ The student asked for CRICKET!
 
                 if explanation_style == "story":
 
-                    mode_visual_cue = "In STORY MODE: Show the story scenario in SVG (e.g. lighthouse/tower, elevation angle θ, distance to ship/ground)."
+                    mode_visual_cue = "In STORY MODE: If student asked for a diagram, show the story scenario in SVG (e.g. lighthouse/tower, elevation angle θ, distance to ship/ground)."
 
                 elif explanation_style == "step_by_step":
 
-                    mode_visual_cue = "In STEP-BY-STEP MODE: Show a clean labeled SVG diagram at the start, then explicitly reference its vertices/sides in Step 1, Step 2, Step 3."
+                    mode_visual_cue = "In STEP-BY-STEP MODE: If student asked for a diagram, show a clean labeled SVG diagram at the start, then explicitly reference its vertices/sides in Step 1, Step 2, Step 3."
 
                 elif explanation_style == "quick":
 
-                    mode_visual_cue = "In QUICK MODE: Include a compact, clean SVG diagram alongside the boxed formula."
+                    mode_visual_cue = "In QUICK MODE: If student asked for a diagram, include a compact, clean SVG diagram alongside the boxed formula."
 
                 else:
 
-                    mode_visual_cue = "In CONCEPT-FIRST MODE: Include a clean blueprint SVG diagram showing the triangle with vertices A, B, C, 90° right angle symbol, angle θ, and sides Base, Perpendicular, Hypotenuse."
+                    mode_visual_cue = "In CONCEPT-FIRST MODE: If student asked for a diagram, include a clean blueprint SVG diagram showing the triangle with vertices A, B, C, 90° right angle symbol, angle θ, and sides Base, Perpendicular, Hypotenuse."
 
 
 
@@ -845,11 +847,11 @@ The student asked for CRICKET!
 
                     f"\n\n{'='*50}\n"
 
-                    f"MANDATORY EDUCATIONAL VISUAL DIAGRAM DIRECTIVE:\n"
+                    f"EDUCATIONAL VISUAL DIAGRAM DIRECTIVE (ONLY IF STUDENT EXPLICITLY ASKED FOR DIAGRAM/VISUAL):\n"
 
                     f"{'='*50}\n"
 
-                    f"The student is asking about a visual mathematical topic: '{req.question}'.\n"
+                    f"The student asked for a visual diagram of: '{req.question}'.\n"
 
                     f"You MUST include a clean, complete, valid SVG diagram wrapped in a ```svg ... ``` code block right at the beginning of your explanation.\n"
 
