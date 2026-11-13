@@ -293,13 +293,9 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
 
                                 note_text = f"यह अवधारणा {matched_cls} के पाठ्यक्रम में शामिल है।"
 
-                            elif lang_str in ["ur", "urdu"]:
+                            else:  # hinglish (default)
 
-                                note_text = f"یہ تصور {matched_cls} کے نصاب میں شامل ہے۔"
-
-                            elif lang_str in ["ar", "arabic"]:
-
-                                note_text = f"هذا المفهوم مشمول في منهج {matched_cls}."
+                                note_text = f"Yeh concept {matched_cls} ke syllabus mein cover hota hai."
 
                             badge_markdown = f"> {ref_badge}{pdf_link_md}  \n> *(ℹ️ Note: {note_text})*"
 
@@ -329,15 +325,15 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
 
         q_raw_lower_early = req.question.lower().strip()
         lang_str = (req.language or "hinglish").strip().lower()
+        # Only 3 supported languages: hinglish, english, hindi
         if re.search(r'\b(english mein|english me|in english|explain in english)\b', q_raw_lower_early):
             lang_str = "english"
         elif re.search(r'\b(hindi mein|hindi me|in hindi|explain in hindi|shuddh hindi)\b', q_raw_lower_early):
             lang_str = "hindi"
-        elif re.search(r'\b(urdu mein|urdu me|in urdu|explain in urdu)\b', q_raw_lower_early):
-            lang_str = "urdu"
-        elif re.search(r'\b(arabic mein|arabic me|in arabic|explain in arabic)\b', q_raw_lower_early):
-            lang_str = "arabic"
         elif re.search(r'\b(hinglish mein|hinglish me|in hinglish)\b', q_raw_lower_early):
+            lang_str = "hinglish"
+        # Urdu/Arabic removed — fallback to hinglish
+        elif lang_str in ["ur", "urdu", "ar", "arabic"]:
             lang_str = "hinglish"
 
 
@@ -372,41 +368,9 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
 
                 "Rule: Write your entire response in clear, fluent English.\n"
 
-                "DO NOT use Hindi, Hinglish, or Urdu words in your explanation.\n"
+                "DO NOT use Hindi, Hinglish, or any other language in your explanation.\n"
 
                 "Mathematical notation stays in clean LaTeX format ($...$ and $$...$$)."
-
-            )
-
-        elif lang_str in ["ur", "urdu"]:
-
-            lang_rule = (
-
-                "══════════════════════════════════════\n"
-
-                "🌐 ACTIVE LANGUAGE = اردو (URDU SCRIPT ONLY)\n"
-
-                "══════════════════════════════════════\n"
-
-                "Rule: Write your entire mathematical explanation in fluent, natural Urdu (اردو رسم الخط).\n"
-
-                "Keep mathematical formulas in standard clean LaTeX format ($...$ and $$...$$)."
-
-            )
-
-        elif lang_str in ["ar", "arabic"]:
-
-            lang_rule = (
-
-                "══════════════════════════════════════\n"
-
-                "🌐 ACTIVE LANGUAGE = العربية (ARABIC SCRIPT ONLY)\n"
-
-                "══════════════════════════════════════\n"
-
-                "Rule: Write your entire mathematical explanation in fluent, standard Arabic (اللغة العربية).\n"
-
-                "Keep mathematical formulas in standard clean LaTeX format ($...$ and $$...$$)."
 
             )
 
@@ -416,15 +380,21 @@ def generate_tutor_response(req: TutorRequest) -> TutorResponse:
 
                 "══════════════════════════════════════\n"
 
-                "🌐 ACTIVE LANGUAGE = HINGLISH (ROMAN SCRIPT HINDI + ENGLISH MATH TERMS)\n"
+                "🌐 ACTIVE LANGUAGE = HINGLISH — MANDATORY ENFORCEMENT\n"
 
                 "══════════════════════════════════════\n"
 
-                "Rule: Write your explanation in natural conversational Hinglish (Hindi written in English alphabets).\n"
+                "STRICT RULE: Every sentence MUST mix Hindi words (Roman script) + English math terms.\n"
 
-                "Example: 'Derivative ka matlab hota hai rate of change. Chaliye formula apply karte hain.'\n"
+                "✅ CORRECT: 'Discriminant ka matlab hota hai roots ki nature. Agar D > 0 hai, toh do alag roots milenge.'\n"
 
-                "DO NOT write in Devanagari script. Use standard LaTeX for equations."
+                "✅ CORRECT: 'Step 1 mein hum a, b, c identify karte hain equation se.'\n"
+
+                "❌ WRONG: 'The discriminant determines the nature of roots.' (Pure English — NOT allowed)\n"
+
+                "❌ WRONG: 'डिस्क्रिमिनेंट रूट्स की प्रकृति बताता है।' (Devanagari — NOT allowed)\n"
+
+                "Mathematical formulas stay in LaTeX: $D = b^2 - 4ac$, $x = \\frac{-b \\pm \\sqrt{D}}{2a}$"
 
             )
 
@@ -674,6 +644,10 @@ The student asked for CRICKET!
             f"4. DIAGRAMS: If a diagram is helpful, provide clean SVG code inside a ```svg fenced block. Never use broken ASCII art.\n"
 
             f"5. LANGUAGE AND STYLE ARE MANDATORY: Adhere 100% to the active language and active teaching style specified above.\n"
+
+            f"6. STEP COMPLETENESS: When solving equations step-by-step, always include a verification step — substitute the found roots back into the original equation to confirm correctness. Example: 'Verification: x=2 rakhne par 4-10+6=0 ✓'\n"
+
+            f"7. ENGAGEMENT CLOSER: End EVERY explanation (non-Socratic mode) with a short practice question for the student. Format: '🎯 Ab tum try karo: [simple similar problem]' — keep it one line, friendly.\n"
 
         )
 

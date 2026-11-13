@@ -255,11 +255,7 @@ const LANG_NAMES_MAP = {
 
     'english': 'English',
 
-    'hindi': 'हिंदी',
-
-    'urdu': 'اردو',
-
-    'arabic': 'العربية'
+    'hindi': 'हिंदी'
 
 };
 
@@ -1777,14 +1773,6 @@ if (micBtn) {
         } else if (selectedLang === 'en' || selectedLang === 'english') {
 
             activeSpeechRecognition.lang = 'en-US';
-
-        } else if (selectedLang === 'ur' || selectedLang === 'urdu') {
-
-            activeSpeechRecognition.lang = 'ur-PK';
-
-        } else if (selectedLang === 'ar' || selectedLang === 'arabic') {
-
-            activeSpeechRecognition.lang = 'ar-SA';
 
         } else {
 
