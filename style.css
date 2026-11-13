@@ -4576,3 +4576,216 @@ body.dark-mode .voice-sample-action-btn {
     transform: translateX(20px);
 }
 
+/* ========================================================================== */
+/* ☀️ PREMIUM LIGHT THEME ENHANCEMENTS (Modern Linear/ChatGPT Clean Aesthetic) */
+/* ========================================================================== */
+
+body:not(.dark-mode) {
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+
+body:not(.dark-mode) .chat-area {
+    background: #f8fafc;
+    background-image: 
+        radial-gradient(circle at 50% 8%, rgba(99, 102, 241, 0.05) 0%, transparent 60%),
+        radial-gradient(circle at 90% 85%, rgba(6, 182, 212, 0.04) 0%, transparent 50%),
+        linear-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+}
+
+body:not(.dark-mode) .sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    box-shadow: 2px 0 12px rgba(15, 23, 42, 0.02);
+}
+
+body:not(.dark-mode) .chat-header {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+body:not(.dark-mode) .welcome-greeting {
+    color: #0f172a;
+    letter-spacing: -0.4px;
+}
+
+body:not(.dark-mode) .welcome-subtitle {
+    color: #475569;
+}
+
+/* 3D Orb refinement for Light Background */
+body:not(.dark-mode) .math-orb-core {
+    background: radial-gradient(circle at 35% 30%, #ffffff 0%, #bae6fd 26%, #818cf8 55%, #c084fc 78%, #f472b6 92%, #fb923c 100%);
+    box-shadow: 
+        0 8px 32px rgba(99, 102, 241, 0.28),
+        0 18px 45px rgba(56, 189, 248, 0.22),
+        inset -6px -6px 18px rgba(30, 41, 59, 0.22),
+        inset 6px 6px 18px rgba(255, 255, 255, 1);
+}
+
+body:not(.dark-mode) .math-orb-glow {
+    background: radial-gradient(circle, rgba(129, 140, 248, 0.25) 0%, rgba(6, 182, 212, 0.15) 50%, transparent 75%);
+}
+
+body:not(.dark-mode) .math-orb-ring {
+    border-color: rgba(99, 102, 241, 0.45);
+    box-shadow: 0 0 14px rgba(99, 102, 241, 0.25), inset 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
+body:not(.dark-mode) .ring-inclined {
+    border-color: rgba(168, 85, 247, 0.5);
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.3);
+}
+
+body:not(.dark-mode) .ring-vertical {
+    border-color: rgba(6, 182, 212, 0.5);
+    box-shadow: 0 0 14px rgba(6, 182, 212, 0.3);
+}
+
+/* Light Mode Topic Cards (Polished cards with tactile elevation) */
+body:not(.dark-mode) .topic-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+
+body:not(.dark-mode) .topic-card:hover {
+    background: #ffffff;
+    border-color: #6366f1;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.16), 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+body:not(.dark-mode) .topic-card-body h5 {
+    color: #0f172a;
+    font-weight: 600;
+}
+
+body:not(.dark-mode) .topic-card-body span {
+    color: #64748b;
+}
+
+body:not(.dark-mode) .topic-card-icon {
+    background-color: #eef2ff;
+    color: #4f46e5;
+}
+
+/* Math Toolbar in Light Mode */
+body:not(.dark-mode) .math-toolbar {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+body:not(.dark-mode) .sym-btn {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+}
+
+body:not(.dark-mode) .sym-btn:hover {
+    background: #e0e7ff;
+    border-color: #818cf8;
+    color: #3730a3;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}
+
+/* Light Mode Input Dock (Clean frosted container without harsh black patch) */
+body:not(.dark-mode) .sleek-rect-card {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    box-shadow: 
+        -10px 0 24px -4px rgba(249, 115, 22, 0.18),
+        10px 0 24px -4px rgba(6, 182, 212, 0.20),
+        0 4px 20px rgba(15, 23, 42, 0.08);
+}
+
+body:not(.dark-mode) .sleek-rect-card:hover {
+    border-color: #94a3b8;
+    box-shadow: 
+        -14px 0 28px -4px rgba(249, 115, 22, 0.24),
+        14px 0 28px -4px rgba(6, 182, 212, 0.26),
+        0 6px 24px rgba(15, 23, 42, 0.11);
+}
+
+body:not(.dark-mode) .sleek-rect-card:focus-within {
+    border-color: #6366f1;
+    box-shadow: 
+        -16px 0 32px -4px rgba(249, 115, 22, 0.28),
+        16px 0 32px -4px rgba(6, 182, 212, 0.32),
+        0 0 0 3px rgba(99, 102, 241, 0.12),
+        0 8px 28px rgba(15, 23, 42, 0.12);
+}
+
+body:not(.dark-mode) .sleek-rect-card textarea,
+body:not(.dark-mode) #user-input {
+    color: #0f172a !important;
+}
+
+body:not(.dark-mode) .sleek-rect-card textarea::placeholder,
+body:not(.dark-mode) #user-input::placeholder {
+    color: #94a3b8 !important;
+}
+
+body:not(.dark-mode) .chatgpt-plus-btn {
+    color: #64748b;
+}
+
+body:not(.dark-mode) .chatgpt-plus-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+/* Light Mode Assistant Messages & Bubbles */
+body:not(.dark-mode) .message-content {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+}
+
+body:not(.dark-mode) .message.user .message-content {
+    background-color: #4f46e5;
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+}
+
+body:not(.dark-mode) .user-profile-card {
+    border-top: 1px solid #e2e8f0;
+}
+
+body:not(.dark-mode) .user-profile-card:hover {
+    background-color: #f8fafc;
+}
+
+body:not(.dark-mode) .profile-popup-menu {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+    color: #0f172a;
+}
+
+body:not(.dark-mode) .popup-email {
+    color: #0f172a;
+}
+
+body:not(.dark-mode) .popup-item {
+    color: #334155;
+}
+
+body:not(.dark-mode) .popup-item:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+body:not(.dark-mode) .popup-divider {
+    background-color: #e2e8f0;
+}
+
+
