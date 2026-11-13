@@ -40,7 +40,7 @@ def call_ollama(messages: list[dict], model: str | None = None) -> str | None:
         ollama_url = raw_url
     elif raw_url.endswith("/v1"):
         ollama_url = f"{raw_url}/chat/completions"
-    elif api_key.startswith("sk-") and "11434" not in raw_url:
+    elif "trycloudflare.com" in raw_url or (api_key.startswith("sk-") and "11434" not in raw_url):
         ollama_url = f"{raw_url}/v1/chat/completions"
     else:
         ollama_url = f"{raw_url}/api/chat"
@@ -51,9 +51,18 @@ def call_ollama(messages: list[dict], model: str | None = None) -> str | None:
         headers["Authorization"] = f"Bearer {api_key}"
 
     is_v1 = "chat/completions" in ollama_url
+    # Dynamic model fallback if server runs qwen3:8b or custom local model
+    detected_model = target_model
+    if is_v1 and ("trycloudflare" in raw_url or "qwen" in str(target_model).lower()):
+        configured_local = os.getenv("LOCAL_MODEL", "").strip()
+        if configured_local:
+            detected_model = configured_local
+        else:
+            detected_model = "qwen3:8b" if "qwen" in str(target_model).lower() else target_model
+
     if is_v1:
         payload = {
-            "model": target_model,
+            "model": detected_model,
             "messages": messages,
             "temperature": TEMPERATURE,
             "max_tokens": MAX_TOKENS
