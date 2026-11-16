@@ -755,7 +755,7 @@ def get_google_jwk_client():
     return _google_jwk_client
 
 
-def verify_google_id_token(token: str, client_id: str) -> dict:
+def verify_google_id_token(token: str, client_id: str = None) -> dict:
     """
     Cryptographically verifies Google ID Token (JWT) against Google's public JWKS certificates.
     Enforces signature, expiration, issuer, audience, and email_verified=true.
@@ -763,9 +763,13 @@ def verify_google_id_token(token: str, client_id: str) -> dict:
     if not token or not token.strip():
         raise HTTPException(status_code=400, detail="Google credential token is required.")
 
-    # Allow client_id passed or from module GOOGLE_CLIENT_ID or env var
-    effective_client_id = client_id.strip() if client_id else os.getenv("GOOGLE_CLIENT_ID", "").strip()
-    if not effective_client_id and not GOOGLE_CLIENT_ID:
+    # Allow client_id passed or from env var or module GOOGLE_CLIENT_ID
+    env_client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    effective_client_id = client_id.strip() if client_id else env_client_id
+    if not effective_client_id:
+        effective_client_id = GOOGLE_CLIENT_ID
+
+    if not effective_client_id:
         if IS_PRODUCTION:
             raise HTTPException(
                 status_code=500,
@@ -776,7 +780,7 @@ def verify_google_id_token(token: str, client_id: str) -> dict:
             detail="Google authentication is not configured (missing GOOGLE_CLIENT_ID)."
         )
 
-    target_audience = effective_client_id or GOOGLE_CLIENT_ID
+    target_audience = effective_client_id
 
     try:
         jwks_client = get_google_jwk_client()
@@ -834,7 +838,8 @@ def google_auth(req: GoogleAuthRequest):
         raise HTTPException(status_code=400, detail="Google credential token is required.")
 
     # Cryptographically verify the Google ID token
-    google_payload = verify_google_id_token(req.credential.strip(), GOOGLE_CLIENT_ID)
+    active_client_id = os.getenv("GOOGLE_CLIENT_ID", "").strip() or GOOGLE_CLIENT_ID
+    google_payload = verify_google_id_token(req.credential.strip(), active_client_id)
 
     email = google_payload["email"].strip().lower()
     name = google_payload.get("name") or email.split("@")[0].capitalize()
