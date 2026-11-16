@@ -1571,70 +1571,8 @@ const menuItems = document.querySelectorAll('.model-dropdown-menu .menu-item');
 
 
 
-let currentModel = localStorage.getItem('tutorModel') || 'openai/gpt-oss-120b';
-
-
-
-// Restore saved model on load
-
-if (selectedModelText && currentModel) {
-
-    let found = false;
-
-    menuItems.forEach(item => {
-
-        if (item.getAttribute('data-model') === currentModel) {
-
-            menuItems.forEach(i => i.classList.remove('active'));
-
-            item.classList.add('active');
-
-            updateModelPillUI(item);
-
-            found = true;
-
-        }
-
-    });
-
-    if (!found) {
-
-        currentModel = 'openai/gpt-oss-120b';
-
-        localStorage.setItem('tutorModel', currentModel);
-
-    }
-
-}
-
-
-
-if (modelPillBtn && modelDropdown) {
-
-    modelPillBtn.addEventListener('click', (e) => {
-
-        e.stopPropagation();
-
-        const isHidden = modelDropdown.style.display === 'none' || modelDropdown.style.display === '';
-
-        modelDropdown.style.display = isHidden ? 'block' : 'none';
-
-    });
-
-
-
-    document.addEventListener('click', () => {
-
-        modelDropdown.style.display = 'none';
-
-    });
-
-}
-
-
-
-let currentModelStatusClass = 'dot-gray';
-let currentModelStatusTitle = '';
+var currentModelStatusClass = 'dot-gray';
+var currentModelStatusTitle = '';
 
 function updateModelPillUI(item) {
     if (!modelPillBtn || !item) return;
@@ -1648,28 +1586,55 @@ function updateModelPillUI(item) {
                  labelText.includes('20B') ? '🚀' :
                  labelText.includes('Qwen') ? '🧠' :
                  labelText.includes('Allam') ? '🌍' : '⚡';
-    modelPillBtn.innerHTML = `<span id="model-status-dot" class="model-status-dot ${currentModelStatusClass}"></span> ${icon} <span id="selected-model-text">${shortName}</span> ▾`;
-    modelPillBtn.title = currentModelStatusTitle ? `Model: ${labelText} (${currentModelStatusTitle})` : `Model: ${labelText}`;
+    const dotClass = (typeof currentModelStatusClass !== 'undefined') ? currentModelStatusClass : 'dot-gray';
+    modelPillBtn.innerHTML = `<span id="model-status-dot" class="model-status-dot ${dotClass}"></span> ${icon} <span id="selected-model-text">${shortName}</span> ▾`;
+    if (typeof currentModelStatusTitle !== 'undefined' && currentModelStatusTitle) {
+        modelPillBtn.title = `Model: ${labelText} (${currentModelStatusTitle})`;
+    } else {
+        modelPillBtn.title = `Current Model: ${labelText}`;
+    }
+}
+
+let currentModel = localStorage.getItem('tutorModel') || 'openai/gpt-oss-120b';
+
+// Restore saved model on load
+if (selectedModelText && currentModel) {
+    let found = false;
+    menuItems.forEach(item => {
+        if (item.getAttribute('data-model') === currentModel) {
+            menuItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            updateModelPillUI(item);
+            found = true;
+        }
+    });
+    if (!found) {
+        currentModel = 'openai/gpt-oss-120b';
+        localStorage.setItem('tutorModel', currentModel);
+    }
+}
+
+if (modelPillBtn && modelDropdown) {
+    modelPillBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = modelDropdown.style.display === 'none' || modelDropdown.style.display === '';
+        modelDropdown.style.display = isHidden ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', () => {
+        modelDropdown.style.display = 'none';
+    });
 }
 
 menuItems.forEach(item => {
-
     item.addEventListener('click', () => {
-
         menuItems.forEach(i => i.classList.remove('active'));
-
         item.classList.add('active');
-
         currentModel = item.getAttribute('data-model') || 'openai/gpt-oss-120b';
-
         localStorage.setItem('tutorModel', currentModel);
-
         updateModelPillUI(item);
-
         modelDropdown.style.display = 'none';
-
     });
-
 });
 
 
