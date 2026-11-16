@@ -1353,6 +1353,7 @@ def chat_with_tutor(request: ChatRequest):
         ai_query = raw_q
 
     # Phase 1: DB Read & Chat Init (Commit and close immediately so SQLite/MySQL is never locked during AI call)
+    uid = request.user_id if request.user_id else 1
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -1364,7 +1365,6 @@ def chat_with_tutor(request: ChatRequest):
         if not chat_id or not chat_exists:
             title_source = raw_q or (f"File: {request.attachment_name}" if request.attachment_name else "Maths Question")
             title = title_source[:35] + ("..." if len(title_source) > 35 else "")
-            uid = request.user_id if request.user_id else 1
             cursor.execute("INSERT INTO chats (user_id, title, is_pinned) VALUES (?, ?, 0)", (uid, title))
             conn.commit()
             chat_id = cursor.lastrowid
@@ -1375,8 +1375,17 @@ def chat_with_tutor(request: ChatRequest):
             cursor.execute("SELECT sender, text FROM messages WHERE chat_id = ? ORDER BY id DESC LIMIT 10", (chat_id,))
             rows = cursor.fetchall()
             for row in reversed(rows):
-                role = "user" if row["sender"] == "user" else "assistant"
-                chat_history_msgs.append(ChatMessage(role=role, content=row["text"]))
+                if isinstance(row, dict):
+                    sender_val = row.get("sender", "user")
+                    text_val = row.get("text", "")
+                elif hasattr(row, "keys"):
+                    sender_val = row["sender"]
+                    text_val = row["text"]
+                else:
+                    sender_val = row[0]
+                    text_val = row[1]
+                role = "user" if sender_val == "user" else "assistant"
+                chat_history_msgs.append(ChatMessage(role=role, content=text_val or ""))
     finally:
         conn.close()
 
