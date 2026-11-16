@@ -4954,6 +4954,7 @@ function renderSidebarChats(chats) {
 
 
 
+var userRole = localStorage.getItem('userRole') || 'student';
 let devShowAllUsersHistory = false;
 
 
@@ -5953,23 +5954,18 @@ function applyFontSize(level) {
     if (level > 2) level = 2;
 
     currentFontSizeLevel = level;
-
     localStorage.setItem('tutorFontSizeLevel', level);
-
     
-
-    if (fontSizeDisplay) {
-
-        fontSizeDisplay.innerText = fontLevels[level].label;
-
-    }
-
-    document.documentElement.style.setProperty('--chat-font-size', fontLevels[level].size);
-
-    if (messagesContainer) {
-
-        messagesContainer.style.fontSize = fontLevels[level].size;
-
+    if (fontLevels && fontLevels[level]) {
+        if (fontSizeDisplay) {
+            fontSizeDisplay.innerText = fontLevels[level].label;
+        }
+        if (document.documentElement && document.documentElement.style) {
+            document.documentElement.style.setProperty('--chat-font-size', fontLevels[level].size);
+        }
+        if (messagesContainer) {
+            messagesContainer.style.fontSize = fontLevels[level].size;
+        }
     }
 
 }
@@ -6803,7 +6799,7 @@ if (sidebarToggleBtn) {
 
 // ===================================================
 
-const userRole = localStorage.getItem('userRole') || 'student';
+userRole = localStorage.getItem('userRole') || 'student';
 
 const popupDevItem = document.getElementById('popup-dev-item');
 
