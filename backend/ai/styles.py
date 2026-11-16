@@ -94,7 +94,7 @@ STYLE_INSTRUCTIONS = {
     # 7. Real-Life Analogy Mode
     "analogy": (
         "TEACHING STYLE — REAL-LIFE ANALOGY:\n"
-        "• Core goal: Use practical, relatable everyday scenarios (e.g., ladders leaning on walls, buildings and shadows, car speedometers, water tank flow, distance measurement) where appropriate.\n"
+        "• Core goal: Use practical, relatable modern scenarios (e.g., smartphone camera angles, drone tracking, skateboard ramps, solar panel tilt, bridge cables, car speedometers) where appropriate. Avoid overused textbook ladder-wall clichés.\n"
         "• Clearly explain how the mathematical concept applies directly to the scenario.\n"
         "• Ground the student's intuition in real life while keeping formulas and calculations mathematically explicit."
     ),

@@ -597,6 +597,14 @@ The student asked for CRICKET!
                 "2. STRICT PROHIBITION: DO NOT explain internal software engineering, backend code, or AI architecture. Focus 100% on the MATHEMATICAL problem-solving workflow.\n"
             )
 
+        # Language-aware engagement closer format
+        if lang_str in ["en", "english"]:
+            closer_format_rule = "Format in ENGLISH: '🎯 Now you try: [simple practice question strictly in English]'"
+        elif lang_str in ["hi", "hindi"]:
+            closer_format_rule = "Format in HINDI: '🎯 अब आप हल करें: [सरल अभ्यास प्रश्न केवल शुद्ध देवनागरी हिंदी में]'"
+        else:
+            closer_format_rule = "Format in HINGLISH: '🎯 Ab tum try karo: [simple practice question in natural Hinglish]'"
+
         # Add style, question type, and formatting instructions to system prompt
 
         system_prompt = (
@@ -647,7 +655,9 @@ The student asked for CRICKET!
 
             f"6. STEP COMPLETENESS: When solving equations step-by-step, always include a verification step — substitute the found roots back into the original equation to confirm correctness. Example: 'Verification: x=2 rakhne par 4-10+6=0 ✓'\n"
 
-            f"7. ENGAGEMENT CLOSER: End EVERY explanation (non-Socratic mode) with a short practice question for the student. Format: '🎯 Ab tum try karo: [simple similar problem]' — keep it one line, friendly.\n"
+            f"7. ENGAGEMENT CLOSER: End EVERY explanation (non-Socratic mode) with a short practice question for the student. {closer_format_rule} — keep it one line, friendly. NEVER output Hinglish phrases like 'Ab tum try karo' in English or Hindi mode.\n"
+
+            f"8. GEOMETRIC ACCURACY: In any geometry/trigonometry problem, a right-angled triangle's Hypotenuse MUST be strictly greater than both perpendicular and base ($h > p$ and $h > b$). NEVER generate degenerate or impossible triangles where $h \\le p$.\n"
 
         )
 
