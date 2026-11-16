@@ -1633,6 +1633,9 @@ if (modelPillBtn && modelDropdown) {
 
 
 
+let currentModelStatusClass = 'dot-gray';
+let currentModelStatusTitle = '';
+
 function updateModelPillUI(item) {
     if (!modelPillBtn || !item) return;
     const labelText = item.getAttribute('data-text') || item.innerText.trim();
@@ -1645,8 +1648,8 @@ function updateModelPillUI(item) {
                  labelText.includes('20B') ? '🚀' :
                  labelText.includes('Qwen') ? '🧠' :
                  labelText.includes('Allam') ? '🌍' : '⚡';
-    modelPillBtn.innerHTML = `${icon} <span id="selected-model-text">${shortName}</span> ▾`;
-    modelPillBtn.title = `Current Model: ${labelText}`;
+    modelPillBtn.innerHTML = `<span id="model-status-dot" class="model-status-dot ${currentModelStatusClass}"></span> ${icon} <span id="selected-model-text">${shortName}</span> ▾`;
+    modelPillBtn.title = currentModelStatusTitle ? `Model: ${labelText} (${currentModelStatusTitle})` : `Model: ${labelText}`;
 }
 
 menuItems.forEach(item => {
@@ -8155,36 +8158,33 @@ fetchModelConfig();
 // REAL-TIME LLM STATUS MONITOR (RTX GPU / GROQ CLOUD)
 // =========================================================
 async function updateLlmLiveStatus() {
-    const badge = document.getElementById('llm-live-badge');
-    const textEl = document.getElementById('live-status-text');
-    const dotEl = badge ? badge.querySelector('.live-dot') : null;
-    if (!badge || !textEl || !dotEl) return;
-
     try {
         const res = await fetch(`${getApiBaseUrl()}/api/llm/status`, { method: 'GET' });
         if (!res.ok) throw new Error('Status endpoint unreachable');
         const data = await res.json();
 
-        dotEl.className = 'live-dot';
         if (data.rtx_online) {
-            dotEl.classList.add('dot-green');
-            textEl.innerText = data.rtx_latency_ms ? `RTX (${data.rtx_latency_ms}ms)` : 'RTX Online';
-            badge.title = `🟢 Local RTX GPU Connected (${data.rtx_latency_ms || 0}ms latency)`;
+            currentModelStatusClass = 'dot-green';
+            currentModelStatusTitle = `Local RTX Online (${data.rtx_latency_ms || 0}ms)`;
         } else if (data.groq_online) {
-            dotEl.classList.add('dot-yellow');
-            textEl.innerText = 'Groq Ready';
-            badge.title = '🟡 Groq Cloud API Active (Local RTX Offline)';
+            currentModelStatusClass = 'dot-yellow';
+            currentModelStatusTitle = 'Groq Cloud Ready (RTX Offline)';
         } else {
-            dotEl.classList.add('dot-red');
-            textEl.innerText = 'Offline';
-            badge.title = '🔴 All Models Offline (Check .env configuration)';
+            currentModelStatusClass = 'dot-red';
+            currentModelStatusTitle = 'Offline';
         }
     } catch (e) {
-        if (dotEl) {
-            dotEl.className = 'live-dot dot-gray';
-            textEl.innerText = 'Connecting...';
-            badge.title = 'Waiting for backend server...';
-        }
+        currentModelStatusClass = 'dot-gray';
+        currentModelStatusTitle = 'Connecting...';
+    }
+
+    const currentDot = document.getElementById('model-status-dot');
+    if (currentDot) {
+        currentDot.className = `model-status-dot ${currentModelStatusClass}`;
+    }
+    if (modelPillBtn && currentModelStatusTitle) {
+        const baseTitle = modelPillBtn.title ? modelPillBtn.title.split('(')[0].trim() : 'AI Model';
+        modelPillBtn.title = `${baseTitle} (${currentModelStatusTitle})`;
     }
 }
 

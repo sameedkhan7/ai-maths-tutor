@@ -422,18 +422,13 @@
                     <!-- Center: Slim Auto-Expanding Textarea -->
                     <textarea id="user-input" placeholder="Ask any maths equation..." rows="1"></textarea>
 
-                    <!-- Right: Action Controls Toolbar (Live Status, Model Pill, Mic, Send) -->
+                    <!-- Right: Action Controls Toolbar (Model Pill, Mic, Send) -->
                     <div class="input-right-tools">
-                        <!-- 🟢 Live Connection Status Badge -->
-                        <div id="llm-live-badge" class="llm-live-badge" title="Live Model Connection Status">
-                            <span class="live-dot dot-gray"></span>
-                            <span id="live-status-text" class="live-status-text">Checking...</span>
-                        </div>
-
-                        <!-- ⚡ Model Selector Pill -->
+                        <!-- ⚡ Model Selector Pill with Integrated Status Dot -->
                         <div class="model-picker">
                             <button type="button" id="model-pill-btn" class="model-pill-btn" title="Choose AI Model">
-                                ⚡ <span id="selected-model-text">Groq</span> ▾
+                                <span id="model-status-dot" class="model-status-dot dot-gray"></span>
+                                <span id="model-pill-text">⚡ <span id="selected-model-text">Groq</span> ▾</span>
                             </button>
                             <div id="model-dropdown-menu" class="model-dropdown-menu" style="display: none;">
                                 <div class="menu-item" data-model="qwen2.5:7b" data-text="Local RTX · Qwen 2.5 (7B)">💻 Local RTX · Qwen 2.5 (7B GPU)</div>
