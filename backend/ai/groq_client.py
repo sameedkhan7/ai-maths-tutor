@@ -1,22 +1,44 @@
 from groq import Groq
 
 from backend.ai.config import (
-    GROQ_API_KEY,
     GROQ_MODEL,
     TEMPERATURE,
     MAX_TOKENS,
 )
 
 
+def get_live_env() -> dict:
+    """Read fresh .env values directly from disk (no stale memory cache)."""
+    import os
+    try:
+        from dotenv import dotenv_values
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        env_path = os.path.join(project_root, ".env")
+        if os.path.exists(env_path):
+            return {k: (v if v is not None else "") for k, v in dotenv_values(env_path).items()}
+    except Exception:
+        pass
+    return {}
+
+
+def get_live_groq_key() -> str:
+    """Returns active Groq key directly from fresh .env, fallback to os.environ."""
+    import os
+    live = get_live_env()
+    if "GROQ_API_KEY" in live:
+        return live.get("GROQ_API_KEY", "").strip()
+    return os.getenv("GROQ_API_KEY", "").strip()
+
+
 def create_groq_client() -> Groq:
     """
-    Create and return Groq API client.
+    Create and return Groq API client with dynamic fresh key.
     """
+    key = get_live_groq_key()
+    if not key:
+        raise ValueError("GROQ_API_KEY is missing or commented out in .env")
 
-    if not GROQ_API_KEY:
-        raise ValueError("GROQ_API_KEY is missing")
-
-    return Groq(api_key=GROQ_API_KEY)
+    return Groq(api_key=key)
 
 
 def call_ollama(messages: list[dict], model: str | None = None) -> str | None:
@@ -24,15 +46,18 @@ def call_ollama(messages: list[dict], model: str | None = None) -> str | None:
     Sends prompt to local Ollama or local LLM server running on RTX GPU.
     Supports both native Ollama (/api/chat) and OpenAI-compatible endpoints (/v1/chat/completions),
     with optional API key authentication (OLLAMA_API_KEY or LOCAL_LLM_KEY).
+    Dynamically loads fresh .env parameters so tunnel URLs can be updated without restart.
     """
     import os
     import requests
     import logging
 
     logger = logging.getLogger("groq_client")
-    target_model = model or os.getenv("LOCAL_MODEL") or "qwen2.5:3b"
-    api_key = (os.getenv("OLLAMA_API_KEY") or os.getenv("LOCAL_LLM_KEY") or "").strip()
-    raw_url = os.getenv("OLLAMA_URL") or os.getenv("LOCAL_LLM_URL") or "http://localhost:11434"
+    live = get_live_env()
+
+    target_model = model or live.get("LOCAL_MODEL") or os.getenv("LOCAL_MODEL") or "qwen2.5:3b"
+    api_key = (live.get("OLLAMA_API_KEY") or live.get("LOCAL_LLM_KEY") or os.getenv("OLLAMA_API_KEY") or os.getenv("LOCAL_LLM_KEY") or "").strip()
+    raw_url = live.get("OLLAMA_URL") or live.get("LOCAL_LLM_URL") or os.getenv("OLLAMA_URL") or os.getenv("LOCAL_LLM_URL") or "http://localhost:11434"
     raw_url = raw_url.rstrip("/")
 
     # Detect endpoint format
@@ -45,7 +70,6 @@ def call_ollama(messages: list[dict], model: str | None = None) -> str | None:
     else:
         ollama_url = f"{raw_url}/api/chat"
 
-    api_key = (os.getenv("OLLAMA_API_KEY") or os.getenv("LOCAL_LLM_KEY") or "").strip()
     headers = {"Content-Type": "application/json"}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
@@ -54,7 +78,7 @@ def call_ollama(messages: list[dict], model: str | None = None) -> str | None:
     # Dynamic model fallback if server runs qwen3:8b or custom local model
     detected_model = target_model
     if is_v1 and ("trycloudflare" in raw_url or "qwen" in str(target_model).lower()):
-        configured_local = os.getenv("LOCAL_MODEL", "").strip()
+        configured_local = (live.get("LOCAL_MODEL") or os.getenv("LOCAL_MODEL") or "").strip()
         if configured_local:
             detected_model = configured_local
         else:
@@ -163,40 +187,41 @@ def call_groq(
     allowed_models = dev_cfg.get("allowed_models", {})
 
     # 1. Check if Local RTX Qwen / Ollama model is requested or forced
-    use_local_env = os.getenv("USE_LOCAL_LLM", "").lower() in ("true", "1", "yes")
+    live = get_live_env()
+    use_local_env = (live.get("USE_LOCAL_LLM") or os.getenv("USE_LOCAL_LLM") or "").lower() in ("true", "1", "yes")
     is_local_model_requested = bool(model and ("qwen2.5" in model.lower() or "local" in model.lower()))
+    live_groq_key = get_live_groq_key()
 
     if force_local_only or (local_rtx_enabled and (is_local_model_requested or use_local_env)):
-        local_target = model if (model and "qwen" in model.lower()) else (os.getenv("LOCAL_MODEL") or "qwen2.5:3b")
+        local_target = model if (model and "qwen" in model.lower()) else (live.get("LOCAL_MODEL") or os.getenv("LOCAL_MODEL") or "qwen2.5:3b")
         local_result = call_ollama(messages, model=local_target)
         if local_result:
             return local_result
-        if force_local_only or not groq_enabled:
-            # Strictly enforce Developer Admin's master toggle for ALL users (no bypass)
+        if force_local_only or not groq_enabled or not live_groq_key:
+            # Strictly enforce Developer Admin's master toggle or missing Groq key
             if is_admin:
                 return (
                     "⚡ **[AI Maths Tutor Service Notice]**\n\n"
                     "AI Maths Tutor server is currently undergoing a scheduled system update / maintenance mode. "
                     "Kripya thodi der baad koshish karein ya page refresh karein.\n\n"
-                    f"*(🛠️ Dev Note: 'Force Local RTX Only' active hai aur server `{local_target}` unreachable hai. Ollama start karein ya Groq ON karein).* "
+                    f"*(🛠️ Dev Note: 'Force Local RTX Only' active hai ya GROQ_API_KEY unset hai, aur server `{local_target}` unreachable hai).* "
                 )
             else:
-                # Sanitized, zero-information-disclosure notice for students & public users (No internal server/panel leaks)
                 return (
                     "⚡ **[AI Maths Tutor Service Notice]**\n\n"
-                    "AI Maths Tutor server is currently undergoing a scheduled system update / maintenance mode. "
-                    "Kripya thodi der baad koshish karein ya page refresh karein."
+                    "AI Maths Tutor local RTX server is currently offline or connecting. "
+                    "Kripya check karein ki Cloudflare tunnel chalu hai ya page refresh karein."
                 )
         logger.info(f"[LLM Router] Local model '{local_target}' not reached. Falling back to Cloud...")
 
     # 2. If Groq is disabled by Developer Admin, do not call Groq API
-    if not groq_enabled:
+    if not groq_enabled or not live_groq_key:
         if is_admin:
             return (
                 "⚡ **[AI Maths Tutor Service Notice]**\n\n"
                 "AI Maths Tutor server is currently undergoing a scheduled system update / maintenance mode. "
                 "Kripya thodi der baad koshish karein ya page refresh karein.\n\n"
-                "*(🛠️ Dev Note: Groq Cloud API Developer Panel mein OFF kiya gaya hai).* "
+                "*(🛠️ Dev Note: Groq Cloud API Developer Panel mein OFF kiya gaya hai ya GROQ_API_KEY unset hai).* "
             )
         else:
             return (
@@ -206,20 +231,22 @@ def call_groq(
             )
 
     # 3. Check if official Qwen Cloud API key is configured
-    qwen_api_key = os.getenv("QWEN_API_KEY", "").strip()
+    qwen_api_key = (live.get("QWEN_API_KEY") or os.getenv("QWEN_API_KEY") or "").strip()
     if qwen_api_key and (is_local_model_requested or "qwen" in (model or "").lower()):
-        cloud_target = os.getenv("QWEN_MODEL", "qwen-plus")
+        cloud_target = live.get("QWEN_MODEL") or os.getenv("QWEN_MODEL", "qwen-plus")
         cloud_result = call_qwen_cloud(messages, model=cloud_target)
         if cloud_result:
             return cloud_result
 
     client = create_groq_client()
-    default_model = GROQ_MODEL or "openai/gpt-oss-120b"
+    default_model = live.get("GROQ_MODEL") or GROQ_MODEL or "openai/gpt-oss-120b"
     primary_model = model or default_model
 
-    # If local model was requested but failed, fallback to cloud default
+    # If local model was requested but failed, fallback to cloud default with notification
+    fell_back_from_local = False
     if "qwen2.5" in primary_model.lower() or "local" in primary_model.lower():
         primary_model = default_model
+        fell_back_from_local = True
 
     # Filter by allowed models if specified in dev configuration
     if allowed_models and primary_model in allowed_models and not allowed_models[primary_model]:
@@ -259,6 +286,8 @@ def call_groq(
                         break
 
                 if content and content.strip():
+                    if fell_back_from_local:
+                        content = "*(ℹ️ Note: Local RTX unreachable tha — answer Groq Cloud se deliver kiya gaya hai)*\n\n" + content
                     return content
 
                 logger.warning(f"[Groq] Model {candidate} returned empty response on attempt {attempt + 1}")

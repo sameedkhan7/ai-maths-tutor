@@ -422,8 +422,14 @@
                     <!-- Center: Slim Auto-Expanding Textarea -->
                     <textarea id="user-input" placeholder="Ask any maths equation..." rows="1"></textarea>
 
-                    <!-- Right: Action Controls Toolbar (Model Pill, Mic, Send) -->
+                    <!-- Right: Action Controls Toolbar (Live Status, Model Pill, Mic, Send) -->
                     <div class="input-right-tools">
+                        <!-- 🟢 Live Connection Status Badge -->
+                        <div id="llm-live-badge" class="llm-live-badge" title="Live Model Connection Status">
+                            <span class="live-dot dot-gray"></span>
+                            <span id="live-status-text" class="live-status-text">Checking...</span>
+                        </div>
+
                         <!-- ⚡ Model Selector Pill -->
                         <div class="model-picker">
                             <button type="button" id="model-pill-btn" class="model-pill-btn" title="Choose AI Model">

@@ -4788,4 +4788,56 @@ body:not(.dark-mode) .popup-divider {
     background-color: #e2e8f0;
 }
 
+/* =========================================================
+   LIVE LLM STATUS BADGE (RTX GPU / GROQ CLOUD)
+   ========================================================= */
+.llm-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    font-weight: 500;
+    user-select: none;
+    transition: all 0.25s ease;
+    cursor: default;
+}
+
+.llm-live-badge:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    transition: all 0.25s ease;
+}
+
+.live-dot.dot-green {
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+}
+
+.live-dot.dot-yellow {
+    background: #eab308;
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.8);
+}
+
+.live-dot.dot-red {
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+}
+
+.live-dot.dot-gray {
+    background: #94a3b8;
+}
+
+
 

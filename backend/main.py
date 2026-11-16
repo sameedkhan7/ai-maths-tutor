@@ -131,6 +131,48 @@ class LoginRequest(BaseModel):
 def home():
     return {"status": "online", "message": "AI Maths Tutor Backend with DB is running!"}
 
+@app.get("/api/llm/status")
+def llm_health_status():
+    """Lightweight real-time check for Local RTX GPU and Groq Cloud status (Zero key disclosure)."""
+    import time
+    import requests
+    from backend.ai.groq_client import get_live_env, get_live_groq_key
+    
+    live = get_live_env()
+    raw_url = live.get("OLLAMA_URL") or live.get("LOCAL_LLM_URL") or os.getenv("OLLAMA_URL") or os.getenv("LOCAL_LLM_URL") or "http://localhost:11434"
+    raw_url = raw_url.rstrip("/")
+    api_key = (live.get("OLLAMA_API_KEY") or live.get("LOCAL_LLM_KEY") or os.getenv("OLLAMA_API_KEY") or os.getenv("LOCAL_LLM_KEY") or "").strip()
+
+    rtx_online = False
+    rtx_latency_ms = None
+    try:
+        t0 = time.time()
+        test_url = f"{raw_url}/v1/models" if ("trycloudflare" in raw_url or raw_url.endswith("/v1")) else f"{raw_url}/api/tags"
+        headers = {}
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+        r = requests.get(test_url, headers=headers, timeout=2.0)
+        if r.status_code == 200:
+            rtx_online = True
+            rtx_latency_ms = int((time.time() - t0) * 1000)
+    except Exception:
+        rtx_online = False
+
+    groq_online = bool(get_live_groq_key())
+
+    try:
+        from backend.ai.model_manager import get_model_config
+        dev_cfg = get_model_config()
+    except Exception:
+        dev_cfg = {}
+
+    return {
+        "rtx_online": rtx_online,
+        "rtx_latency_ms": rtx_latency_ms,
+        "groq_online": groq_online,
+        "force_local_only": dev_cfg.get("force_local_only", False),
+    }
+
 # -------------------------------------------------------------
 # REAL USER ACCOUNT & CRYPTOGRAPHIC AUTHENTICATION (BCRYPT + JWT)
 # -------------------------------------------------------------

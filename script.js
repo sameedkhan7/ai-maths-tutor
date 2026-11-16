@@ -8151,4 +8151,46 @@ document.querySelectorAll('.model-item-toggle').forEach(t => {
 // Preload model config on initial script load
 fetchModelConfig();
 
+// =========================================================
+// REAL-TIME LLM STATUS MONITOR (RTX GPU / GROQ CLOUD)
+// =========================================================
+async function updateLlmLiveStatus() {
+    const badge = document.getElementById('llm-live-badge');
+    const textEl = document.getElementById('live-status-text');
+    const dotEl = badge ? badge.querySelector('.live-dot') : null;
+    if (!badge || !textEl || !dotEl) return;
+
+    try {
+        const res = await fetch(`${getApiBaseUrl()}/api/llm/status`, { method: 'GET' });
+        if (!res.ok) throw new Error('Status endpoint unreachable');
+        const data = await res.json();
+
+        dotEl.className = 'live-dot';
+        if (data.rtx_online) {
+            dotEl.classList.add('dot-green');
+            textEl.innerText = data.rtx_latency_ms ? `RTX (${data.rtx_latency_ms}ms)` : 'RTX Online';
+            badge.title = `🟢 Local RTX GPU Connected (${data.rtx_latency_ms || 0}ms latency)`;
+        } else if (data.groq_online) {
+            dotEl.classList.add('dot-yellow');
+            textEl.innerText = 'Groq Ready';
+            badge.title = '🟡 Groq Cloud API Active (Local RTX Offline)';
+        } else {
+            dotEl.classList.add('dot-red');
+            textEl.innerText = 'Offline';
+            badge.title = '🔴 All Models Offline (Check .env configuration)';
+        }
+    } catch (e) {
+        if (dotEl) {
+            dotEl.className = 'live-dot dot-gray';
+            textEl.innerText = 'Connecting...';
+            badge.title = 'Waiting for backend server...';
+        }
+    }
+}
+
+// Check status on load and poll every 12 seconds
+updateLlmLiveStatus();
+setInterval(updateLlmLiveStatus, 12000);
+
+
 
