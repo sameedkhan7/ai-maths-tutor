@@ -9,7 +9,12 @@
 // 🌐 Dynamic API URL (Automatically connects to local 8000 on laptop, phone Wi-Fi LAN IP, or custom tunnel)
 
 function getApiBaseUrl() {
-            const saved = localStorage.getItem('customApiBaseUrl');
+            let saved = localStorage.getItem('customApiBaseUrl');
+            // Auto-heal: If an accidental LLM tunnel or model URL was pasted here, auto-clean it
+            if (saved && (saved.includes('trycloudflare.com') || saved.includes(':11434') || saved.includes('/v1'))) {
+                try { localStorage.removeItem('customApiBaseUrl'); } catch (e) {}
+                saved = null;
+            }
             if (window.location.protocol === 'https:') {
                 if (saved && (saved.startsWith('http://') || saved.includes('localhost') || saved.includes('127.0.0.1'))) {
                     try { localStorage.removeItem('customApiBaseUrl'); } catch (e) {}
@@ -6122,6 +6127,7 @@ function openSettingsModal() {
 // Save Custom Backend API URL (Cloudflare Tunnel or Local LAN)
 
 const saveCustomApiBtn = document.getElementById('save-custom-api-btn');
+const clearCustomApiBtn = document.getElementById('clear-custom-api-btn');
 
 if (saveCustomApiBtn) {
 
@@ -6148,6 +6154,24 @@ if (saveCustomApiBtn) {
             window.location.reload();
 
         }
+
+    });
+
+}
+
+if (clearCustomApiBtn) {
+
+    clearCustomApiBtn.addEventListener('click', () => {
+
+        const customApiInput = document.getElementById('setting-custom-api-url');
+
+        if (customApiInput) customApiInput.value = '';
+
+        localStorage.removeItem('customApiBaseUrl');
+
+        alert('✅ Restored default auto-detect! Reloading...');
+
+        window.location.reload();
 
     });
 

@@ -525,11 +525,12 @@
                         <div class="settings-row">
                             <div class="setting-info">
                                 <span class="setting-name">Backend API Server</span>
-                                <span class="setting-desc">Local IP (http://127.0.0.1:8000) or Cloudflare Tunnel URL for mobile</span>
+                                <span class="setting-desc">Default: Auto-detect (Leave empty). Only use if connecting phone via local LAN IP.</span>
                             </div>
                             <div class="setting-control" style="display: flex; gap: 8px;">
-                                <input type="text" id="setting-custom-api-url" class="settings-select" style="padding: 6px 10px; min-width: 200px;" placeholder="https://xyz.trycloudflare.com">
+                                <input type="text" id="setting-custom-api-url" class="settings-select" style="padding: 6px 10px; min-width: 170px;" placeholder="Default: Auto-detect">
                                 <button type="button" id="save-custom-api-btn" style="padding: 6px 12px; background: #6366f1; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Save</button>
+                                <button type="button" id="clear-custom-api-btn" style="padding: 6px 12px; background: #475569; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Reset</button>
                             </div>
                         </div>
 
@@ -1223,6 +1224,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=160"></script>
+    <script src="script.js?v=161"></script>
 </body>
 </html>
