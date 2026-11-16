@@ -460,6 +460,7 @@ def generate_documentation_pdf(output_path):
 
 
 if __name__ == "__main__":
-    out_dir = r"C:\Users\SK\OneDrive\Desktop\maths project"
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    out_dir = os.path.join(project_root, "docs")
     pdf_path = os.path.join(out_dir, "PROJECT_DOCUMENTATION.pdf")
     generate_documentation_pdf(pdf_path)

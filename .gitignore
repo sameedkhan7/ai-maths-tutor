@@ -40,6 +40,8 @@ data/raw_pdfs/
 *.zip
 *.pdf
 scratch/
+archives/
+tools/
 
 # IDE / Editor configs
 .vscode/
