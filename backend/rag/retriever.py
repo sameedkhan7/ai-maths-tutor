@@ -19,7 +19,7 @@ _cached_chunks = None
 def get_all_chunks():
     global _cached_chunks
     if _cached_chunks is None:
-        docs = load_documents(include_pdfs=False)
+        docs = load_documents(include_pdfs=True)
         _cached_chunks = split_text_into_chunks(docs)
     return _cached_chunks
 

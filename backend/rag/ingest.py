@@ -16,7 +16,7 @@ from backend.rag.config import (
 )
 from backend.rag.embeddings import get_embeddings
 
-def load_documents(include_pdfs: bool = False):
+def load_documents(include_pdfs: bool = True):
     """
     Loads documents from data/sample_docs/ (Text files) and optionally data/raw_pdfs/ (PDFs).
     """
@@ -139,7 +139,14 @@ def ingest_pdf_bytes(file_bytes: bytes, filename: str):
     with open(pdf_path, "wb") as f:
         f.write(file_bytes)
     
-    ingest_all()
+    # Invalidate retriever chunk cache so model immediately reads the new PDF!
+    try:
+        from backend.rag import retriever as r_mod
+        r_mod._cached_chunks = None
+    except Exception:
+        pass
+
+    get_rag_stats(force_refresh=True)
     return {"filename": filename, "size_bytes": len(file_bytes)}
 
 def ingest_text_content(title: str, content: str):
@@ -234,16 +241,18 @@ def get_rag_stats(force_refresh: bool = False):
             if cached.get("pdf_count") == len(pdf_files) and cached.get("text_count") == len(text_files):
                 cached["pdfs"] = [p.name for p in pdf_files]
                 cached["texts"] = [t.name for t in text_files]
+                cached["total_documents"] = len(pdf_files) + len(text_files)
                 return cached
         except Exception:
             pass
 
-    docs = load_documents()
+    docs = load_documents(include_pdfs=True)
     chunks = split_text_into_chunks(docs)
+    total_docs = len(pdf_files) + len(text_files)
     stats = {
         "pdf_count": len(pdf_files),
         "text_count": len(text_files),
-        "total_documents": len(docs),
+        "total_documents": total_docs,
         "total_chunks": len(chunks),
         "pdfs": [p.name for p in pdf_files],
         "texts": [t.name for t in text_files]
